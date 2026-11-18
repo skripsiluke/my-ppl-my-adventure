@@ -2,9 +2,19 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const KEY = 'myPplMyAdventure.save.v1';
-const state = {name:'Penyuluh Muda',xp:0,coins:0,missionDone:false,farmStage:0,questionIndex:0,quizScore:0,player:{x:145,y:390},keys:{},interact:false};
+const state = {name:'Penyuluh Muda',xp:0,coins:0,missionDone:false,pakMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,player:{x:145,y:390},keys:{},interact:false};
 const screens=['homeScreen','menuScreen','gameScreen'];
-function save(){localStorage.setItem(KEY,JSON.stringify({name:state.name,xp:state.xp,coins:state.coins,missionDone:state.missionDone,farmStage:state.farmStage,player:state.player}));}
+function save(){
+  localStorage.setItem(KEY, JSON.stringify({
+    name:state.name,
+    xp:state.xp,
+    coins:state.coins,
+    missionDone:state.missionDone,
+    pakMissionRewarded:state.pakMissionRewarded,
+    farmStage:state.farmStage,
+    player:state.player
+  }));
+}
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)Object.assign(state,s);}catch(e){}}
 function showScreen(id){screens.forEach(s=>$(s).classList.toggle('hidden',s!==id));}
 function levelName(level){return ['Penyuluh Pemula','Penyuluh Muda','Penyuluh Terampil','Penyuluh Madya','Penyuluh Ahli','Penyuluh Master','Penyuluh Legenda'][Math.min(level-1,6)];}
@@ -75,7 +85,18 @@ function startWorld(){stopWorld();last=0;drawWorld();raf=requestAnimationFrame(l
 function stopWorld(){if(raf)cancelAnimationFrame(raf);raf=0;state.keys={};}
 function interact(){if(dialogOpen)return;const n=nearestNpc();if(!n||Math.hypot(n.x-state.player.x,n.y-state.player.y)>88){$('missionDescription').textContent='Belum ada warga di dekatmu. Dekati petani atau bangunan bertanda.';return;}openNpcDialog(n);}
 function openNpcDialog(n){stopWorld();dialogOpen=true;$('dialog').classList.remove('hidden');$('dialogEmoji').textContent=n.emoji;$('dialogEyebrow').textContent=n.role.toUpperCase();$('dialogChoices').innerHTML='';$('closeDialog').classList.add('hidden');
- if(n.id==='pak'){ $('dialogTitle').textContent='Pak Tani membutuhkan bantuan';$('dialogText').textContent='“Daun padi saya menguning dan ada bercak. Apa langkah pertama yang sebaiknya dilakukan?”';const choices=[['Langsung menyemprot pestisida dosis tinggi',false],['Mengamati gejala dan mengidentifikasi penyebabnya',true],['Membiarkan tanaman sampai panen',false]];choices.forEach(([label,ok])=>addChoice(label,ok,()=>{if(ok&&!state.missionDone){state.missionDone=true;reward(20,10);$('missionStatus').textContent='Selesai ✓';$('missionDescription').textContent='Misi selesai! Kamu telah melakukan langkah awal pengamatan masalah tanaman.';}else if(!ok){$('dialogText').textContent='Belum tepat. Lakukan pengamatan dan identifikasi sebelum menentukan tindakan pengendalian.';}}));}
+ if(n.id==='pak'){ $('dialogTitle').textContent='Pak Tani membutuhkan bantuan';$('dialogText').textContent='“Daun padi saya menguning dan ada bercak. Apa langkah pertama yang sebaiknya dilakukan?”';const choices=[['Langsung menyemprot pestisida dosis tinggi',false],['Mengamati gejala dan mengidentifikasi penyebabnya',true],['Membiarkan tanaman sampai panen',false]];choices.forEach(([label,ok])=>addChoice(label,ok,()=>{if(ok&&!state.pakMissionRewarded){
+      state.missionDone=true;
+      state.pakMissionRewarded=true;
+      reward(20,10);
+      $('missionStatus').textContent='Selesai ✓';
+      $('missionDescription').textContent='Misi selesai! Kamu memperoleh 20 XP dan 10 koin.';
+      $('dialogText').textContent='Hebat! Kamu berhasil membantu Pak Tani. Hadiah 20 XP dan 10 koin sudah ditambahkan.';
+    }else if(ok){
+      $('dialogText').textContent='Misi Pak Tani sudah selesai. Hadiah 20 XP dan 10 koin sebelumnya sudah kamu terima.';
+    }else{
+      $('dialogText').textContent='Belum tepat. Lakukan pengamatan dan identifikasi sebelum menentukan tindakan pengendalian.';
+    }}));}
  else if(n.id==='bu'){$('dialogTitle').textContent='Berbincang dengan Bu Rina';$('dialogText').textContent='“Kami ingin belajar membuat catatan kegiatan kelompok tani. Apa manfaat pencatatan?”';addChoice('Membantu mendokumentasikan kegiatan dan mengevaluasi kemajuan',true,()=>{});addChoice('Tidak perlu mencatat kegiatan',false,()=>{});}
  else{$('dialogTitle').textContent='Ketua Kelompok Tani';$('dialogText').textContent='“Sebelum menyusun kegiatan, sebaiknya kita mengetahui kebutuhan anggota kelompok.” Apa pendekatan yang tepat?';addChoice('Melakukan diskusi dan identifikasi kebutuhan bersama anggota',true,()=>{});addChoice('Menentukan kegiatan tanpa mendengar petani',false,()=>{});}
  $('closeDialog').classList.remove('hidden');}
