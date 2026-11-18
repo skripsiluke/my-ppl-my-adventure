@@ -5,7 +5,15 @@ const screens = ['homeScreen','menuScreen','gameScreen'];
 function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify({name:state.name,xp:state.xp,coins:state.coins,missionDone:state.missionDone,farmStage:state.farmStage})); }
 function load(){ try { const s=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null'); if(s) Object.assign(state,s); } catch(e){} }
 function showScreen(id){ screens.forEach(s=>$(s).classList.toggle('hidden',s!==id)); }
-function updateStats(){ $('xpValue').textContent=state.xp; $('coinValue').textContent=state.coins; $('gameCoins').textContent=state.coins; $('levelXp').textContent=state.xp%100; $('levelProgress').style.width=(state.xp%100)+'%'; }
+function updateStats(){
+  $('xpValue').textContent=state.xp; $('coinValue').textContent=state.coins; $('gameCoins').textContent=state.coins;
+  const level=Math.floor(state.xp/100)+1, names=['Penyuluh Pemula','Penyuluh Muda','Penyuluh Terampil','Penyuluh Madya','Penyuluh Ahli','Penyuluh Master'];
+  const title=names[Math.min(level-1,names.length-1)] || 'Penyuluh Legenda';
+  $('levelLabel').textContent='LEVEL '+level; $('levelTitle').textContent=title;
+  $('levelXp').textContent=state.xp%100; $('levelProgress').style.width=(state.xp%100)+'%';
+  $('dailyMissionText').textContent=state.missionDone?'Misi pertama selesai! Jelajahi mode simulasi dan kuis untuk menambah pengalaman.':'Temui Pak Tani dan bantu mengamati masalah tanaman.';
+  $('dailyMissionReward').textContent=state.missionDone?'SELESAI':' +20 XP';
+}
 function reward(xp,coins){ state.xp+=xp; state.coins+=coins; updateStats(); save(); }
 load(); updateStats();
 $('playerName').value=state.name==='Penyuluh Muda'?'':state.name;
@@ -32,12 +40,28 @@ function drawWorld(){ const w=canvas.width,h=canvas.height; ctx.clearRect(0,0,w,
   if(!state.missionDone){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(farmer.x,farmer.y-35,15,0,Math.PI*2);ctx.fill();ctx.fillStyle='#e29a28';ctx.font='bold 19px Nunito';ctx.fillText('!',farmer.x-4,farmer.y-29);}
 }
 function drawHouse(x,y,color){ctx.fillStyle=color;ctx.fillRect(x,y,78,55);ctx.fillStyle='#9b6242';ctx.beginPath();ctx.moveTo(x-9,y+3);ctx.lineTo(x+39,y-35);ctx.lineTo(x+88,y+3);ctx.closePath();ctx.fill();ctx.fillStyle='#6d9a71';ctx.fillRect(x+32,y+25,16,30);}
-function worldLoop(t){const dt=Math.min((t-lastTime)/16||1,2);lastTime=t;const speed=2.5*dt;if(state.keys.ArrowLeft||state.keys.a)state.player.x-=speed;if(state.keys.ArrowRight||state.keys.d)state.player.x+=speed;if(state.keys.ArrowUp||state.keys.w)state.player.y-=speed;if(state.keys.ArrowDown||state.keys.s)state.player.y+=speed;state.player.x=Math.max(25,Math.min(775,state.player.x));state.player.y=Math.max(70,Math.min(410,state.player.y));drawWorld();if(!state.missionDone&&Math.hypot(state.player.x-farmer.x,state.player.y-farmer.y)<58)openFarmerDialog();animationId=requestAnimationFrame(worldLoop);}
+function worldLoop(t){
+  const dt=Math.min((t-lastTime)/16||1,2); lastTime=t;
+  let dx=(state.keys.ArrowRight||state.keys.d?1:0)-(state.keys.ArrowLeft||state.keys.a?1:0);
+  let dy=(state.keys.ArrowDown||state.keys.s?1:0)-(state.keys.ArrowUp||state.keys.w?1:0);
+  if(dx&&dy){dx*=.7071;dy*=.7071;}
+  const speed=2.8*dt; state.player.x+=dx*speed; state.player.y+=dy*speed;
+  state.player.x=Math.max(25,Math.min(775,state.player.x)); state.player.y=Math.max(70,Math.min(410,state.player.y));
+  drawWorld();
+  if(!state.missionDone&&Math.hypot(state.player.x-farmer.x,state.player.y-farmer.y)<58)openFarmerDialog();
+  animationId=requestAnimationFrame(worldLoop);
+}
 function startWorld(){cancelAnimationFrame(animationId);lastTime=0;drawWorld();animationId=requestAnimationFrame(worldLoop);}
-window.addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();state.keys[e.key]=true;});window.addEventListener('keyup',e=>state.keys[e.key]=false);
-document.querySelectorAll('[data-key]').forEach(btn=>{const k=btn.dataset.key;btn.addEventListener('pointerdown',e=>{e.preventDefault();state.keys[k]=true;});['pointerup','pointerleave','pointercancel'].forEach(ev=>btn.addEventListener(ev,()=>state.keys[k]=false));});
+window.addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();state.keys[e.key]=true;});
+window.addEventListener('keyup',e=>state.keys[e.key]=false);
+window.addEventListener('blur',()=>{state.keys={};});
+document.querySelectorAll('[data-key]').forEach(btn=>{
+  const k=btn.dataset.key;
+  btn.addEventListener('pointerdown',e=>{e.preventDefault();btn.setPointerCapture?.(e.pointerId);state.keys[k]=true;});
+  ['pointerup','pointerleave','pointercancel','lostpointercapture'].forEach(ev=>btn.addEventListener(ev,()=>state.keys[k]=false));
+});
 function openFarmerDialog(){ cancelAnimationFrame(animationId); $('dialog').classList.remove('hidden'); $('dialogTitle').textContent='Pak Tani membutuhkan bantuan'; $('dialogText').textContent='“Daun padi di sawah saya mulai menguning dan ada bercak. Apa langkah pertama yang sebaiknya dilakukan?”'; $('dialogChoices').innerHTML=''; $('closeDialog').classList.add('hidden'); const choices=[['Langsung menyemprot pestisida dengan dosis tinggi',false],['Mengamati gejala dan mengidentifikasi penyebabnya',true],['Membiarkan tanaman sampai panen',false]]; choices.forEach(([label,correct])=>{const b=document.createElement('button');b.className='answer-option';b.textContent=label;b.onclick=()=>{if(correct){b.classList.add('correct');$('dialogText').textContent='Tepat! Pengamatan dan identifikasi merupakan langkah awal pengendalian yang bijak. Pak Tani berterima kasih atas bantuanmu.';if(!state.missionDone){state.missionDone=true;reward(20,10);$('missionStatus').textContent='Selesai ✓';}}else{b.classList.add('wrong');$('dialogText').textContent='Belum tepat. Sebaiknya lakukan pengamatan dan identifikasi terlebih dahulu sebelum menentukan tindakan.';} $('dialogChoices').querySelectorAll('button').forEach(x=>x.disabled=true);$('closeDialog').classList.remove('hidden');};$('dialogChoices').appendChild(b);}); }
-$('closeDialog').addEventListener('click',()=>{$('dialog').classList.add('hidden');if(state.missionDone)$('missionStatus').textContent='Selesai ✓';startWorld();});
+$('closeDialog').addEventListener('click',()=>{$('dialog').classList.add('hidden');if(state.missionDone){$('missionStatus').textContent='Selesai ✓';updateStats();}startWorld();});
 // Farm simulator
 function updateFarm(){const stages=['🟫','🌱','🌿','🌾'];$('cropEmoji').textContent=stages[state.farmStage];$('plantButton').disabled=state.farmStage!==0;$('waterButton').disabled=state.farmStage!==1;$('harvestButton').disabled=state.farmStage!==2;$('farmStatus').textContent=['Lahan masih kosong. Mulai dengan menanam benih.','Benih sudah ditanam. Tanaman membutuhkan air.','Tanaman tumbuh subur. Saatnya panen!','Panen berhasil! Kamu memperoleh hasil dari kerja kerasmu.'][state.farmStage];}
 $('plantButton').addEventListener('click',()=>{state.farmStage=1;reward(5,0);updateFarm();});$('waterButton').addEventListener('click',()=>{state.farmStage=2;reward(5,0);updateFarm();});$('harvestButton').addEventListener('click',()=>{state.farmStage=3;reward(20,15);updateFarm();setTimeout(()=>{state.farmStage=0;updateFarm();save();},1800);});

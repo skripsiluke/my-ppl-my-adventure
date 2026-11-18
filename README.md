@@ -30,3 +30,11 @@ Workflow pada `.github/workflows/deploy.yml` juga disediakan untuk deployment ot
 - Nama pemain bersifat nickname.
 - Progres disimpan di browser/perangkat melalui LocalStorage. Menghapus data browser dapat menghapus progres.
 - Leaderboard online, sinkronisasi lintas perangkat, aset karakter khusus, audio, dan konten misi lanjutan belum termasuk prototipe awal.
+
+
+## Pembaruan versi 0.2.0
+- Tampilan level dan gelar penyuluh mengikuti akumulasi XP.
+- Informasi misi pada dashboard berubah setelah misi pertama selesai.
+- Kontrol arah lebih nyaman untuk layar sentuh dan mendukung gerak diagonal yang seimbang.
+- Status tombol gerak dibersihkan saat jendela kehilangan fokus.
+- Fokus keyboard lebih terlihat untuk aksesibilitas.

@@ -37,21 +37,21 @@
 
     <section id="menuScreen" class="screen hidden">
       <div class="welcome-row"><div><p class="eyebrow">SELAMAT DATANG,</p><h2 id="welcomeName">Penyuluh Muda!</h2><p class="muted">Desa menantimu. Misi pertamamu sudah tersedia.</p></div><div class="avatar-bubble">🧑‍🌾</div></div>
-      <div class="level-card"><div><span class="eyebrow light">LEVEL 1</span><h3>Penyuluh Pemula</h3><p><span id="levelXp">0</span> / 100 XP menuju level berikutnya</p></div><div class="level-icon">🌱</div><div class="progress-track"><span id="levelProgress"></span></div></div>
+      <div class="level-card"><div><span class="eyebrow light" id="levelLabel">LEVEL 1</span><h3 id="levelTitle">Penyuluh Pemula</h3><p><span id="levelXp">0</span> / 100 XP menuju level berikutnya</p></div><div class="level-icon">🌱</div><div class="progress-track"><span id="levelProgress"></span></div></div>
       <h3 class="section-heading">Pilih petualangan</h3>
       <div class="mode-grid">
         <button class="mode-card adventure-card" data-mode="adventure"><span class="mode-icon">🗺️</span><b>Adventure</b><small>Jelajahi desa dan bantu petani menyelesaikan masalah.</small><span class="mode-link">Mainkan →</span></button>
         <button class="mode-card farm-card" data-mode="farm"><span class="mode-icon">🌾</span><b>Farm Simulator</b><small>Tanam, rawat, dan panen tanaman di lahanmu.</small><span class="mode-link">Mainkan →</span></button>
         <button class="mode-card quiz-card" data-mode="quiz"><span class="mode-icon">🧠</span><b>Quiz Challenge</b><small>Uji pengetahuan budidaya dan penyuluhan.</small><span class="mode-link">Mainkan →</span></button>
       </div>
-      <div class="daily-card"><span class="daily-icon">📋</span><div><b>Misi hari ini</b><p>Selesaikan satu aktivitas untuk mendapatkan XP pertamamu.</p></div><span class="daily-reward">+20 XP</span></div>
+      <div class="daily-card"><span class="daily-icon">📋</span><div><b>Misi perjalanan</b><p id="dailyMissionText">Temui Pak Tani dan bantu mengamati masalah tanaman.</p></div><span class="daily-reward" id="dailyMissionReward">+20 XP</span></div>
       <button id="resetButton" class="text-button">Reset progres permainan</button>
     </section>
 
     <section id="gameScreen" class="screen hidden">
       <div class="game-heading"><button id="backButton" class="icon-button" aria-label="Kembali">←</button><div><p class="eyebrow" id="gameEyebrow">MODE ADVENTURE</p><h2 id="gameTitle">Desa Sukamaju</h2></div><span class="game-coin">🪙 <b id="gameCoins">0</b></span></div>
       <div id="adventurePanel" class="game-panel hidden">
-        <div class="canvas-wrap"><canvas id="worldCanvas" width="800" height="440" aria-label="Peta desa pertanian"></canvas><div class="canvas-hint">Gerakkan karakter dengan tombol panah / WASD. Dekati petani untuk berinteraksi.</div></div>
+        <div class="canvas-wrap"><canvas id="worldCanvas" width="800" height="440" aria-label="Peta desa pertanian"></canvas><div class="canvas-hint">Komputer: tombol panah / WASD. HP: gunakan tombol arah. Dekati petani untuk berinteraksi.</div></div>
         <div class="game-info"><div><b>🎯 Misi: Temui Pak Tani</b><p>Berjalanlah menuju petani di dekat sawah untuk memulai percakapan.</p></div><span id="missionStatus" class="status-pill">Belum selesai</span></div>
         <div class="mobile-controls"><button data-key="ArrowUp">▲</button><div><button data-key="ArrowLeft">◀</button><button data-key="ArrowDown">▼</button><button data-key="ArrowRight">▶</button></div></div>
       </div>
@@ -72,7 +72,7 @@
     <div id="dialog" class="dialog-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
       <div class="dialog-card"><div class="dialog-emoji">👨‍🌾</div><p class="eyebrow">MISI PENYULUHAN</p><h3 id="dialogTitle">Percakapan dengan Pak Tani</h3><p id="dialogText">Tanaman padi saya mulai terserang hama. Apa yang sebaiknya saya lakukan?</p><div id="dialogChoices" class="answer-list"></div><button id="closeDialog" class="button button-secondary hidden">Kembali ke desa</button></div>
     </div>
-    <footer>MY PPL MY ADVENTURE <span>•</span> Versi prototipe 0.1.0</footer>
+    <footer>MY PPL MY ADVENTURE <span>•</span> Versi pengembangan 0.2.0</footer>
   </main>
   <script src="js/main.js"></script>
 </body>
