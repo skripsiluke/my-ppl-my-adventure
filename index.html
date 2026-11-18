@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#174d32" />
+  <meta name="description" content="My PPL My Adventure — game edukasi petualangan dan simulasi penyuluhan pertanian." />
+  <title>My PPL My Adventure</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#home" aria-label="My PPL My Adventure">
+        <span class="brand-mark">🌱</span><span>MY PPL <b>MY ADVENTURE</b></span>
+      </a>
+      <div class="top-stats"><span>⭐ <b id="xpValue">0</b> XP</span><span>🪙 <b id="coinValue">0</b></span></div>
+    </header>
+
+    <section id="homeScreen" class="screen home-screen">
+      <div class="hero-art" aria-hidden="true">
+        <div class="sun"></div><div class="cloud cloud-one"></div><div class="cloud cloud-two"></div>
+        <div class="mountain mountain-back"></div><div class="mountain mountain-front"></div>
+        <div class="field field-back"></div><div class="field field-front"></div>
+        <div class="hero-person">🧑‍🌾</div><div class="hero-crop crop-a">🌾</div><div class="hero-crop crop-b">🌿</div>
+      </div>
+      <div class="hero-copy">
+        <p class="eyebrow">GAME EDUKASI PENYULUHAN PERTANIAN</p>
+        <h1>Belajar, Bertani,<br><span>Berpetualang!</span></h1>
+        <p class="hero-description">Jelajahi desa, bantu petani, kembangkan lahan, dan buktikan kemampuanmu menjadi calon penyuluh pertanian andal.</p>
+        <label class="field-label" for="playerName">Nama pemain</label>
+        <input id="playerName" maxlength="18" placeholder="Masukkan nama panggilan" autocomplete="nickname" />
+        <button id="startButton" class="button button-primary">Mulai Petualangan <span>➜</span></button>
+        <p class="tiny-note">Tidak perlu membuat akun. Progres awal disimpan di perangkat ini.</p>
+      </div>
+    </section>
+
+    <section id="menuScreen" class="screen hidden">
+      <div class="welcome-row"><div><p class="eyebrow">SELAMAT DATANG,</p><h2 id="welcomeName">Penyuluh Muda!</h2><p class="muted">Desa menantimu. Misi pertamamu sudah tersedia.</p></div><div class="avatar-bubble">🧑‍🌾</div></div>
+      <div class="level-card"><div><span class="eyebrow light">LEVEL 1</span><h3>Penyuluh Pemula</h3><p><span id="levelXp">0</span> / 100 XP menuju level berikutnya</p></div><div class="level-icon">🌱</div><div class="progress-track"><span id="levelProgress"></span></div></div>
+      <h3 class="section-heading">Pilih petualangan</h3>
+      <div class="mode-grid">
+        <button class="mode-card adventure-card" data-mode="adventure"><span class="mode-icon">🗺️</span><b>Adventure</b><small>Jelajahi desa dan bantu petani menyelesaikan masalah.</small><span class="mode-link">Mainkan →</span></button>
+        <button class="mode-card farm-card" data-mode="farm"><span class="mode-icon">🌾</span><b>Farm Simulator</b><small>Tanam, rawat, dan panen tanaman di lahanmu.</small><span class="mode-link">Mainkan →</span></button>
+        <button class="mode-card quiz-card" data-mode="quiz"><span class="mode-icon">🧠</span><b>Quiz Challenge</b><small>Uji pengetahuan budidaya dan penyuluhan.</small><span class="mode-link">Mainkan →</span></button>
+      </div>
+      <div class="daily-card"><span class="daily-icon">📋</span><div><b>Misi hari ini</b><p>Selesaikan satu aktivitas untuk mendapatkan XP pertamamu.</p></div><span class="daily-reward">+20 XP</span></div>
+      <button id="resetButton" class="text-button">Reset progres permainan</button>
+    </section>
+
+    <section id="gameScreen" class="screen hidden">
+      <div class="game-heading"><button id="backButton" class="icon-button" aria-label="Kembali">←</button><div><p class="eyebrow" id="gameEyebrow">MODE ADVENTURE</p><h2 id="gameTitle">Desa Sukamaju</h2></div><span class="game-coin">🪙 <b id="gameCoins">0</b></span></div>
+      <div id="adventurePanel" class="game-panel hidden">
+        <div class="canvas-wrap"><canvas id="worldCanvas" width="800" height="440" aria-label="Peta desa pertanian"></canvas><div class="canvas-hint">Gerakkan karakter dengan tombol panah / WASD. Dekati petani untuk berinteraksi.</div></div>
+        <div class="game-info"><div><b>🎯 Misi: Temui Pak Tani</b><p>Berjalanlah menuju petani di dekat sawah untuk memulai percakapan.</p></div><span id="missionStatus" class="status-pill">Belum selesai</span></div>
+        <div class="mobile-controls"><button data-key="ArrowUp">▲</button><div><button data-key="ArrowLeft">◀</button><button data-key="ArrowDown">▼</button><button data-key="ArrowRight">▶</button></div></div>
+      </div>
+      <div id="farmPanel" class="game-panel hidden">
+        <div class="farm-scene"><div class="farm-sky">☀️ &nbsp; Kebun Belajar</div><div class="farm-plot" id="farmPlot"><span id="cropEmoji">🟫</span></div><p id="farmStatus">Lahan masih kosong. Mulai dengan menanam benih.</p></div>
+        <div class="action-row"><button id="plantButton" class="button button-primary">🌱 Tanam benih</button><button id="waterButton" class="button button-secondary" disabled>💧 Siram</button><button id="harvestButton" class="button button-secondary" disabled>🧺 Panen</button></div>
+        <p class="muted small">Simulasi sederhana: tanam → siram → panen. Setiap tahap memberi pengalaman belajar.</p>
+      </div>
+      <div id="quizPanel" class="game-panel hidden">
+        <div class="quiz-top"><span class="status-pill">KUIS PERTANIAN</span><span id="questionCount">Soal 1 dari 5</span></div>
+        <h3 id="questionText">Apa tujuan utama penyuluhan pertanian?</h3>
+        <div id="answerList" class="answer-list"></div>
+        <p id="quizFeedback" class="quiz-feedback" aria-live="polite"></p>
+        <button id="nextQuestionButton" class="button button-primary hidden">Soal berikutnya →</button>
+      </div>
+    </section>
+
+    <div id="dialog" class="dialog-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
+      <div class="dialog-card"><div class="dialog-emoji">👨‍🌾</div><p class="eyebrow">MISI PENYULUHAN</p><h3 id="dialogTitle">Percakapan dengan Pak Tani</h3><p id="dialogText">Tanaman padi saya mulai terserang hama. Apa yang sebaiknya saya lakukan?</p><div id="dialogChoices" class="answer-list"></div><button id="closeDialog" class="button button-secondary hidden">Kembali ke desa</button></div>
+    </div>
+    <footer>MY PPL MY ADVENTURE <span>•</span> Versi prototipe 0.1.0</footer>
+  </main>
+  <script src="js/main.js"></script>
+</body>
+</html>
