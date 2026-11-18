@@ -15,7 +15,18 @@ function save(){
     player:state.player
   }));
 }
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)Object.assign(state,s);}catch(e){}}
+function load(){
+  try{
+    const s=JSON.parse(localStorage.getItem(KEY)||'null');
+    if(s)Object.assign(state,s);
+  }catch(e){}
+  // Compatibility: if either old completion flag is true, treat Pak Tani mission as completed.
+  if(state.missionDone || state.pakMissionRewarded){
+    state.missionDone=true;
+    state.pakMissionRewarded=true;
+    save();
+  }
+}
 function showScreen(id){screens.forEach(s=>$(s).classList.toggle('hidden',s!==id));}
 function levelName(level){return ['Penyuluh Pertanian Pemula','Penyuluh Pertanian Terampil','Penyuluh Pertanian Mahir','Penyuluh Pertanian Penyelia','Penyuluh Pertanian Ahli Pertama','Penyuluh Pertanian Ahli Muda','Penyuluh Pertanian Ahli Madya','Penyuluh Pertanian Ahli Utama'][Math.min(level-1,7)];}
 function updateStats(){ $('xpValue').textContent=state.xp;$('coinValue').textContent=state.coins;$('gameCoins').textContent=state.coins;const level=Math.floor(state.xp/100)+1;$('levelLabel').textContent='LEVEL '+level;$('levelTitle').textContent=levelName(level);$('levelXp').textContent=state.xp%100;$('levelProgress').style.width=(state.xp%100)+'%';$('dailyMissionText').textContent=state.missionDone?'Misi pengenalan desa selesai! Jelajahi mode simulasi dan kuis.':'Temui Pak Tani di persawahan dan dengarkan masalahnya.';$('dailyMissionReward').textContent=state.missionDone?'SELESAI':'+20 XP';}
@@ -83,8 +94,28 @@ function movePlayer(dx,dy){if(!dx&&!dy)return;const len=Math.hypot(dx,dy)||1;dx/
 function loop(ts){const dt=Math.min((ts-last)/16||1,2);last=ts;let dx=(state.keys.ArrowRight||state.keys.d?1:0)-(state.keys.ArrowLeft||state.keys.a?1:0);let dy=(state.keys.ArrowDown||state.keys.s?1:0)-(state.keys.ArrowUp||state.keys.w?1:0);if(dx||dy)movePlayer(dx*dt,dy*dt);drawWorld(ts);raf=requestAnimationFrame(loop);}
 function startWorld(){stopWorld();last=0;drawWorld();raf=requestAnimationFrame(loop);}
 function stopWorld(){if(raf)cancelAnimationFrame(raf);raf=0;state.keys={};}
-function interact(){if(dialogOpen)return;const n=nearestNpc();if(!n||Math.hypot(n.x-state.player.x,n.y-state.player.y)>88){$('missionDescription').textContent='Belum ada warga di dekatmu. Dekati petani atau bangunan bertanda.';return;}openNpcDialog(n);}
-function openNpcDialog(n){stopWorld();dialogOpen=true;$('dialog').classList.remove('hidden');$('dialogEmoji').textContent=n.emoji;$('dialogEyebrow').textContent=n.role.toUpperCase();$('dialogChoices').innerHTML='';$('closeDialog').classList.add('hidden');
+function interact(){
+  if(dialogOpen)return;
+  const n=nearestNpc();
+  if(!n||Math.hypot(n.x-state.player.x,n.y-state.player.y)>88){
+    $('missionDescription').textContent='Belum ada warga di dekatmu. Dekati petani atau bangunan bertanda.';
+    return;
+  }
+  if(n.id==='pak' && (state.missionDone || state.pakMissionRewarded)){
+    $('missionDescription').textContent='Misi Pak Tani sudah selesai. Hadiah 20 XP dan 10 koin sudah diterima.';
+    return;
+  }
+  openNpcDialog(n);
+}
+function openNpcDialog(n){
+  if(n.id==='pak' && (state.missionDone || state.pakMissionRewarded)){
+    state.missionDone=true;
+    state.pakMissionRewarded=true;
+    save();
+    $('missionDescription').textContent='Misi Pak Tani sudah selesai. Hadiah 20 XP dan 10 koin sudah diterima.';
+    return;
+  }
+  stopWorld();dialogOpen=true;$('dialog').classList.remove('hidden');$('dialogEmoji').textContent=n.emoji;$('dialogEyebrow').textContent=n.role.toUpperCase();$('dialogChoices').innerHTML='';$('closeDialog').classList.add('hidden');
  if(n.id==='pak'){ $('dialogTitle').textContent='Pak Tani membutuhkan bantuan';$('dialogText').textContent='“Daun padi saya menguning dan ada bercak. Apa langkah pertama yang sebaiknya dilakukan?”';const choices=[['Langsung menyemprot pestisida dosis tinggi',false],['Mengamati gejala dan mengidentifikasi penyebabnya',true],['Membiarkan tanaman sampai panen',false]];choices.forEach(([label,ok])=>addChoice(label,ok,()=>{if(ok&&!state.pakMissionRewarded){
       state.missionDone=true;
       state.pakMissionRewarded=true;
