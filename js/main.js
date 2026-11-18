@@ -102,19 +102,24 @@ function interact(){
     return;
   }
   if(n.id==='pak' && (state.missionDone || state.pakMissionRewarded)){
-    $('missionDescription').textContent='Misi Pak Tani sudah selesai. Hadiah 20 XP dan 10 koin sudah diterima.';
-    return;
-  }
+  state.missionDone=true;
+  state.pakMissionRewarded=true;
+  updateStats();
+  save();
+  $('missionDescription').textContent='Misi Pak Tani sudah selesai. Hadiah 20 XP dan 10 koin sudah diterima.';
+  return;
+}
   openNpcDialog(n);
 }
 function openNpcDialog(n){
   if(n.id==='pak' && (state.missionDone || state.pakMissionRewarded)){
-    state.missionDone=true;
-    state.pakMissionRewarded=true;
-    save();
-    $('missionDescription').textContent='Misi Pak Tani sudah selesai. Hadiah 20 XP dan 10 koin sudah diterima.';
-    return;
-  }
+  state.missionDone=true;
+  state.pakMissionRewarded=true;
+  updateStats();
+  save();
+  $('missionDescription').textContent='Misi Pak Tani sudah selesai. Hadiah 20 XP dan 10 koin sudah diterima.';
+  return;
+}
   stopWorld();dialogOpen=true;$('dialog').classList.remove('hidden');$('dialogEmoji').textContent=n.emoji;$('dialogEyebrow').textContent=n.role.toUpperCase();$('dialogChoices').innerHTML='';$('closeDialog').classList.add('hidden');
  if(n.id==='pak'){ $('dialogTitle').textContent='Pak Tani membutuhkan bantuan';$('dialogText').textContent='“Daun padi saya menguning dan ada bercak. Apa langkah pertama yang sebaiknya dilakukan?”';const choices=[['Langsung menyemprot pestisida dosis tinggi',false],['Mengamati gejala dan mengidentifikasi penyebabnya',true],['Membiarkan tanaman sampai panen',false]];choices.forEach(([label,ok])=>addChoice(label,ok,()=>{if(ok&&!state.pakMissionRewarded){
       state.missionDone=true;
