@@ -17,7 +17,7 @@ function save(){
 }
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)Object.assign(state,s);}catch(e){}}
 function showScreen(id){screens.forEach(s=>$(s).classList.toggle('hidden',s!==id));}
-function levelName(level){return ['Penyuluh Pemula','Penyuluh Muda','Penyuluh Terampil','Penyuluh Madya','Penyuluh Ahli','Penyuluh Master','Penyuluh Legenda'][Math.min(level-1,6)];}
+function levelName(level){return ['Penyuluh Pertanian Pemula','Penyuluh Pertanian Terampil','Penyuluh Pertanian Mahir','Penyuluh Pertanian Penyelia','Penyuluh Pertanian Ahli Pertama','Penyuluh Pertanian Ahli Muda','Penyuluh Pertanian Ahli Madya','Penyuluh Pertanian Ahli Utama'][Math.min(level-1,7)];}
 function updateStats(){ $('xpValue').textContent=state.xp;$('coinValue').textContent=state.coins;$('gameCoins').textContent=state.coins;const level=Math.floor(state.xp/100)+1;$('levelLabel').textContent='LEVEL '+level;$('levelTitle').textContent=levelName(level);$('levelXp').textContent=state.xp%100;$('levelProgress').style.width=(state.xp%100)+'%';$('dailyMissionText').textContent=state.missionDone?'Misi pengenalan desa selesai! Jelajahi mode simulasi dan kuis.':'Temui Pak Tani di persawahan dan dengarkan masalahnya.';$('dailyMissionReward').textContent=state.missionDone?'SELESAI':'+20 XP';}
 function reward(xp,coins){state.xp+=xp;state.coins+=coins;updateStats();save();}
 load();updateStats();$('playerName').value=state.name==='Penyuluh Muda'?'':state.name;
