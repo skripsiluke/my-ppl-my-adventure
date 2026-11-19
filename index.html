@@ -11,6 +11,7 @@
     .achievement-tools{margin:18px 0}.achievement-toggle{width:100%;border:0;border-radius:14px;padding:15px 18px;background:#174d32;color:#fff;font:700 15px inherit;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;box-shadow:0 5px 14px #174d3220}
     .achievement-panel{margin-top:12px;padding:16px;border:1px solid #dce8dc;border-radius:16px;background:#fff}.achievement-panel h3{margin:0 0 4px;color:#174d32}.achievement-count{font-size:13px;color:#64806a;margin:0 0 12px}.achievement-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.achievement-item{display:flex;gap:10px;align-items:center;padding:12px;border-radius:12px;background:#f1f6ef;border:1px solid #e1ebdf;min-width:0}.achievement-item.locked{filter:grayscale(.8);opacity:.65;background:#f4f4f1}.achievement-icon{font-size:27px;flex:0 0 34px;text-align:center}.achievement-item b{font-size:13px;color:#244c32}.achievement-item p{font-size:11px;line-height:1.35;margin:3px 0;color:#637268}.achievement-item small{font-size:10px;font-weight:700;color:#27834b}.achievement-toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:9999;background:#174d32;color:#fff;padding:13px 18px;border-radius:999px;font-weight:700;font-size:13px;box-shadow:0 8px 25px #0003;transition:.25s;max-width:90%;text-align:center}.achievement-toast.show{opacity:1;transform:translate(-50%,0)}
     @media(max-width:520px){.achievement-grid{grid-template-columns:1fr}}
+    .profile-tools{margin:12px 0}.profile-toggle{width:100%;border:1px solid #dce8dc;border-radius:14px;padding:14px 18px;background:#fff;color:#174d32;font-weight:700;text-align:left;cursor:pointer;display:flex;justify-content:space-between}.profile-panel{margin-top:10px;padding:16px;border:1px solid #dce8dc;border-radius:16px;background:#fff;display:flex;gap:14px;align-items:center}.profile-avatar{width:58px;height:58px;border-radius:50%;background:#edf5e9;display:grid;place-items:center;font-size:32px;flex-shrink:0}.profile-details{min-width:0}.profile-details h3{margin:0;color:#174d32}.profile-details p{margin:3px 0 9px;color:#647568;font-size:12px}.profile-stats{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:#315b3b}.levelup-overlay{position:fixed;inset:0;z-index:10000;background:#102b1dcc;display:grid;place-items:center;padding:20px}.levelup-card{width:min(100%,360px);padding:28px 22px;border-radius:24px;background:linear-gradient(160deg,#fffdf1,#e8f5e8);text-align:center;box-shadow:0 20px 70px #0005;animation:levelpop .35s ease-out}.levelup-spark{font-size:34px}.levelup-card>p{font-size:12px;letter-spacing:3px;font-weight:800;color:#b27a13}.levelup-card h2{font-size:32px;margin:5px 0;color:#174d32}.levelup-card #levelUpRank{font-weight:700;color:#355c3c;margin:10px 0 18px}.levelup-card strong{display:block;color:#a36b0b;margin-bottom:20px}.levelup-card .button{width:100%}@keyframes levelpop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
   </style>
 </head>
 <body>
@@ -50,6 +51,13 @@
         <div id="achievementGrid" class="achievement-grid"></div>
       </section>
     </div>
+
+    <div class="profile-tools">
+      <button id="profileToggle" class="profile-toggle" type="button"><span>👤 Profil Penyuluh</span><span>▼</span></button>
+      <section id="profilePanel" class="profile-panel hidden">
+        <div class="profile-avatar">🧑‍🌾</div><div class="profile-details"><h3 id="profileName">Penyuluh Muda</h3><p id="profileRank">Penyuluh Pertanian Pemula</p><div class="profile-stats"><span>⭐ <b id="profileXp">0</b> XP</span><span>🪙 <b id="profileCoins">0</b></span><span>🏆 <b id="profileBadges">0/4</b></span></div></div>
+      </section>
+    </div>
     <button id="resetButton" class="text-button">Reset progres permainan</button>
   </section>
 
@@ -67,7 +75,8 @@
 
   <div id="dialog" class="dialog-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><div class="dialog-card"><div class="dialog-emoji" id="dialogEmoji">👨‍🌾</div><p class="eyebrow" id="dialogEyebrow">MISI PENYULUHAN</p><h3 id="dialogTitle">Percakapan dengan warga</h3><p id="dialogText"></p><div id="dialogChoices" class="answer-list"></div><button id="closeDialog" class="button button-secondary hidden">Kembali ke desa</button></div></div>
   <div id="achievementToast" class="achievement-toast" role="status" aria-live="polite"></div>
-  <footer>MY PPL MY ADVENTURE <span>•</span> Versi pengembangan 0.4.0</footer>
+  <div id="levelUpOverlay" class="levelup-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="levelUpTitle"><div class="levelup-card"><div class="levelup-spark">✨🌟✨</div><p>SELAMAT!</p><h2 id="levelUpTitle">LEVEL UP!</h2><div id="levelUpRank">Penyuluh Pertanian Terampil</div><strong id="levelUpBonus">Bonus +25 koin</strong><button id="closeLevelUp" class="button button-primary" type="button">Lanjutkan petualangan</button></div></div>
+  <footer>MY PPL MY ADVENTURE <span>•</span> Versi pengembangan 0.5.0</footer>
 </main>
 <script src="js/main.js"></script>
 </body>
