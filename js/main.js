@@ -110,8 +110,72 @@ function reward(xp,coins){
  if(newLevel>oldLevel)showLevelUp(newLevel,levelBonus);
  else playSound('success');
 }
+
+/* Background music and persistent audio settings */
+const SETTINGS_KEY='myPplMyAdventure.settings.v1';
+const bgm=$('bgmAudio');
+const audioSettings={bgmEnabled:true,bgmVolume:0.7};
+let gameStarted=false;
+function saveAudioSettings(){
+  try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(audioSettings));}catch(e){}
+}
+function updateAudioSettingsUI(){
+  if($('bgmToggle'))$('bgmToggle').checked=audioSettings.bgmEnabled;
+  if($('bgmVolume'))$('bgmVolume').value=Math.round(audioSettings.bgmVolume*100);
+  if($('bgmVolumeValue'))$('bgmVolumeValue').textContent=Math.round(audioSettings.bgmVolume*100)+'%';
+  if($('bgmStatus'))$('bgmStatus').textContent=audioSettings.bgmEnabled?'🎵 BGM aktif':'🔇 BGM nonaktif';
+}
+function applyBgmSettings(){
+  if(!bgm)return;
+  bgm.volume=audioSettings.bgmVolume;
+  bgm.muted=!audioSettings.bgmEnabled || audioSettings.bgmVolume===0;
+  if(!audioSettings.bgmEnabled || audioSettings.bgmVolume===0){
+    bgm.pause();
+  }else if(gameStarted){
+    const result=bgm.play();
+    if(result&&typeof result.catch==='function')result.catch(()=>{});
+  }
+  updateAudioSettingsUI();
+}
+function loadAudioSettings(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'null');
+    if(saved){
+      if(typeof saved.bgmEnabled==='boolean')audioSettings.bgmEnabled=saved.bgmEnabled;
+      if(Number.isFinite(Number(saved.bgmVolume)))audioSettings.bgmVolume=Math.max(0,Math.min(1,Number(saved.bgmVolume)));
+    }
+  }catch(e){}
+  applyBgmSettings();
+}
+function startBgm(){
+  gameStarted=true;
+  if(!bgm||!audioSettings.bgmEnabled||audioSettings.bgmVolume===0)return;
+  bgm.volume=audioSettings.bgmVolume;
+  bgm.muted=false;
+  const result=bgm.play();
+  if(result&&typeof result.catch==='function')result.catch(()=>{});
+}
+$('settingsToggle').addEventListener('click',()=>{
+  const panel=$('settingsPanel');
+  const opening=panel.classList.contains('hidden');
+  panel.classList.toggle('hidden');
+  $('settingsToggle').setAttribute('aria-expanded',String(opening));
+});
+$('bgmToggle').addEventListener('change',e=>{
+  audioSettings.bgmEnabled=e.target.checked;
+  saveAudioSettings();
+  if(audioSettings.bgmEnabled&&gameStarted)startBgm();
+  else applyBgmSettings();
+});
+$('bgmVolume').addEventListener('input',e=>{
+  audioSettings.bgmVolume=Math.max(0,Math.min(1,Number(e.target.value)/100));
+  saveAudioSettings();
+  applyBgmSettings();
+});
+
+loadAudioSettings();
 load();updateStats();checkAchievements();$('playerName').value=state.name==='Penyuluh Muda'?'':state.name;
-$('startButton').addEventListener('click',()=>{const n=$('playerName').value.trim();if(n)state.name=n;$('welcomeName').textContent=state.name+'!';showScreen('menuScreen');updateProfile();save();});
+$('startButton').addEventListener('click',()=>{startBgm();const n=$('playerName').value.trim();if(n)state.name=n;$('welcomeName').textContent=state.name+'!';showScreen('menuScreen');updateProfile();save();});
 $('resetButton').addEventListener('click',()=>{if(confirm('Hapus seluruh progres permainan di perangkat ini?')){localStorage.removeItem(KEY);location.reload();}});
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>openMode(b.dataset.mode)));
 $('backButton').addEventListener('click',()=>{stopWorld();showScreen('menuScreen');});
