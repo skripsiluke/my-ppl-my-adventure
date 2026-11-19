@@ -7,6 +7,11 @@
   <meta name="description" content="My PPL My Adventure — game edukasi petualangan penyuluhan pertanian.">
   <title>My PPL My Adventure</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    .achievement-tools{margin:18px 0}.achievement-toggle{width:100%;border:0;border-radius:14px;padding:15px 18px;background:#174d32;color:#fff;font:700 15px inherit;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;box-shadow:0 5px 14px #174d3220}
+    .achievement-panel{margin-top:12px;padding:16px;border:1px solid #dce8dc;border-radius:16px;background:#fff}.achievement-panel h3{margin:0 0 4px;color:#174d32}.achievement-count{font-size:13px;color:#64806a;margin:0 0 12px}.achievement-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.achievement-item{display:flex;gap:10px;align-items:center;padding:12px;border-radius:12px;background:#f1f6ef;border:1px solid #e1ebdf;min-width:0}.achievement-item.locked{filter:grayscale(.8);opacity:.65;background:#f4f4f1}.achievement-icon{font-size:27px;flex:0 0 34px;text-align:center}.achievement-item b{font-size:13px;color:#244c32}.achievement-item p{font-size:11px;line-height:1.35;margin:3px 0;color:#637268}.achievement-item small{font-size:10px;font-weight:700;color:#27834b}.achievement-toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:9999;background:#174d32;color:#fff;padding:13px 18px;border-radius:999px;font-weight:700;font-size:13px;box-shadow:0 8px 25px #0003;transition:.25s;max-width:90%;text-align:center}.achievement-toast.show{opacity:1;transform:translate(-50%,0)}
+    @media(max-width:520px){.achievement-grid{grid-template-columns:1fr}}
+  </style>
 </head>
 <body>
 <main class="app-shell">
@@ -38,6 +43,13 @@
       <button class="mode-card quiz-card" data-mode="quiz"><span class="mode-icon">🧠</span><b>Quiz Challenge</b><small>Uji pengetahuan budidaya dan penyuluhan.</small><span class="mode-link">Mainkan →</span></button>
     </div>
     <div class="daily-card"><span class="daily-icon">📋</span><div><b>Misi perjalanan</b><p id="dailyMissionText">Temui Pak Tani dan bantu mengamati masalah tanaman.</p></div><span class="daily-reward" id="dailyMissionReward">+20 XP</span></div>
+    <div class="achievement-tools">
+      <button id="achievementToggle" class="achievement-toggle" type="button"><span>🏆 Koleksi Achievement & Badge</span><span>▼</span></button>
+      <section id="achievementPanel" class="achievement-panel hidden">
+        <h3>Pencapaian Penyuluh</h3><p id="achievementCount" class="achievement-count">0 / 4 terbuka</p>
+        <div id="achievementGrid" class="achievement-grid"></div>
+      </section>
+    </div>
     <button id="resetButton" class="text-button">Reset progres permainan</button>
   </section>
 
@@ -47,33 +59,15 @@
       <div class="world-hud"><span id="worldLocation">📍 Gerbang Desa</span><span id="worldObjective">🎯 Tujuan: temui warga desa</span></div>
       <div class="canvas-wrap"><canvas id="worldCanvas" width="960" height="600" aria-label="Peta top-down Desa Sukamaju"></canvas><div class="canvas-hint">WASD / tombol panah untuk bergerak • E atau Spasi untuk berinteraksi</div></div>
       <div class="game-info"><div><b>🎯 Misi: Kenali Desa Sukamaju</b><p id="missionDescription">Temui Pak Tani di area persawahan. Dekati warga lalu tekan E.</p></div><span id="missionStatus" class="status-pill">Belum selesai</span></div>
-      <div class="mobile-controls">
-        <div class="dpad">
-          <button data-key="ArrowUp" aria-label="Atas">▲</button>
-          <button data-key="ArrowLeft" aria-label="Kiri">◀</button>
-          <button data-key="ArrowDown" aria-label="Bawah">▼</button>
-          <button data-key="ArrowRight" aria-label="Kanan">▶</button>
-        </div>
-        <button id="interactButton" class="interact-button">INTERAKSI</button>
-      </div>
+      <div class="mobile-controls"><div class="dpad"><button data-key="ArrowUp" aria-label="Atas">▲</button><button data-key="ArrowLeft" aria-label="Kiri">◀</button><button data-key="ArrowDown" aria-label="Bawah">▼</button><button data-key="ArrowRight" aria-label="Kanan">▶</button></div><button id="interactButton" class="interact-button">INTERAKSI</button></div>
     </div>
-    <div id="farmPanel" class="game-panel hidden">
-      <div class="farm-scene"><div class="farm-sky">☀️ &nbsp; Kebun Belajar</div><div class="farm-plot" id="farmPlot"><span id="cropEmoji">🟫</span></div><p id="farmStatus">Lahan masih kosong. Mulai dengan menanam benih.</p></div>
-      <div class="action-row"><button id="plantButton" class="button button-primary">🌱 Tanam benih</button><button id="waterButton" class="button button-secondary" disabled>💧 Siram</button><button id="harvestButton" class="button button-secondary" disabled>🧺 Panen</button></div>
-      <p class="muted small">Simulasi sederhana: tanam → siram → panen.</p>
-    </div>
-    <div id="quizPanel" class="game-panel hidden">
-      <div class="quiz-top"><span class="status-pill">KUIS PERTANIAN</span><span id="questionCount">Soal 1 dari 5</span></div>
-      <h3 id="questionText">Apa tujuan utama penyuluhan pertanian?</h3>
-      <div id="answerList" class="answer-list"></div><p id="quizFeedback" class="quiz-feedback" aria-live="polite"></p>
-      <button id="nextQuestionButton" class="button button-primary hidden">Soal berikutnya →</button>
-    </div>
+    <div id="farmPanel" class="game-panel hidden"><div class="farm-scene"><div class="farm-sky">☀️ &nbsp; Kebun Belajar</div><div class="farm-plot" id="farmPlot"><span id="cropEmoji">🟫</span></div><p id="farmStatus">Lahan masih kosong. Mulai dengan menanam benih.</p></div><div class="action-row"><button id="plantButton" class="button button-primary">🌱 Tanam benih</button><button id="waterButton" class="button button-secondary" disabled>💧 Siram</button><button id="harvestButton" class="button button-secondary" disabled>🧺 Panen</button></div><p class="muted small">Simulasi sederhana: tanam → siram → panen.</p></div>
+    <div id="quizPanel" class="game-panel hidden"><div class="quiz-top"><span class="status-pill">KUIS PERTANIAN</span><span id="questionCount">Soal 1 dari 5</span></div><h3 id="questionText">Apa tujuan utama penyuluhan pertanian?</h3><div id="answerList" class="answer-list"></div><p id="quizFeedback" class="quiz-feedback" aria-live="polite"></p><button id="nextQuestionButton" class="button button-primary hidden">Soal berikutnya →</button></div>
   </section>
 
-  <div id="dialog" class="dialog-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="dialogTitle">
-    <div class="dialog-card"><div class="dialog-emoji" id="dialogEmoji">👨‍🌾</div><p class="eyebrow" id="dialogEyebrow">MISI PENYULUHAN</p><h3 id="dialogTitle">Percakapan dengan warga</h3><p id="dialogText"></p><div id="dialogChoices" class="answer-list"></div><button id="closeDialog" class="button button-secondary hidden">Kembali ke desa</button></div>
-  </div>
-  <footer>MY PPL MY ADVENTURE <span>•</span> Versi pengembangan 0.3.0</footer>
+  <div id="dialog" class="dialog-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><div class="dialog-card"><div class="dialog-emoji" id="dialogEmoji">👨‍🌾</div><p class="eyebrow" id="dialogEyebrow">MISI PENYULUHAN</p><h3 id="dialogTitle">Percakapan dengan warga</h3><p id="dialogText"></p><div id="dialogChoices" class="answer-list"></div><button id="closeDialog" class="button button-secondary hidden">Kembali ke desa</button></div></div>
+  <div id="achievementToast" class="achievement-toast" role="status" aria-live="polite"></div>
+  <footer>MY PPL MY ADVENTURE <span>•</span> Versi pengembangan 0.4.0</footer>
 </main>
 <script src="js/main.js"></script>
 </body>
