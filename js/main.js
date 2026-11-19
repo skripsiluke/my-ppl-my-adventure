@@ -2,7 +2,8 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const KEY = 'myPplMyAdventure.save.v1';
-const state = {name:'Penyuluh Muda',xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,player:{x:145,y:390},keys:{},interact:false};
+const XP_PER_LEVEL=250;
+const state = {name:'Penyuluh Muda',xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},player:{x:145,y:390},keys:{},interact:false};
 const screens=['homeScreen','menuScreen','gameScreen'];
 function save(){
   localStorage.setItem(KEY, JSON.stringify({
@@ -21,13 +22,14 @@ function save(){
     unlockedAchievements:state.unlockedAchievements,
     achievementRewardsClaimed:state.achievementRewardsClaimed,
     highestLevelReached:state.highestLevelReached,
+    missionFlags:state.missionFlags,
     player:state.player
   }));
 }
 function load(){
   try{
     const s=JSON.parse(localStorage.getItem(KEY)||'null');
-    if(s){Object.assign(state,s);if(!Object.prototype.hasOwnProperty.call(s,'highestLevelReached'))state.highestLevelReached=Math.floor((Number(s.xp)||0)/100)+1;}
+    if(s){Object.assign(state,s);if(!Object.prototype.hasOwnProperty.call(s,'highestLevelReached'))state.highestLevelReached=Math.floor((Number(s.xp)||0)/XP_PER_LEVEL)+1;}
   }catch(e){}
   // Compatibility: if either old completion flag is true, treat Pak Tani mission as completed.
   if(state.missionDone || state.pakMissionRewarded){
@@ -43,17 +45,37 @@ function load(){
   state.correctQuizCount=Number(state.correctQuizCount)||0;
   state.unlockedAchievements=Array.isArray(state.unlockedAchievements)?state.unlockedAchievements:[];
   state.achievementRewardsClaimed=Array.isArray(state.achievementRewardsClaimed)?state.achievementRewardsClaimed:[];
-  state.highestLevelReached=Math.max(1,Number(state.highestLevelReached)||Math.floor(state.xp/100)+1);
+  state.highestLevelReached=Math.max(1,Math.min(Number(state.highestLevelReached)||Math.floor(state.xp/XP_PER_LEVEL)+1,Math.floor(state.xp/XP_PER_LEVEL)+1));
+  state.missionFlags=state.missionFlags&&typeof state.missionFlags==='object'?state.missionFlags:{};
   save();
 }
 function showScreen(id){screens.forEach(s=>$(s).classList.toggle('hidden',s!==id));}
 function levelName(level){return ['Penyuluh Pertanian Pemula','Penyuluh Pertanian Terampil','Penyuluh Pertanian Mahir','Penyuluh Pertanian Penyelia','Penyuluh Pertanian Ahli Pertama','Penyuluh Pertanian Ahli Muda','Penyuluh Pertanian Ahli Madya','Penyuluh Pertanian Ahli Utama'][Math.min(level-1,7)];}
-function missionTotal(){return [state.missionDone,state.buMissionDone,state.ketuaMissionDone].filter(Boolean).length;}
-function nextMission(){return [{done:state.missionDone,text:'Temui Pak Tani dan bantu mengamati masalah tanaman padi.',reward:'+20 XP'},{done:state.buMissionDone,text:'Bantu Bu Rina memahami manfaat pencatatan kegiatan kelompok tani.',reward:'+25 XP'},{done:state.ketuaMissionDone,text:'Bantu Pak Ketua mengidentifikasi kebutuhan anggota kelompok tani.',reward:'+30 XP'}].find(m=>!m.done)||null;}
-function updateStats(){const count=missionTotal();$('missionStatus').textContent=count===3?'3/3 Selesai ✓':count+'/3 Misi selesai';$('missionStatus').classList.toggle('completed',count===3);$('xpValue').textContent=state.xp;$('coinValue').textContent=state.coins;$('gameCoins').textContent=state.coins;const level=Math.floor(state.xp/100)+1;$('levelLabel').textContent='LEVEL '+level;$('levelTitle').textContent=levelName(level);$('levelXp').textContent=state.xp%100;$('levelProgress').style.width=(state.xp%100)+'%';const next=nextMission();$('dailyMissionText').textContent=next?next.text:'Semua misi warga desa telah diselesaikan! Jelajahi mode simulasi dan kuis.';$('dailyMissionReward').textContent=next?next.reward:'SEMUA SELESAI';const desc=next?next.text:'Semua misi warga desa selesai. Terima kasih telah membantu Desa Sukamaju!';$('missionDescription').textContent=desc;updateProfile();}
+const extraMissions=[
+ {id:'sari',name:'Bu Sari',x:190,y:500,emoji:'👩‍🌾',role:'Anggota kelompok tani',title:'Misi Bu Sari: Benih Berkualitas',question:'“Saya akan memilih benih untuk musim tanam. Apa yang perlu diperhatikan?”',choices:[['Memilih benih bermutu, sehat, dan sesuai varietas',true],['Memilih benih hanya karena warnanya menarik',false],['Menggunakan benih yang sudah rusak',false]],explain:'Benih bermutu dan sesuai varietas membantu memperoleh pertumbuhan yang baik.',xp:14,coins:5},
+ {id:'dedi',name:'Pak Dedi',x:900,y:350,emoji:'👨‍🌾',role:'Petani hortikultura',title:'Misi Pak Dedi: Pemupukan Berimbang',question:'“Bagaimana menentukan pemupukan yang tepat?”',choices:[['Mengikuti kebutuhan tanaman dan rekomendasi pemupukan',true],['Memberi pupuk sebanyak-banyaknya',false],['Menggunakan dosis yang sama untuk semua lahan',false]],explain:'Pemupukan perlu mempertimbangkan kebutuhan tanaman, kondisi lahan, dan rekomendasi.',xp:16,coins:5},
+ {id:'penyuluh',name:'Ibu Maya',x:850,y:900,emoji:'👩‍🌾',role:'Penyuluh pertanian',title:'Misi Ibu Maya: Komunikasi Penyuluhan',question:'“Saat menyampaikan materi, bagaimana memastikan petani memahami?”',choices:[['Mengajak diskusi dan memberi kesempatan bertanya',true],['Membaca materi secepat mungkin',false],['Tidak perlu mengecek pemahaman',false]],explain:'Komunikasi dua arah membantu memastikan materi dipahami dan sesuai kebutuhan.',xp:18,coins:6},
+ {id:'kios',name:'Pak Hasan',x:1600,y:370,emoji:'🧑‍🌾',role:'Pemilik kios tani',title:'Misi Pak Hasan: Penggunaan Pestisida',question:'“Petani bertanya cara menggunakan pestisida dengan aman. Apa saranmu?”',choices:[['Membaca label dan mengikuti dosis serta petunjuk keselamatan',true],['Mencampur semua produk agar lebih kuat',false],['Mengabaikan alat pelindung diri',false]],explain:'Pestisida harus digunakan sesuai label, dosis, dan ketentuan keselamatan.',xp:16,coins:5},
+ {id:'ujang',name:'Pak Ujang',x:560,y:900,emoji:'👨‍🌾',role:'Petani sayuran',title:'Misi Pak Ujang: Konservasi Tanah',question:'“Bagaimana membantu menjaga tanah di lahan miring?”',choices:[['Menerapkan konservasi seperti terasering sesuai kondisi lahan',true],['Membiarkan aliran air mengikis tanah',false],['Membakar seluruh penutup tanah',false]],explain:'Konservasi tanah membantu mengurangi erosi dan menjaga kesuburan lahan.',xp:15,coins:5},
+ {id:'yati',name:'Bu Yati',x:1550,y:650,emoji:'👩‍🌾',role:'Pengurus kelompok wanita tani',title:'Misi Bu Yati: Pangan Keluarga',question:'“Apa langkah sederhana mendukung pangan keluarga?”',choices:[['Memanfaatkan pekarangan untuk tanaman pangan bergizi',true],['Membiarkan pekarangan tidak terawat',false],['Menanam tanpa memperhatikan kebutuhan keluarga',false]],explain:'Pekarangan dapat dimanfaatkan untuk mendukung ketersediaan pangan keluarga.',xp:14,coins:5},
+ {id:'irigasi',name:'Pak Rahmat',x:300,y:1050,emoji:'👨‍🌾',role:'Petani pengelola air',title:'Misi Pak Rahmat: Pengelolaan Air',question:'“Apa prinsip penggunaan air irigasi yang baik?”',choices:[['Mengatur air sesuai fase pertumbuhan dan kebutuhan tanaman',true],['Menggenangi lahan terus-menerus tanpa pengamatan',false],['Membiarkan saluran bocor',false]],explain:'Pengairan perlu disesuaikan dengan kebutuhan tanaman dan kondisi lahan.',xp:15,coins:5},
+ {id:'kompos',name:'Bu Nani',x:1200,y:1080,emoji:'👩‍🌾',role:'Pengolah pupuk organik',title:'Misi Bu Nani: Pupuk Organik',question:'“Bahan organik rumah tangga dan sisa tanaman dapat dimanfaatkan menjadi apa?”',choices:[['Kompos setelah melalui proses pengomposan',true],['Pestisida kimia',false],['Benih unggul secara langsung',false]],explain:'Bahan organik dapat diolah menjadi kompos untuk memperbaiki kualitas tanah.',xp:15,coins:5}
+];
+const missionInfo=[
+ {id:'pak',done:()=>state.missionDone,text:'Temui Pak Tani dan amati gejala pada tanaman padi.',reward:'+20 XP'},
+ {id:'bu',done:()=>state.buMissionDone,text:'Bantu Bu Rina memahami pencatatan kelompok tani.',reward:'+25 XP'},
+ {id:'ketua',done:()=>state.ketuaMissionDone,text:'Bantu Pak Ketua mengidentifikasi kebutuhan anggota.',reward:'+30 XP'},
+ ...extraMissions.map(m=>({id:m.id,done:()=>!!state.missionFlags[m.id],text:'Temui '+m.name+': '+m.title.replace(/^Misi [^:]+: /,''),reward:'+'+m.xp+' XP'}))
+];
+function missionDone(id){const m=missionInfo.find(x=>x.id===id);return m?m.done():false;}
+function missionTotal(){return missionInfo.filter(m=>m.done()).length;}
+function nextMission(){return missionInfo.find(m=>!m.done())||null;}
+function updateStats(){const count=missionTotal();$('missionStatus').textContent=count+'/'+missionInfo.length+' Misi selesai';$('missionStatus').classList.toggle('completed',count===missionInfo.length);$('xpValue').textContent=state.xp;$('coinValue').textContent=state.coins;$('gameCoins').textContent=state.coins;const level=Math.floor(state.xp/XP_PER_LEVEL)+1;const progress=state.xp%XP_PER_LEVEL;$('levelLabel').textContent='LEVEL '+level;$('levelTitle').textContent=levelName(level);$('levelXp').textContent=progress;$('levelProgress').style.width=(progress/XP_PER_LEVEL*100)+'%';const next=nextMission();$('dailyMissionText').textContent=next?next.text:'Semua misi Adventure selesai! Jelajahi desa, simulasi, dan kuis.';$('dailyMissionReward').textContent=next?next.reward:'SEMUA SELESAI';$('missionDescription').textContent=next?next.text:'Semua misi Adventure selesai. Terima kasih telah membantu Desa Sukamaju!';updateProfile();}
 const achievementList=[
- {id:'missions',icon:'🌾',name:'Sahabat Petani',desc:'Selesaikan 3 misi NPC',check:()=>missionTotal()>=3},
- {id:'level5',icon:'⭐',name:'Penyuluh Berprestasi',desc:'Capai Level 5 (400 XP)',check:()=>state.xp>=400},
+ {id:'missions',icon:'🌾',name:'Sahabat Petani',desc:'Selesaikan 3 misi Adventure',check:()=>missionTotal()>=3},
+ {id:'explorer',icon:'🧭',name:'Penjelajah Desa',desc:'Selesaikan 6 misi Adventure',check:()=>missionTotal()>=6},
+ {id:'mastermission',icon:'🏅',name:'Pahlawan Sukamaju',desc:'Selesaikan seluruh 11 misi Adventure',check:()=>missionTotal()>=missionInfo.length},
+ {id:'level5',icon:'⭐',name:'Penyuluh Berprestasi',desc:'Capai Level 5 (1.000 XP)',check:()=>state.xp>=1000},
  {id:'harvest10',icon:'🧺',name:'Petani Produktif',desc:'Panen tanaman 10 kali',check:()=>state.harvestCount>=10},
  {id:'quiz10',icon:'🧠',name:'Ahli Pertanian',desc:'Jawab 10 soal kuis dengan benar',check:()=>state.correctQuizCount>=10}
 ];
@@ -66,7 +88,7 @@ function playSound(kind='success'){
  }catch(e){}
 }
 function updateProfile(){
- const level=Math.floor(state.xp/100)+1;
+ const level=Math.floor(state.xp/XP_PER_LEVEL)+1;
  if($('profileName'))$('profileName').textContent=state.name;
  if($('profileRank'))$('profileRank').textContent=levelName(level)+' • Level '+level;
  if($('profileXp'))$('profileXp').textContent=state.xp;
@@ -102,9 +124,9 @@ function showLevelUp(level,bonus){
  $('levelUpOverlay').classList.remove('hidden');playSound('level');
 }
 function reward(xp,coins){
- const oldLevel=Math.floor(state.xp/100)+1;
+ const oldLevel=Math.floor(state.xp/XP_PER_LEVEL)+1;
  state.xp+=xp;state.coins+=coins;
- const newLevel=Math.floor(state.xp/100)+1;let levelBonus=0;
+ const newLevel=Math.floor(state.xp/XP_PER_LEVEL)+1;let levelBonus=0;
  while(state.highestLevelReached<newLevel){state.highestLevelReached++;state.coins+=25;levelBonus+=25;}
  updateStats();checkAchievements();save();
  if(newLevel>oldLevel)showLevelUp(newLevel,levelBonus);
@@ -186,7 +208,8 @@ const WORLD={w:1800,h:1200};let raf=0,last=0,dialogOpen=false;
 const npcs=[
 {id:'pak',name:'Pak Tani',x:1160,y:510,emoji:'👨‍🌾',role:'Petani padi',kind:'mission'},
 {id:'bu',name:'Bu Rina',x:390,y:330,emoji:'👩‍🌾',role:'Anggota kelompok tani',kind:'mission'},
-{id:'ketua',name:'Pak Ketua',x:760,y:690,emoji:'🧑‍🌾',role:'Ketua kelompok tani',kind:'mission'}
+{id:'ketua',name:'Pak Ketua',x:760,y:690,emoji:'🧑‍🌾',role:'Ketua kelompok tani',kind:'mission'},
+...extraMissions.map(m=>({...m,kind:'mission'}))
 ];
 const buildings=[
 {x:220,y:210,w:150,h:110,name:'Rumah Bu Rina',roof:'#a65f3e',wall:'#f1dfb7',door:'#6b986b'},
@@ -222,7 +245,7 @@ function drawWorld(t=0){
  // labels
  ctx.textAlign='left';ctx.font='bold 20px Nunito';ctx.fillStyle='#315c37';ctx.fillText('DESA SUKAMAJU',45,55);ctx.font='bold 16px Nunito';ctx.fillText('AREA PERSAWAHAN',1190,690);ctx.fillText('JALAN DESA',420,530);
  // NPCs
- npcs.forEach(n=>{const done=n.id==='pak'?state.missionDone:n.id==='bu'?state.buMissionDone:state.ketuaMissionDone;ctx.font='38px serif';ctx.textAlign='center';ctx.fillText(n.emoji,n.x,n.y+8);ctx.font='bold 14px Nunito';ctx.fillStyle='#23452c';ctx.fillText(n.name,n.x,n.y+27);if(n.kind==='mission'){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(n.x,n.y-32,15,0,Math.PI*2);ctx.fill();ctx.fillStyle=done?'#23834b':'#d88b1f';ctx.font='bold 17px Nunito';ctx.fillText(done?'✓':'!',n.x,n.y-26);}});
+ npcs.forEach(n=>{const done=missionDone(n.id);ctx.font='38px serif';ctx.textAlign='center';ctx.fillText(n.emoji,n.x,n.y+8);ctx.font='bold 14px Nunito';ctx.fillStyle='#23452c';ctx.fillText(n.name,n.x,n.y+27);if(n.kind==='mission'){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(n.x,n.y-32,15,0,Math.PI*2);ctx.fill();ctx.fillStyle=done?'#23834b':'#d88b1f';ctx.font='bold 17px Nunito';ctx.fillText(done?'✓':'!',n.x,n.y-26);}});
  // player shadow and character
  ctx.fillStyle='#31552c55';ctx.beginPath();ctx.ellipse(state.player.x,state.player.y+8,16,7,0,0,Math.PI*2);ctx.fill();ctx.font='38px serif';ctx.textAlign='center';ctx.fillText('🧑‍🌾',state.player.x,state.player.y+5);
  // proximity indicator
@@ -260,18 +283,34 @@ function openNpcDialog(n){
    addChoice('Membantu mendokumentasikan kegiatan dan mengevaluasi kemajuan',true,()=>{if(!state.buMissionDone)completeMission('bu',25,10);$('dialogText').textContent='Tepat! Pencatatan membantu kelompok mendokumentasikan kegiatan dan mengevaluasi kemajuan. '+(state.buMissionDone?'Hadiah 25 XP dan 10 koin sudah diterima.':'');});
    addChoice('Tidak perlu mencatat kegiatan',false,()=>{$('dialogText').textContent='Belum tepat. Catatan membantu kelompok melihat kegiatan yang sudah dilakukan dan hasil yang dicapai.';});
  }
- else {
+ else if(n.id==='ketua'){
    $('dialogTitle').textContent='Misi Pak Ketua: Identifikasi Kebutuhan';
    $('dialogText').textContent=state.ketuaMissionDone?'Misi Pak Ketua sudah selesai. Hadiah sebelumnya sudah diterima.':'“Sebelum menyusun kegiatan, sebaiknya kita mengetahui kebutuhan anggota kelompok.” Apa pendekatan yang tepat?';
    addChoice('Melakukan diskusi dan identifikasi kebutuhan bersama anggota',true,()=>{if(!state.ketuaMissionDone)completeMission('ketua',30,15);$('dialogText').textContent='Tepat! Kegiatan penyuluhan perlu disusun berdasarkan kebutuhan anggota kelompok. Hadiah 30 XP dan 15 koin sudah diterima.';});
    addChoice('Menentukan kegiatan tanpa mendengar petani',false,()=>{$('dialogText').textContent='Belum tepat. Kebutuhan petani perlu digali melalui diskusi dan identifikasi bersama.';});
+ } else {
+   const m=extraMissions.find(x=>x.id===n.id);
+   if(m){
+     $('dialogTitle').textContent=m.title;
+     $('dialogText').textContent=state.missionFlags[m.id]?'Misi ini sudah selesai. Hadiah telah diterima.':m.question;
+     m.choices.forEach(([label,ok])=>addChoice(label,ok,()=>{
+       if(ok&&!state.missionFlags[m.id])completeMission(m.id,m.xp,m.coins);
+       $('dialogText').textContent=ok?'Tepat! '+m.explain+' Hadiah '+m.xp+' XP dan '+m.coins+' koin telah diterima.':'Belum tepat. Coba pikirkan kembali kebutuhan petani dan prinsip budidaya yang baik.';
+     }));
+   }
  }
  $('closeDialog').classList.remove('hidden');}
 function completeMission(id,xp,coins){
   if(id==='pak'){if(state.pakMissionRewarded)return;state.missionDone=true;state.pakMissionRewarded=true;}
   if(id==='bu'){if(state.buMissionRewarded)return;state.buMissionDone=true;state.buMissionRewarded=true;}
   if(id==='ketua'){if(state.ketuaMissionRewarded)return;state.ketuaMissionDone=true;state.ketuaMissionRewarded=true;}
-  state.xp+=xp;state.coins+=coins;updateStats();save();
+  if(!['pak','bu','ketua'].includes(id)){if(state.missionFlags[id])return;state.missionFlags[id]=true;}
+  const oldLevel=Math.floor(state.xp/XP_PER_LEVEL)+1;
+  state.xp+=xp;state.coins+=coins;
+  const newLevel=Math.floor(state.xp/XP_PER_LEVEL)+1;let bonus=0;
+  while(state.highestLevelReached<newLevel){state.highestLevelReached++;state.coins+=25;bonus+=25;}
+  updateStats();checkAchievements();save();
+  if(newLevel>oldLevel)showLevelUp(newLevel,bonus);
   $('missionDescription').textContent='Misi selesai! Kamu memperoleh '+xp+' XP dan '+coins+' koin.';
 }
 function addChoice(label,correct,after){const b=document.createElement('button');b.className='answer-option';b.textContent=label;b.addEventListener('click',()=>{document.querySelectorAll('#dialogChoices button').forEach(x=>x.disabled=true);if(correct){b.classList.add('correct');$('dialogText').textContent='Tepat!';}else{b.classList.add('wrong');$('dialogText').textContent='Coba pikirkan kembali jawaban yang paling tepat.';}after();});$('dialogChoices').appendChild(b);}
