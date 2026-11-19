@@ -2,7 +2,7 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const KEY = 'myPplMyAdventure.save.v1';
-const state = {name:'Penyuluh Muda',xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,player:{x:145,y:390},keys:{},interact:false};
+const state = {name:'Penyuluh Muda',xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],player:{x:145,y:390},keys:{},interact:false};
 const screens=['homeScreen','menuScreen','gameScreen'];
 function save(){
   localStorage.setItem(KEY, JSON.stringify({
@@ -16,6 +16,9 @@ function save(){
     ketuaMissionDone:state.ketuaMissionDone,
     ketuaMissionRewarded:state.ketuaMissionRewarded,
     farmStage:state.farmStage,
+    harvestCount:state.harvestCount,
+    correctQuizCount:state.correctQuizCount,
+    unlockedAchievements:state.unlockedAchievements,
     player:state.player
   }));
 }
@@ -34,6 +37,9 @@ function load(){
   state.buMissionRewarded=state.buMissionDone;
   state.ketuaMissionDone=!!state.ketuaMissionDone || !!state.ketuaMissionRewarded;
   state.ketuaMissionRewarded=state.ketuaMissionDone;
+  state.harvestCount=Number(state.harvestCount)||0;
+  state.correctQuizCount=Number(state.correctQuizCount)||0;
+  state.unlockedAchievements=Array.isArray(state.unlockedAchievements)?state.unlockedAchievements:[];
   save();
 }
 function showScreen(id){screens.forEach(s=>$(s).classList.toggle('hidden',s!==id));}
@@ -41,8 +47,32 @@ function levelName(level){return ['Penyuluh Pertanian Pemula','Penyuluh Pertania
 function missionTotal(){return [state.missionDone,state.buMissionDone,state.ketuaMissionDone].filter(Boolean).length;}
 function nextMission(){return [{done:state.missionDone,text:'Temui Pak Tani dan bantu mengamati masalah tanaman padi.',reward:'+20 XP'},{done:state.buMissionDone,text:'Bantu Bu Rina memahami manfaat pencatatan kegiatan kelompok tani.',reward:'+25 XP'},{done:state.ketuaMissionDone,text:'Bantu Pak Ketua mengidentifikasi kebutuhan anggota kelompok tani.',reward:'+30 XP'}].find(m=>!m.done)||null;}
 function updateStats(){const count=missionTotal();$('missionStatus').textContent=count===3?'3/3 Selesai ✓':count+'/3 Misi selesai';$('missionStatus').classList.toggle('completed',count===3);$('xpValue').textContent=state.xp;$('coinValue').textContent=state.coins;$('gameCoins').textContent=state.coins;const level=Math.floor(state.xp/100)+1;$('levelLabel').textContent='LEVEL '+level;$('levelTitle').textContent=levelName(level);$('levelXp').textContent=state.xp%100;$('levelProgress').style.width=(state.xp%100)+'%';const next=nextMission();$('dailyMissionText').textContent=next?next.text:'Semua misi warga desa telah diselesaikan! Jelajahi mode simulasi dan kuis.';$('dailyMissionReward').textContent=next?next.reward:'SEMUA SELESAI';const desc=next?next.text:'Semua misi warga desa selesai. Terima kasih telah membantu Desa Sukamaju!';$('missionDescription').textContent=desc;}
-function reward(xp,coins){state.xp+=xp;state.coins+=coins;updateStats();save();}
-load();updateStats();$('playerName').value=state.name==='Penyuluh Muda'?'':state.name;
+const achievementList=[
+ {id:'missions',icon:'🌾',name:'Sahabat Petani',desc:'Selesaikan 3 misi NPC',check:()=>missionTotal()>=3},
+ {id:'level5',icon:'⭐',name:'Penyuluh Berprestasi',desc:'Capai Level 5 (400 XP)',check:()=>state.xp>=400},
+ {id:'harvest10',icon:'🧺',name:'Petani Produktif',desc:'Panen tanaman 10 kali',check:()=>state.harvestCount>=10},
+ {id:'quiz10',icon:'🧠',name:'Ahli Pertanian',desc:'Jawab 10 soal kuis dengan benar',check:()=>state.correctQuizCount>=10}
+];
+function checkAchievements(){
+ let newly=[];
+ achievementList.forEach(a=>{if(a.check()&&!state.unlockedAchievements.includes(a.id)){state.unlockedAchievements.push(a.id);newly.push(a);}});
+ if(newly.length){showAchievementToast(newly[0]);save();}
+ renderAchievements();
+}
+function showAchievementToast(a){
+ let toast=$('achievementToast');if(!toast)return;
+ toast.textContent='🏆 Lencana terbuka: '+a.name;toast.classList.add('show');
+ clearTimeout(window.achievementToastTimer);window.achievementToastTimer=setTimeout(()=>toast.classList.remove('show'),3500);
+}
+function renderAchievements(){
+ const grid=$('achievementGrid');if(!grid)return;
+ const unlocked=state.unlockedAchievements||[];
+ $('achievementCount').textContent=unlocked.length+' / '+achievementList.length+' terbuka';
+ grid.innerHTML=achievementList.map(a=>{const yes=unlocked.includes(a.id);return `<article class="achievement-item ${yes?'unlocked':'locked'}"><div class="achievement-icon">${yes?a.icon:'🔒'}</div><div><b>${a.name}</b><p>${a.desc}</p><small>${yes?'Terbuka ✓':'Belum terbuka'}</small></div></article>`;}).join('');
+}
+$('achievementToggle').addEventListener('click',()=>{const panel=$('achievementPanel');panel.classList.toggle('hidden');renderAchievements();});
+function reward(xp,coins){state.xp+=xp;state.coins+=coins;updateStats();checkAchievements();save();}
+load();updateStats();checkAchievements();$('playerName').value=state.name==='Penyuluh Muda'?'':state.name;
 $('startButton').addEventListener('click',()=>{const n=$('playerName').value.trim();if(n)state.name=n;$('welcomeName').textContent=state.name+'!';showScreen('menuScreen');save();});
 $('resetButton').addEventListener('click',()=>{if(confirm('Hapus seluruh progres permainan di perangkat ini?')){localStorage.removeItem(KEY);location.reload();}});
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>openMode(b.dataset.mode)));
@@ -150,7 +180,7 @@ document.querySelectorAll('[data-key]').forEach(b=>{const k=b.dataset.key;b.addE
 $('interactButton').addEventListener('click',interact);
 /* Farm simulator */
 function updateFarm(){const stages=['🟫','🌱','🌿','🌾'];$('cropEmoji').textContent=stages[state.farmStage];$('plantButton').disabled=state.farmStage!==0;$('waterButton').disabled=state.farmStage!==1;$('harvestButton').disabled=state.farmStage!==2;$('farmStatus').textContent=['Lahan masih kosong. Mulai dengan menanam benih.','Benih sudah ditanam. Tanaman membutuhkan air.','Tanaman tumbuh subur. Saatnya panen!','Panen berhasil! Kamu memperoleh hasil dari kerja kerasmu.'][state.farmStage];}
-$('plantButton').addEventListener('click',()=>{state.farmStage=1;reward(5,0);updateFarm();});$('waterButton').addEventListener('click',()=>{state.farmStage=2;reward(5,0);updateFarm();});$('harvestButton').addEventListener('click',()=>{state.farmStage=3;reward(20,15);updateFarm();setTimeout(()=>{state.farmStage=0;updateFarm();save();},1800);});
+$('plantButton').addEventListener('click',()=>{state.farmStage=1;reward(5,0);updateFarm();});$('waterButton').addEventListener('click',()=>{state.farmStage=2;reward(5,0);updateFarm();});$('harvestButton').addEventListener('click',()=>{state.farmStage=3;state.harvestCount++;reward(20,15);updateFarm();setTimeout(()=>{state.farmStage=0;updateFarm();save();},1800);});
 /* Quiz */
 const questions=[
 {q:'Apa tujuan utama penyuluhan pertanian?',a:['Menggantikan seluruh keputusan petani','Meningkatkan pengetahuan, keterampilan, dan sikap petani','Menjual sarana produksi sebanyak-banyaknya','Mewajibkan satu teknologi untuk semua petani'],c:1,why:'Penyuluhan membantu petani meningkatkan kapasitas agar mampu mengambil keputusan secara mandiri.'},
@@ -159,6 +189,6 @@ const questions=[
 {q:'Mengapa petani perlu melakukan pemupukan berimbang?',a:['Agar pupuk digunakan sebanyak mungkin','Agar kebutuhan hara tanaman terpenuhi sesuai kondisi dan rekomendasi','Agar tidak perlu mengairi tanaman','Agar semua jenis tanah mendapat dosis sama'],c:1,why:'Pemupukan berimbang menyesuaikan kebutuhan hara, kondisi tanah, dan rekomendasi.'},
 {q:'Dalam penyuluhan, metode demonstrasi bertujuan untuk…',a:['Memperlihatkan praktik atau cara kerja teknologi secara langsung','Menggantikan seluruh diskusi kelompok','Menguji hafalan istilah saja','Membatasi petani untuk bertanya'],c:0,why:'Demonstrasi memberi kesempatan sasaran melihat proses dan praktik penerapan teknologi.'}
 ];
-function renderQuestion(){const q=questions[state.questionIndex];$('questionCount').textContent=`Soal ${state.questionIndex+1} dari ${questions.length}`;$('questionText').textContent=q.q;$('quizFeedback').textContent='';$('nextQuestionButton').classList.add('hidden');$('answerList').innerHTML='';q.a.forEach((a,i)=>{const b=document.createElement('button');b.className='answer-option';b.textContent=String.fromCharCode(65+i)+'. '+a;b.addEventListener('click',()=>{const all=$('answerList').querySelectorAll('button');all.forEach(x=>x.disabled=true);if(i===q.c){b.classList.add('correct');$('quizFeedback').textContent='Benar! '+q.why;state.quizScore++;reward(10,3);}else{b.classList.add('wrong');all[q.c].classList.add('correct');$('quizFeedback').textContent='Belum tepat. '+q.why;}$('nextQuestionButton').classList.remove('hidden');});$('answerList').appendChild(b);});}
+function renderQuestion(){const q=questions[state.questionIndex];$('questionCount').textContent=`Soal ${state.questionIndex+1} dari ${questions.length}`;$('questionText').textContent=q.q;$('quizFeedback').textContent='';$('nextQuestionButton').classList.add('hidden');$('answerList').innerHTML='';q.a.forEach((a,i)=>{const b=document.createElement('button');b.className='answer-option';b.textContent=String.fromCharCode(65+i)+'. '+a;b.addEventListener('click',()=>{const all=$('answerList').querySelectorAll('button');all.forEach(x=>x.disabled=true);if(i===q.c){b.classList.add('correct');$('quizFeedback').textContent='Benar! '+q.why;state.quizScore++;state.correctQuizCount++;reward(10,3);}else{b.classList.add('wrong');all[q.c].classList.add('correct');$('quizFeedback').textContent='Belum tepat. '+q.why;}$('nextQuestionButton').classList.remove('hidden');});$('answerList').appendChild(b);});}
 $('nextQuestionButton').addEventListener('click',()=>{state.questionIndex++;if(state.questionIndex<questions.length){renderQuestion();}else{$('questionText').textContent=`Kuis selesai! Skor kamu ${state.quizScore} dari ${questions.length}.`;$('answerList').innerHTML='';$('quizFeedback').textContent='Terus belajar dan tingkatkan kemampuan penyuluhanmu!';$('nextQuestionButton').textContent='Ulangi kuis';$('nextQuestionButton').onclick=()=>{state.questionIndex=0;state.quizScore=0;$('nextQuestionButton').textContent='Soal berikutnya →';$('nextQuestionButton').onclick=null;renderQuestion();};}});
 })();
