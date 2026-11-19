@@ -54,7 +54,7 @@
 
   <section id="menuScreen" class="screen hidden">
     <div class="welcome-row"><div><p class="eyebrow">SELAMAT DATANG,</p><h2 id="welcomeName">Penyuluh Muda!</h2><p class="muted">Desa menantimu. Misi petualangan sudah tersedia.</p></div><div class="avatar-bubble">🧑‍🌾</div></div>
-    <div class="level-card"><div><span class="eyebrow light" id="levelLabel">LEVEL 1</span><h3 id="levelTitle">Penyuluh Pemula</h3><p><span id="levelXp">0</span> / 100 XP menuju level berikutnya</p></div><div class="level-icon">🌱</div><div class="progress-track"><span id="levelProgress"></span></div></div>
+    <div class="level-card"><div><span class="eyebrow light" id="levelLabel">LEVEL 1</span><h3 id="levelTitle">Penyuluh Pemula</h3><p><span id="levelXp">0</span> / 250 XP menuju level berikutnya</p></div><div class="level-icon">🌱</div><div class="progress-track"><span id="levelProgress"></span></div></div>
     <h3 class="section-heading">Pilih petualangan</h3>
     <div class="mode-grid">
       <button class="mode-card adventure-card" data-mode="adventure"><span class="mode-icon">🗺️</span><b>Adventure</b><small>Jelajahi Desa Sukamaju dan temui warga.</small><span class="mode-link">Mainkan →</span></button>
@@ -104,7 +104,7 @@
     <div id="adventurePanel" class="game-panel hidden">
       <div class="world-hud"><span id="worldLocation">📍 Gerbang Desa</span><span id="worldObjective">🎯 Tujuan: temui warga desa</span></div>
       <div class="canvas-wrap"><canvas id="worldCanvas" width="960" height="600" aria-label="Peta top-down Desa Sukamaju"></canvas><div class="canvas-hint">WASD / tombol panah untuk bergerak • E atau Spasi untuk berinteraksi</div></div>
-      <div class="game-info"><div><b>🎯 Misi: Kenali Desa Sukamaju</b><p id="missionDescription">Temui Pak Tani di area persawahan. Dekati warga lalu tekan E.</p></div><span id="missionStatus" class="status-pill">Belum selesai</span></div>
+      <div class="game-info"><div><b>🎯 Misi Adventure: Jelajahi Desa Sukamaju</b><p id="missionDescription">Jelajahi Desa Sukamaju, temui warga, dan selesaikan 11 misi penyuluhan.</p></div><span id="missionStatus" class="status-pill">Belum selesai</span></div>
       <div class="mobile-controls"><div class="dpad"><button data-key="ArrowUp" aria-label="Atas">▲</button><button data-key="ArrowLeft" aria-label="Kiri">◀</button><button data-key="ArrowDown" aria-label="Bawah">▼</button><button data-key="ArrowRight" aria-label="Kanan">▶</button></div><button id="interactButton" class="interact-button">INTERAKSI</button></div>
     </div>
     <div id="farmPanel" class="game-panel hidden"><div class="farm-scene"><div class="farm-sky">☀️ &nbsp; Kebun Belajar</div><div class="farm-plot" id="farmPlot"><span id="cropEmoji">🟫</span></div><p id="farmStatus">Lahan masih kosong. Mulai dengan menanam benih.</p></div><div class="action-row"><button id="plantButton" class="button button-primary">🌱 Tanam benih</button><button id="waterButton" class="button button-secondary" disabled>💧 Siram</button><button id="harvestButton" class="button button-secondary" disabled>🧺 Panen</button></div><p class="muted small">Simulasi sederhana: tanam → siram → panen.</p></div>
@@ -114,7 +114,7 @@
   <div id="dialog" class="dialog-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="dialogTitle"><div class="dialog-card"><div class="dialog-emoji" id="dialogEmoji">👨‍🌾</div><p class="eyebrow" id="dialogEyebrow">MISI PENYULUHAN</p><h3 id="dialogTitle">Percakapan dengan warga</h3><p id="dialogText"></p><div id="dialogChoices" class="answer-list"></div><button id="closeDialog" class="button button-secondary hidden">Kembali ke desa</button></div></div>
   <div id="achievementToast" class="achievement-toast" role="status" aria-live="polite"></div>
   <div id="levelUpOverlay" class="levelup-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="levelUpTitle"><div class="levelup-card"><div class="levelup-spark">✨🌟✨</div><p>SELAMAT!</p><h2 id="levelUpTitle">LEVEL UP!</h2><div id="levelUpRank">Penyuluh Pertanian Terampil</div><strong id="levelUpBonus">Bonus +25 koin</strong><button id="closeLevelUp" class="button button-primary" type="button">Lanjutkan petualangan</button></div></div>
-  <footer>MY PPL MY ADVENTURE <span>•</span> Versi pengembangan 0.6.0</footer>
+  <footer>MY PPL MY ADVENTURE <span>•</span> Versi pengembangan 0.7.0</footer>
   <audio id="bgmAudio" src="assets/audio/background-music.mp3" loop preload="auto"></audio>
 </main>
 <script src="js/main.js"></script>

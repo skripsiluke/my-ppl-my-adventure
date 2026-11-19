@@ -38,3 +38,23 @@ Workflow pada `.github/workflows/deploy.yml` juga disediakan untuk deployment ot
 - Kontrol arah lebih nyaman untuk layar sentuh dan mendukung gerak diagonal yang seimbang.
 - Status tombol gerak dibersihkan saat jendela kehilangan fokus.
 - Fokus keyboard lebih terlihat untuk aksesibilitas.
+
+
+## Versi 0.6.0 — Background Music & Settings
+- Menambahkan menu **Pengaturan Game** pada menu utama.
+- Toggle BGM Music untuk menghidupkan atau mematikan musik latar.
+- Slider untuk mengatur volume musik (0–100%).
+- Musik diputar berulang (loop) dan pengaturan audio tersimpan di perangkat melalui localStorage.
+- Musik mulai diputar setelah interaksi pengguna melalui tombol **Mulai Petualangan**, sesuai kebijakan autoplay browser.
+- File musik berada di `assets/audio/background-music.mp3`.
+
+
+## Versi 0.7.0 — Adventure Missions & Milestones
+- Adventure diperluas menjadi 11 misi dengan 8 warga/NPC tambahan.
+- Tema misi: benih bermutu, pemupukan berimbang, komunikasi penyuluhan, keamanan pestisida, konservasi tanah, pangan keluarga, pengelolaan air, dan kompos.
+- Setiap misi memiliki pertanyaan, pilihan jawaban, penjelasan, serta hadiah XP dan koin.
+- Progres misi tambahan disimpan terpisah agar progres lama tetap dipertahankan.
+- Kurva level diperlambat menjadi 250 XP per level (sebelumnya 100 XP).
+- Indikator XP menampilkan progres terhadap target 250 XP.
+- Ditambahkan milestone Penjelajah Desa (6 misi) dan Pahlawan Sukamaju (seluruh 11 misi).
+- Syarat Penyuluh Berprestasi disesuaikan menjadi Level 5 (1.000 XP).
