@@ -2,7 +2,7 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const KEY = 'myPplMyAdventure.save.v1';
-const state = {name:'Penyuluh Muda',xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],player:{x:145,y:390},keys:{},interact:false};
+const state = {name:'Penyuluh Muda',xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,player:{x:145,y:390},keys:{},interact:false};
 const screens=['homeScreen','menuScreen','gameScreen'];
 function save(){
   localStorage.setItem(KEY, JSON.stringify({
@@ -19,13 +19,15 @@ function save(){
     harvestCount:state.harvestCount,
     correctQuizCount:state.correctQuizCount,
     unlockedAchievements:state.unlockedAchievements,
+    achievementRewardsClaimed:state.achievementRewardsClaimed,
+    highestLevelReached:state.highestLevelReached,
     player:state.player
   }));
 }
 function load(){
   try{
     const s=JSON.parse(localStorage.getItem(KEY)||'null');
-    if(s)Object.assign(state,s);
+    if(s){Object.assign(state,s);if(!Object.prototype.hasOwnProperty.call(s,'highestLevelReached'))state.highestLevelReached=Math.floor((Number(s.xp)||0)/100)+1;}
   }catch(e){}
   // Compatibility: if either old completion flag is true, treat Pak Tani mission as completed.
   if(state.missionDone || state.pakMissionRewarded){
@@ -40,40 +42,76 @@ function load(){
   state.harvestCount=Number(state.harvestCount)||0;
   state.correctQuizCount=Number(state.correctQuizCount)||0;
   state.unlockedAchievements=Array.isArray(state.unlockedAchievements)?state.unlockedAchievements:[];
+  state.achievementRewardsClaimed=Array.isArray(state.achievementRewardsClaimed)?state.achievementRewardsClaimed:[];
+  state.highestLevelReached=Math.max(1,Number(state.highestLevelReached)||Math.floor(state.xp/100)+1);
   save();
 }
 function showScreen(id){screens.forEach(s=>$(s).classList.toggle('hidden',s!==id));}
 function levelName(level){return ['Penyuluh Pertanian Pemula','Penyuluh Pertanian Terampil','Penyuluh Pertanian Mahir','Penyuluh Pertanian Penyelia','Penyuluh Pertanian Ahli Pertama','Penyuluh Pertanian Ahli Muda','Penyuluh Pertanian Ahli Madya','Penyuluh Pertanian Ahli Utama'][Math.min(level-1,7)];}
 function missionTotal(){return [state.missionDone,state.buMissionDone,state.ketuaMissionDone].filter(Boolean).length;}
 function nextMission(){return [{done:state.missionDone,text:'Temui Pak Tani dan bantu mengamati masalah tanaman padi.',reward:'+20 XP'},{done:state.buMissionDone,text:'Bantu Bu Rina memahami manfaat pencatatan kegiatan kelompok tani.',reward:'+25 XP'},{done:state.ketuaMissionDone,text:'Bantu Pak Ketua mengidentifikasi kebutuhan anggota kelompok tani.',reward:'+30 XP'}].find(m=>!m.done)||null;}
-function updateStats(){const count=missionTotal();$('missionStatus').textContent=count===3?'3/3 Selesai ✓':count+'/3 Misi selesai';$('missionStatus').classList.toggle('completed',count===3);$('xpValue').textContent=state.xp;$('coinValue').textContent=state.coins;$('gameCoins').textContent=state.coins;const level=Math.floor(state.xp/100)+1;$('levelLabel').textContent='LEVEL '+level;$('levelTitle').textContent=levelName(level);$('levelXp').textContent=state.xp%100;$('levelProgress').style.width=(state.xp%100)+'%';const next=nextMission();$('dailyMissionText').textContent=next?next.text:'Semua misi warga desa telah diselesaikan! Jelajahi mode simulasi dan kuis.';$('dailyMissionReward').textContent=next?next.reward:'SEMUA SELESAI';const desc=next?next.text:'Semua misi warga desa selesai. Terima kasih telah membantu Desa Sukamaju!';$('missionDescription').textContent=desc;}
+function updateStats(){const count=missionTotal();$('missionStatus').textContent=count===3?'3/3 Selesai ✓':count+'/3 Misi selesai';$('missionStatus').classList.toggle('completed',count===3);$('xpValue').textContent=state.xp;$('coinValue').textContent=state.coins;$('gameCoins').textContent=state.coins;const level=Math.floor(state.xp/100)+1;$('levelLabel').textContent='LEVEL '+level;$('levelTitle').textContent=levelName(level);$('levelXp').textContent=state.xp%100;$('levelProgress').style.width=(state.xp%100)+'%';const next=nextMission();$('dailyMissionText').textContent=next?next.text:'Semua misi warga desa telah diselesaikan! Jelajahi mode simulasi dan kuis.';$('dailyMissionReward').textContent=next?next.reward:'SEMUA SELESAI';const desc=next?next.text:'Semua misi warga desa selesai. Terima kasih telah membantu Desa Sukamaju!';$('missionDescription').textContent=desc;updateProfile();}
 const achievementList=[
  {id:'missions',icon:'🌾',name:'Sahabat Petani',desc:'Selesaikan 3 misi NPC',check:()=>missionTotal()>=3},
  {id:'level5',icon:'⭐',name:'Penyuluh Berprestasi',desc:'Capai Level 5 (400 XP)',check:()=>state.xp>=400},
  {id:'harvest10',icon:'🧺',name:'Petani Produktif',desc:'Panen tanaman 10 kali',check:()=>state.harvestCount>=10},
  {id:'quiz10',icon:'🧠',name:'Ahli Pertanian',desc:'Jawab 10 soal kuis dengan benar',check:()=>state.correctQuizCount>=10}
 ];
+function playSound(kind='success'){
+ try{
+  const AudioCtx=window.AudioContext||window.webkitAudioContext;if(!AudioCtx)return;
+  const ac=playSound.ctx||(playSound.ctx=new AudioCtx());if(ac.state==='suspended')ac.resume();
+  const notes=kind==='level'?[523.25,659.25,783.99,1046.5]:kind==='badge'?[659.25,880,1046.5]:[587.33,783.99];
+  notes.forEach((freq,i)=>{const osc=ac.createOscillator(),gain=ac.createGain();osc.type='sine';osc.frequency.value=freq;gain.gain.setValueAtTime(.0001,ac.currentTime+i*.11);gain.gain.exponentialRampToValueAtTime(.12,ac.currentTime+i*.11+.025);gain.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+i*.11+.18);osc.connect(gain);gain.connect(ac.destination);osc.start(ac.currentTime+i*.11);osc.stop(ac.currentTime+i*.11+.2);});
+ }catch(e){}
+}
+function updateProfile(){
+ const level=Math.floor(state.xp/100)+1;
+ if($('profileName'))$('profileName').textContent=state.name;
+ if($('profileRank'))$('profileRank').textContent=levelName(level)+' • Level '+level;
+ if($('profileXp'))$('profileXp').textContent=state.xp;
+ if($('profileCoins'))$('profileCoins').textContent=state.coins;
+ if($('profileBadges'))$('profileBadges').textContent=(state.unlockedAchievements||[]).length+'/'+achievementList.length;
+}
 function checkAchievements(){
  let newly=[];
  achievementList.forEach(a=>{if(a.check()&&!state.unlockedAchievements.includes(a.id)){state.unlockedAchievements.push(a.id);newly.push(a);}});
- if(newly.length){showAchievementToast(newly[0]);save();}
+ newly.forEach(a=>{
+  if(!state.achievementRewardsClaimed.includes(a.id)){state.achievementRewardsClaimed.push(a.id);state.coins+=20;}
+ });
+ if(newly.length){showAchievementToast(newly[0]);playSound('badge');updateStats();save();}
  renderAchievements();
 }
 function showAchievementToast(a){
  let toast=$('achievementToast');if(!toast)return;
- toast.textContent='🏆 Lencana terbuka: '+a.name;toast.classList.add('show');
- clearTimeout(window.achievementToastTimer);window.achievementToastTimer=setTimeout(()=>toast.classList.remove('show'),3500);
+ toast.textContent='🏆 Lencana terbuka: '+a.name+' • Bonus +20 koin';toast.classList.add('show');
+ if(showAchievementToast.timer)clearTimeout(showAchievementToast.timer);
+ showAchievementToast.timer=setTimeout(()=>toast.classList.remove('show'),3800);
 }
 function renderAchievements(){
  const grid=$('achievementGrid');if(!grid)return;
  const unlocked=state.unlockedAchievements||[];
  $('achievementCount').textContent=unlocked.length+' / '+achievementList.length+' terbuka';
- grid.innerHTML=achievementList.map(a=>{const yes=unlocked.includes(a.id);return `<article class="achievement-item ${yes?'unlocked':'locked'}"><div class="achievement-icon">${yes?a.icon:'🔒'}</div><div><b>${a.name}</b><p>${a.desc}</p><small>${yes?'Terbuka ✓':'Belum terbuka'}</small></div></article>`;}).join('');
+ grid.innerHTML=achievementList.map(a=>{const yes=unlocked.includes(a.id);return `<article class="achievement-item ${yes?'unlocked':'locked'}"><div class="achievement-icon">${yes?a.icon:'🔒'}</div><div><b>${a.name}</b><p>${a.desc}</p><small>${yes?'Terbuka ✓ • Bonus +20 koin':'Belum terbuka'}</small></div></article>`;}).join('');
 }
 $('achievementToggle').addEventListener('click',()=>{const panel=$('achievementPanel');panel.classList.toggle('hidden');renderAchievements();});
-function reward(xp,coins){state.xp+=xp;state.coins+=coins;updateStats();checkAchievements();save();}
+$('profileToggle').addEventListener('click',()=>$('profilePanel').classList.toggle('hidden'));
+$('closeLevelUp').addEventListener('click',()=>$('levelUpOverlay').classList.add('hidden'));
+function showLevelUp(level,bonus){
+ $('levelUpTitle').textContent='LEVEL '+level+'!';$('levelUpRank').textContent=levelName(level);$('levelUpBonus').textContent='Bonus kenaikan level: +'+bonus+' koin';
+ $('levelUpOverlay').classList.remove('hidden');playSound('level');
+}
+function reward(xp,coins){
+ const oldLevel=Math.floor(state.xp/100)+1;
+ state.xp+=xp;state.coins+=coins;
+ const newLevel=Math.floor(state.xp/100)+1;let levelBonus=0;
+ while(state.highestLevelReached<newLevel){state.highestLevelReached++;state.coins+=25;levelBonus+=25;}
+ updateStats();checkAchievements();save();
+ if(newLevel>oldLevel)showLevelUp(newLevel,levelBonus);
+ else playSound('success');
+}
 load();updateStats();checkAchievements();$('playerName').value=state.name==='Penyuluh Muda'?'':state.name;
-$('startButton').addEventListener('click',()=>{const n=$('playerName').value.trim();if(n)state.name=n;$('welcomeName').textContent=state.name+'!';showScreen('menuScreen');save();});
+$('startButton').addEventListener('click',()=>{const n=$('playerName').value.trim();if(n)state.name=n;$('welcomeName').textContent=state.name+'!';showScreen('menuScreen');updateProfile();save();});
 $('resetButton').addEventListener('click',()=>{if(confirm('Hapus seluruh progres permainan di perangkat ini?')){localStorage.removeItem(KEY);location.reload();}});
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>openMode(b.dataset.mode)));
 $('backButton').addEventListener('click',()=>{stopWorld();showScreen('menuScreen');});
