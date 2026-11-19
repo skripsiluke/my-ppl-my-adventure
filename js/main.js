@@ -3,7 +3,7 @@
 const $ = id => document.getElementById(id);
 const KEY = 'myPplMyAdventure.save.v1';
 const XP_PER_LEVEL=250;
-const state = {name:'Penyuluh Muda',xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},player:{x:145,y:390},keys:{},interact:false};
+const state = {name:'Penyuluh Muda',xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0},player:{x:145,y:390},keys:{},interact:false};
 const screens=['homeScreen','menuScreen','gameScreen'];
 function save(){
   localStorage.setItem(KEY, JSON.stringify({
@@ -23,6 +23,7 @@ function save(){
     achievementRewardsClaimed:state.achievementRewardsClaimed,
     highestLevelReached:state.highestLevelReached,
     missionFlags:state.missionFlags,
+    pmaas:state.pmaas,
     player:state.player
   }));
 }
@@ -47,6 +48,10 @@ function load(){
   state.achievementRewardsClaimed=Array.isArray(state.achievementRewardsClaimed)?state.achievementRewardsClaimed:[];
   state.highestLevelReached=Math.max(1,Math.min(Number(state.highestLevelReached)||Math.floor(state.xp/XP_PER_LEVEL)+1,Math.floor(state.xp/XP_PER_LEVEL)+1));
   state.missionFlags=state.missionFlags&&typeof state.missionFlags==='object'?state.missionFlags:{};
+  state.pmaas=state.pmaas&&typeof state.pmaas==='object'?state.pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0};
+  state.pmaas.stages=state.pmaas.stages&&typeof state.pmaas.stages==='object'?state.pmaas.stages:{};
+  state.pmaas.milestones=Array.isArray(state.pmaas.milestones)?state.pmaas.milestones:[];
+  state.pmaas.farmers=Number(state.pmaas.farmers)||0;state.pmaas.groups=Number(state.pmaas.groups)||0;state.pmaas.xpEarned=Number(state.pmaas.xpEarned)||0;
   save();
 }
 function showScreen(id){screens.forEach(s=>$(s).classList.toggle('hidden',s!==id));}
@@ -70,7 +75,66 @@ const missionInfo=[
 function missionDone(id){const m=missionInfo.find(x=>x.id===id);return m?m.done():false;}
 function missionTotal(){return missionInfo.filter(m=>m.done()).length;}
 function nextMission(){return missionInfo.find(m=>!m.done())||null;}
-function updateStats(){const count=missionTotal();$('missionStatus').textContent=count+'/'+missionInfo.length+' Misi selesai';$('missionStatus').classList.toggle('completed',count===missionInfo.length);$('xpValue').textContent=state.xp;$('coinValue').textContent=state.coins;$('gameCoins').textContent=state.coins;const level=Math.floor(state.xp/XP_PER_LEVEL)+1;const progress=state.xp%XP_PER_LEVEL;$('levelLabel').textContent='LEVEL '+level;$('levelTitle').textContent=levelName(level);$('levelXp').textContent=progress;$('levelProgress').style.width=(progress/XP_PER_LEVEL*100)+'%';const next=nextMission();$('dailyMissionText').textContent=next?next.text:'Semua misi Adventure selesai! Jelajahi desa, simulasi, dan kuis.';$('dailyMissionReward').textContent=next?next.reward:'SEMUA SELESAI';$('missionDescription').textContent=next?next.text:'Semua misi Adventure selesai. Terima kasih telah membantu Desa Sukamaju!';updateProfile();}
+function updateStats(){const count=missionTotal();$('missionStatus').textContent=count+'/'+missionInfo.length+' Misi selesai';$('missionStatus').classList.toggle('completed',count===missionInfo.length);$('xpValue').textContent=state.xp;$('coinValue').textContent=state.coins;$('gameCoins').textContent=state.coins;const level=Math.floor(state.xp/XP_PER_LEVEL)+1;const progress=state.xp%XP_PER_LEVEL;$('levelLabel').textContent='LEVEL '+level;$('levelTitle').textContent=levelName(level);$('levelXp').textContent=progress;$('levelProgress').style.width=(progress/XP_PER_LEVEL*100)+'%';const next=nextMission();$('dailyMissionText').textContent=next?next.text:'Semua misi Adventure selesai! Jelajahi desa, simulasi, dan kuis.';$('dailyMissionReward').textContent=next?next.reward:'SEMUA SELESAI';$('missionDescription').textContent=next?next.text:'Semua misi Adventure selesai. Terima kasih telah membantu Desa Sukamaju!';updateProfile();renderPMAAS();}
+
+const pmaasTargets=[
+ {id:'farmer1',name:'Pak Asep',type:'farmer',label:'Petani padi',topic:'Tabela dan tanam rapat dalam baris'},
+ {id:'farmer2',name:'Bu Enah',type:'farmer',label:'Petani padi',topic:'Pemilihan benih unggul sesuai kondisi lahan'},
+ {id:'farmer3',name:'Pak Jajang',type:'farmer',label:'Petani padi',topic:'Pemupukan berimbang dan kebutuhan tanaman'},
+ {id:'farmer4',name:'Bu Imas',type:'farmer',label:'Petani padi',topic:'Pengelolaan air dan drainase'},
+ {id:'farmer5',name:'Pak Rudi',type:'farmer',label:'Petani padi',topic:'Pengendalian gulma dan OPT terpadu'},
+ {id:'farmer6',name:'Bu Euis',type:'farmer',label:'Petani padi',topic:'Penggunaan alat tanam tepat guna'},
+ {id:'farmer7',name:'Pak Maman',type:'farmer',label:'Petani padi',topic:'Pengamatan pertumbuhan dan pemupukan'},
+ {id:'farmer8',name:'Bu Tati',type:'farmer',label:'Petani padi',topic:'Panen tepat waktu dan evaluasi hasil'},
+ {id:'group1',name:'Poktan Tani Makmur',type:'group',label:'Kelompok tani',topic:'Sosialisasi dan rencana demplot PM-AAS'},
+ {id:'group2',name:'Poktan Mekar Jaya',type:'group',label:'Kelompok tani',topic:'Kesepakatan pola tanam dan kebutuhan sarana'},
+ {id:'group3',name:'Poktan Sumber Rejeki',type:'group',label:'Kelompok tani',topic:'Demonstrasi Tabela dan pendampingan budidaya'},
+ {id:'group4',name:'Poktan Harapan Baru',type:'group',label:'Kelompok tani',topic:'Penerapan dan evaluasi budidaya PM-AAS'}
+];
+const pmaasMilestoneList=[
+ {id:'m3',at:3,xp:40,label:'3 adopter'},
+ {id:'m6',at:6,xp:70,label:'6 adopter'},
+ {id:'m9',at:9,xp:100,label:'9 adopter'},
+ {id:'m12',at:12,xp:150,label:'12 adopter'}
+];
+function pmaasAdoptionCount(){return state.pmaas.farmers+state.pmaas.groups;}
+function renderPMAAS(){
+ const p=state.pmaas;if(!$('pmaasTargets'))return;
+ const count=pmaasAdoptionCount();
+ $('pmaasCount').textContent=count+'/12';$('pmaasXp').textContent=p.xpEarned;
+ $('pmaasProgress').style.width=(count/12*100)+'%';
+ $('pmaasFarmers').textContent=p.farmers;$('pmaasGroups').textContent=p.groups;$('pmaasTotal').textContent=count+'/12';
+ $('pmaasMilestones').innerHTML=pmaasMilestoneList.map(m=>{const done=p.milestones.includes(m.id);return `<div class="pmaas-milestone ${done?'done':''}"><b>${done?'✓ ':''}${m.at}</b><small>${m.label}<br>+${m.xp} XP</small></div>`;}).join('');
+ $('pmaasTargets').innerHTML=pmaasTargets.map(t=>{
+  const stage=Number(p.stages[t.id])||0;
+  const stageNames=['Belum dimulai','Sosialisasi selesai','Demonstrasi / pendampingan selesai','Sudah menerapkan ✓'];
+  const next=['Mulai sosialisasi','Lanjut demonstrasi','Konfirmasi penerapan','Adopsi tercatat ✓'];
+  const detail=t.type==='group'?'Kelompok tani • bonus adopsi lebih besar':'Petani perorangan';
+  return `<article class="pmaas-target"><b>${t.type==='group'?'👥':'🧑‍🌾'} ${t.name}</b><small>${detail}<br>Fokus: ${t.topic}</small><div class="pmaas-stage">${stageNames[stage]}</div><button data-pmaas-id="${t.id}" ${stage>=3?'disabled':''}>${next[stage]}${stage===2?' • +'+(t.type==='group'?90:25)+' XP':''}</button></article>`;
+ }).join('');
+}
+function advancePMAASTarget(id){
+ const t=pmaasTargets.find(x=>x.id===id);if(!t)return;
+ const current=Number(state.pmaas.stages[id])||0;if(current>=3)return;
+ const next=current+1;state.pmaas.stages[id]=next;
+ let xp=next===1?5:next===2?10:(t.type==='group'?90:25);
+ let coins=next===1?1:next===2?2:(t.type==='group'?12:5);
+ if(next===3){if(t.type==='group')state.pmaas.groups++;else state.pmaas.farmers++;}
+ state.pmaas.xpEarned+=xp;
+ reward(xp,coins);
+ if(next===3){
+  const total=pmaasAdoptionCount();
+  pmaasMilestoneList.forEach(m=>{if(total>=m.at&&!state.pmaas.milestones.includes(m.id)){state.pmaas.milestones.push(m.id);state.pmaas.xpEarned+=m.xp;reward(m.xp,Math.round(m.xp/10));}});
+  $('missionDescription').textContent=t.name+' berhasil menerapkan PM-AAS! Adopsi tercatat dalam event.';
+ }else{
+  $('missionDescription').textContent=t.name+': tahap '+next+'/3 selesai. Lanjutkan pendampingan sampai penerapan.';
+ }
+ renderPMAAS();save();
+}
+$('pmaasOpen').addEventListener('click',()=>{$('pmaasPanel').classList.remove('hidden');renderPMAAS();$('pmaasPanel').scrollIntoView({behavior:'smooth',block:'start'});});
+$('pmaasClose').addEventListener('click',()=>$('pmaasPanel').classList.add('hidden'));
+$('pmaasTargets').addEventListener('click',e=>{const b=e.target.closest('[data-pmaas-id]');if(b)advancePMAASTarget(b.dataset.pmaasId);});
+
 const achievementList=[
  {id:'missions',icon:'🌾',name:'Sahabat Petani',desc:'Selesaikan 3 misi Adventure',check:()=>missionTotal()>=3},
  {id:'explorer',icon:'🧭',name:'Penjelajah Desa',desc:'Selesaikan 6 misi Adventure',check:()=>missionTotal()>=6},
