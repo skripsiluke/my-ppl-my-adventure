@@ -2,7 +2,10 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const KEY = 'myPplMyAdventure.save.v1';
-const XP_PER_LEVEL=250;
+const FIRST_LEVEL_XP=150, XP_PER_LEVEL=250;
+function xpThreshold(level){return level<=1?0:FIRST_LEVEL_XP+(level-2)*XP_PER_LEVEL;}
+function levelFromXP(xp){let level=1;while(xp>=xpThreshold(level+1))level++;return level;}
+function levelProgress(xp){const level=levelFromXP(xp);return {level,progress:xp-xpThreshold(level),needed:level===1?FIRST_LEVEL_XP:XP_PER_LEVEL};}
 const state = {name:'Penyuluh Muda',xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},interact:false};
 const screens=['homeScreen','menuScreen','gameScreen'];
 function save(){
@@ -30,7 +33,7 @@ function save(){
 function load(){
   try{
     const s=JSON.parse(localStorage.getItem(KEY)||'null');
-    if(s){Object.assign(state,s);if(!Object.prototype.hasOwnProperty.call(s,'highestLevelReached'))state.highestLevelReached=Math.floor((Number(s.xp)||0)/XP_PER_LEVEL)+1;}
+    if(s){Object.assign(state,s);if(!Object.prototype.hasOwnProperty.call(s,'highestLevelReached'))state.highestLevelReached=levelFromXP(Number(s.xp)||0);}
   }catch(e){}
   // Compatibility: if either old completion flag is true, treat Pak Tani mission as completed.
   if(state.missionDone || state.pakMissionRewarded){
@@ -46,7 +49,7 @@ function load(){
   state.correctQuizCount=Number(state.correctQuizCount)||0;
   state.unlockedAchievements=Array.isArray(state.unlockedAchievements)?state.unlockedAchievements:[];
   state.achievementRewardsClaimed=Array.isArray(state.achievementRewardsClaimed)?state.achievementRewardsClaimed:[];
-  state.highestLevelReached=Math.max(1,Math.min(Number(state.highestLevelReached)||Math.floor(state.xp/XP_PER_LEVEL)+1,Math.floor(state.xp/XP_PER_LEVEL)+1));
+  state.highestLevelReached=Math.max(1,Math.min(Number(state.highestLevelReached)||levelFromXP(state.xp),levelFromXP(state.xp)));
   state.missionFlags=state.missionFlags&&typeof state.missionFlags==='object'?state.missionFlags:{};
   state.pmaas=state.pmaas&&typeof state.pmaas==='object'?state.pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}};
   state.pmaas.stages=state.pmaas.stages&&typeof state.pmaas.stages==='object'?state.pmaas.stages:{};
@@ -75,7 +78,7 @@ const missionInfo=[
 function missionDone(id){const m=missionInfo.find(x=>x.id===id);return m?m.done():false;}
 function missionTotal(){return missionInfo.filter(m=>m.done()).length;}
 function nextMission(){return missionInfo.find(m=>!m.done())||null;}
-function updateStats(){const count=missionTotal();$('missionStatus').textContent=count+'/'+missionInfo.length+' Misi selesai';$('missionStatus').classList.toggle('completed',count===missionInfo.length);$('xpValue').textContent=state.xp;$('coinValue').textContent=state.coins;$('gameCoins').textContent=state.coins;const level=Math.floor(state.xp/XP_PER_LEVEL)+1;const progress=state.xp%XP_PER_LEVEL;$('levelLabel').textContent='LEVEL '+level;$('levelTitle').textContent=levelName(level);$('levelXp').textContent=progress;$('levelProgress').style.width=(progress/XP_PER_LEVEL*100)+'%';const next=nextMission();$('dailyMissionText').textContent=next?next.text:'Semua misi Adventure selesai! Jelajahi desa, simulasi, dan kuis.';$('dailyMissionReward').textContent=next?next.reward:'SEMUA SELESAI';$('missionDescription').textContent=next?next.text:'Semua misi Adventure selesai. Terima kasih telah membantu Desa Sukamaju!';updateProfile();renderPMAAS();}
+function updateStats(){const count=missionTotal();$('missionStatus').textContent=count+'/'+missionInfo.length+' Misi selesai';$('missionStatus').classList.toggle('completed',count===missionInfo.length);$('xpValue').textContent=state.xp;$('coinValue').textContent=state.coins;$('gameCoins').textContent=state.coins;const lp=levelProgress(state.xp),level=lp.level,progress=lp.progress;$('levelLabel').textContent='LEVEL '+level;$('levelTitle').textContent=levelName(level);$('levelXp').textContent=progress;$('levelXpNeeded').textContent=lp.needed;$('levelProgress').style.width=(progress/lp.needed*100)+'%';updatePMAASLock();const next=nextMission();$('dailyMissionText').textContent=next?next.text:'Semua misi Adventure selesai! Jelajahi desa, simulasi, dan kuis.';$('dailyMissionReward').textContent=next?next.reward:'SEMUA SELESAI';$('missionDescription').textContent=next?next.text:'Semua misi Adventure selesai. Terima kasih telah membantu Desa Sukamaju!';updateProfile();renderPMAAS();}
 
 const pmaasTargets=[
  {id:'farmer1',name:'Pak Asep',type:'farmer',label:'Petani padi',topic:'Tabela dan tanam rapat dalam baris'},
@@ -132,6 +135,14 @@ function pmaasProgress(p,id){
   p.adopterProgress[id]=legacy>=3?pmaasTaskCount:0;
  }
  return Math.max(0,Math.min(pmaasTaskCount,Number(p.adopterProgress[id])||0));
+}
+function updatePMAASLock(){
+ const unlocked=levelFromXP(state.xp)>=2;
+ const card=$('pmaasEventCard'),open=$('pmaasOpen'),lock=$('pmaasLockNotice');
+ if(card)card.classList.toggle('pmaas-locked',!unlocked);
+ if(open){open.disabled=!unlocked;open.textContent=unlocked?'Buka Event PM-AAS →':'🔒 Terbuka pada Level 2';}
+ if(lock)lock.classList.toggle('hidden',unlocked);
+ const panel=$('pmaasPanel');if(panel&&!unlocked)panel.classList.add('hidden');
 }
 function renderPMAAS(){
  const p=state.pmaas;if(!$('pmaasTargets'))return;
@@ -248,7 +259,7 @@ $('drumSeederCheck').addEventListener('click',()=>{
  renderDrumSeeder();save();
 });
 
-$('pmaasOpen').addEventListener('click',()=>{$('pmaasPanel').classList.remove('hidden');renderPMAAS();renderDrumSeeder();$('pmaasPanel').scrollIntoView({behavior:'smooth',block:'start'});});
+$('pmaasOpen').addEventListener('click',()=>{if(levelFromXP(state.xp)<2)return;$('pmaasPanel').classList.remove('hidden');renderPMAAS();renderDrumSeeder();$('pmaasPanel').scrollIntoView({behavior:'smooth',block:'start'});});
 $('pmaasClose').addEventListener('click',()=>$('pmaasPanel').classList.add('hidden'));
 $('pmaasTargets').addEventListener('click',e=>{const b=e.target.closest('[data-pmaas-id]');if(b)advancePMAASTarget(b.dataset.pmaasId);const step=e.target.closest('[data-adopter-step]');if(step)advancePMAASTarget(step.dataset.adopterStep);});
 
@@ -269,7 +280,7 @@ function playSound(kind='success'){
  }catch(e){}
 }
 function updateProfile(){
- const level=Math.floor(state.xp/XP_PER_LEVEL)+1;
+ const level=levelFromXP(state.xp);
  if($('profileName'))$('profileName').textContent=state.name;
  if($('profileRank'))$('profileRank').textContent=levelName(level)+' • Level '+level;
  if($('profileXp'))$('profileXp').textContent=state.xp;
@@ -298,16 +309,17 @@ function renderAchievements(){
  grid.innerHTML=achievementList.map(a=>{const yes=unlocked.includes(a.id);return `<article class="achievement-item ${yes?'unlocked':'locked'}"><div class="achievement-icon">${yes?a.icon:'🔒'}</div><div><b>${a.name}</b><p>${a.desc}</p><small>${yes?'Terbuka ✓ • Bonus +20 koin':'Belum terbuka'}</small></div></article>`;}).join('');
 }
 $('achievementToggle').addEventListener('click',()=>{const panel=$('achievementPanel');panel.classList.toggle('hidden');renderAchievements();});
-$('profileToggle').addEventListener('click',()=>$('profilePanel').classList.toggle('hidden'));
+$('avatarProfileButton').addEventListener('click',()=>toggleProfile());
+function toggleProfile(){const panel=$('profilePanel');panel.classList.toggle('hidden');$('avatarProfileButton').setAttribute('aria-expanded',String(!panel.classList.contains('hidden')));}
 $('closeLevelUp').addEventListener('click',()=>$('levelUpOverlay').classList.add('hidden'));
 function showLevelUp(level,bonus){
  $('levelUpTitle').textContent='LEVEL '+level+'!';$('levelUpRank').textContent=levelName(level);$('levelUpBonus').textContent='Bonus kenaikan level: +'+bonus+' koin';
  $('levelUpOverlay').classList.remove('hidden');playSound('level');
 }
 function reward(xp,coins){
- const oldLevel=Math.floor(state.xp/XP_PER_LEVEL)+1;
+ const oldLevel=levelFromXP(state.xp);
  state.xp+=xp;state.coins+=coins;
- const newLevel=Math.floor(state.xp/XP_PER_LEVEL)+1;let levelBonus=0;
+ const newLevel=levelFromXP(state.xp);let levelBonus=0;
  while(state.highestLevelReached<newLevel){state.highestLevelReached++;state.coins+=25;levelBonus+=25;}
  updateStats();checkAchievements();save();
  if(newLevel>oldLevel)showLevelUp(newLevel,levelBonus);
@@ -375,14 +387,15 @@ $('bgmVolume').addEventListener('input',e=>{
   saveAudioSettings();
   applyBgmSettings();
 });
+$('resetButton').addEventListener('click',()=>{if(confirm('Yakin ingin menghapus seluruh progres permainan? XP, koin, misi, dan pencapaian akan direset.')){localStorage.removeItem(KEY);location.reload();}});
 
 loadAudioSettings();
 load();updateStats();checkAchievements();$('playerName').value=state.name==='Penyuluh Muda'?'':state.name;
 $('startButton').addEventListener('click',()=>{startBgm();const n=$('playerName').value.trim();if(n)state.name=n;$('welcomeName').textContent=state.name+'!';showScreen('menuScreen');updateProfile();save();});
-$('resetButton').addEventListener('click',()=>{if(confirm('Hapus seluruh progres permainan di perangkat ini?')){localStorage.removeItem(KEY);location.reload();}});
+
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>openMode(b.dataset.mode)));
 $('backButton').addEventListener('click',()=>{stopWorld();showScreen('menuScreen');});
-function openMode(mode){stopWorld();showScreen('gameScreen');['adventurePanel','farmPanel','quizPanel'].forEach(id=>$(id).classList.add('hidden'));if(mode==='adventure'){$('gameEyebrow').textContent='MODE ADVENTURE';$('gameTitle').textContent='Desa Sukamaju';$('adventurePanel').classList.remove('hidden');startWorld();}if(mode==='farm'){$('gameEyebrow').textContent='MODE FARM SIMULATOR';$('gameTitle').textContent='Kebun Belajar';$('farmPanel').classList.remove('hidden');updateFarm();}if(mode==='quiz'){$('gameEyebrow').textContent='MODE QUIZ CHALLENGE';$('gameTitle').textContent='Uji Pengetahuanmu';$('quizPanel').classList.remove('hidden');state.questionIndex=0;state.quizScore=0;renderQuestion();}}
+function openMode(mode){stopWorld();showScreen('gameScreen');['adventurePanel','farmPanel','quizPanel'].forEach(id=>$(id).classList.add('hidden'));if(mode==='adventure'){$('gameEyebrow').textContent='MODE ADVENTURE';$('gameTitle').textContent='Desa Sukamaju';$('adventurePanel').classList.remove('hidden');startWorld();}if(mode==='farm'){$('gameEyebrow').textContent='MODE FARM SIMULATOR';$('gameTitle').textContent='Kebun Belajar';$('farmPanel').classList.remove('hidden');updateFarm();}if(mode==='quiz'){$('gameEyebrow').textContent='MODE QUIZ CHALLENGE';$('gameTitle').textContent='Uji Pengetahuanmu';$('quizPanel').classList.remove('hidden');state.questionIndex=0;state.quizScore=0;pickQuizQuestions();renderQuestion();}}
 /* Top-down world: world coordinates are larger than the viewport; camera follows player. */
 const canvas=$('worldCanvas'),ctx=canvas.getContext('2d');
 const WORLD={w:1800,h:1200};let raf=0,last=0,dialogOpen=false;
@@ -486,9 +499,9 @@ function completeMission(id,xp,coins){
   if(id==='bu'){if(state.buMissionRewarded)return;state.buMissionDone=true;state.buMissionRewarded=true;}
   if(id==='ketua'){if(state.ketuaMissionRewarded)return;state.ketuaMissionDone=true;state.ketuaMissionRewarded=true;}
   if(!['pak','bu','ketua'].includes(id)){if(state.missionFlags[id])return;state.missionFlags[id]=true;}
-  const oldLevel=Math.floor(state.xp/XP_PER_LEVEL)+1;
+  const oldLevel=levelFromXP(state.xp);
   state.xp+=xp;state.coins+=coins;
-  const newLevel=Math.floor(state.xp/XP_PER_LEVEL)+1;let bonus=0;
+  const newLevel=levelFromXP(state.xp);let bonus=0;
   while(state.highestLevelReached<newLevel){state.highestLevelReached++;state.coins+=25;bonus+=25;}
   updateStats();checkAchievements();save();
   if(newLevel>oldLevel)showLevelUp(newLevel,bonus);
@@ -504,13 +517,31 @@ $('interactButton').addEventListener('click',interact);
 function updateFarm(){const stages=['🟫','🌱','🌿','🌾'];$('cropEmoji').textContent=stages[state.farmStage];$('plantButton').disabled=state.farmStage!==0;$('waterButton').disabled=state.farmStage!==1;$('harvestButton').disabled=state.farmStage!==2;$('farmStatus').textContent=['Lahan masih kosong. Mulai dengan menanam benih.','Benih sudah ditanam. Tanaman membutuhkan air.','Tanaman tumbuh subur. Saatnya panen!','Panen berhasil! Kamu memperoleh hasil dari kerja kerasmu.'][state.farmStage];}
 $('plantButton').addEventListener('click',()=>{state.farmStage=1;reward(5,0);updateFarm();});$('waterButton').addEventListener('click',()=>{state.farmStage=2;reward(5,0);updateFarm();});$('harvestButton').addEventListener('click',()=>{state.farmStage=3;state.harvestCount++;reward(20,15);updateFarm();setTimeout(()=>{state.farmStage=0;updateFarm();save();},1800);});
 /* Quiz */
-const questions=[
+const questionBank=[
 {q:'Apa tujuan utama penyuluhan pertanian?',a:['Menggantikan seluruh keputusan petani','Meningkatkan pengetahuan, keterampilan, dan sikap petani','Menjual sarana produksi sebanyak-banyaknya','Mewajibkan satu teknologi untuk semua petani'],c:1,why:'Penyuluhan membantu petani meningkatkan kapasitas agar mampu mengambil keputusan secara mandiri.'},
 {q:'Apa langkah awal ketika menemukan gejala serangan hama di lahan?',a:['Mengidentifikasi gejala dan organisme penyebab','Mencampur semua pestisida','Menaikkan dosis pupuk','Langsung memusnahkan seluruh tanaman'],c:0,why:'Pengamatan dan identifikasi menjadi dasar menentukan tindakan pengendalian yang tepat.'},
 {q:'Apa kepanjangan PHT?',a:['Pengelolaan Hasil Tanaman','Pengamatan Harian Terpadu','Pengendalian Hama Terpadu','Program Hasil Tani'],c:2,why:'PHT adalah Pengendalian Hama Terpadu.'},
 {q:'Mengapa petani perlu melakukan pemupukan berimbang?',a:['Agar pupuk digunakan sebanyak mungkin','Agar kebutuhan hara tanaman terpenuhi sesuai kondisi dan rekomendasi','Agar tidak perlu mengairi tanaman','Agar semua jenis tanah mendapat dosis sama'],c:1,why:'Pemupukan berimbang menyesuaikan kebutuhan hara, kondisi tanah, dan rekomendasi.'},
-{q:'Dalam penyuluhan, metode demonstrasi bertujuan untuk…',a:['Memperlihatkan praktik atau cara kerja teknologi secara langsung','Menggantikan seluruh diskusi kelompok','Menguji hafalan istilah saja','Membatasi petani untuk bertanya'],c:0,why:'Demonstrasi memberi kesempatan sasaran melihat proses dan praktik penerapan teknologi.'}
+{q:'Dalam penyuluhan, metode demonstrasi bertujuan untuk…',a:['Memperlihatkan praktik atau cara kerja teknologi secara langsung','Menggantikan seluruh diskusi kelompok','Menguji hafalan istilah saja','Membatasi petani untuk bertanya'],c:0,why:'Demonstrasi memberi kesempatan sasaran melihat proses dan praktik penerapan teknologi.'},
+{q:'Apa yang perlu diperhatikan saat memilih varietas padi untuk Tabela?',a:['Kesesuaian dengan kondisi setempat dan mutu benih','Warna kemasan benih saja','Harga paling mahal tanpa melihat mutu','Varietas yang sama wajib untuk semua lokasi'],c:0,why:'Varietas dipilih berdasarkan kesesuaian lokasi dan karakter yang dibutuhkan, serta benih bermutu.'},
+{q:'Berapa lama benih direndam dan diperam dalam tahapan Tabela pada materi PM-AAS ini?',a:['2 jam','6 jam','12 jam','48 jam'],c:2,why:'Materi tahapan PM-AAS yang digunakan dalam game menyebut sekitar 12 jam.'},
+{q:'Apa fungsi utama drum seeder?',a:['Memanen gabah','Menyalurkan benih untuk tanam benih langsung','Mengukur pH tanah','Menyemprotkan pestisida'],c:1,why:'Drum seeder membantu menempatkan benih secara langsung dan teratur di lahan.'},
+{q:'Apa arti kondisi macak-macak pada pengelolaan air sawah?',a:['Tanah lembab tanpa genangan air tinggi','Sawah selalu tergenang dalam','Tanah sangat kering dan retak','Air mengalir deras sepanjang hari'],c:0,why:'Macak-macak adalah kondisi tanah lembab dengan air permukaan sangat tipis atau tanpa genangan.'},
+{q:'Apa tujuan penggunaan pipa pemantau pada metode AWD?',a:['Mengukur tinggi tanaman','Memantau kondisi air tanah untuk membantu pengaturan pengairan','Menentukan varietas benih','Mengukur hasil panen'],c:1,why:'Pipa pemantau membantu melihat kondisi air dan menentukan waktu pengairan.'},
+{q:'Pemupukan pada sistem PM-AAS sebaiknya mengacu pada…',a:['Perkiraan tanpa pengamatan','Hasil uji tanah atau rekomendasi spesifik lokasi','Dosis tertinggi yang tersedia','Kebiasaan lahan lain tanpa penyesuaian'],c:1,why:'Pemupukan mengikuti kebutuhan tanaman dan kondisi lahan berdasarkan rekomendasi.'},
+{q:'Kapan herbisida pratumbuh dapat diaplikasikan pada tahapan persiapan lahan yang dijelaskan?',a:['30 hari setelah panen','Sekitar 3–5 hari sebelum tanam bila diperlukan','Saat bulir padi matang','Setiap hari setelah penyiraman'],c:1,why:'Materi menyebut aplikasi sekitar 3–5 hari sebelum tanam bila diperlukan dan sesuai petunjuk produk.'},
+{q:'Apa tindakan tepat saat menemukan gejala OPT?',a:['Melakukan pemantauan dan identifikasi sebelum menentukan pengendalian','Langsung mencampur beberapa pestisida','Menyemprot tanpa membaca label','Membiarkan tanpa pengamatan'],c:0,why:'Pengendalian terpadu didasarkan pada pemantauan dan identifikasi kondisi di lapangan.'},
+{q:'Apa manfaat memperbaiki inlet dan outlet sawah?',a:['Agar air dan pupuk mudah hilang','Membantu mengatur aliran air dan mengurangi kehilangan air','Agar pematang tidak perlu dirawat','Menggantikan fungsi benih'],c:1,why:'Saluran masuk dan keluar yang baik membantu pengelolaan air.'},
+{q:'Apa alat yang digunakan untuk panen mekanis pada tahapan PM-AAS?',a:['Drum seeder','Rotari','Combine harvester','Pipa AWD'],c:2,why:'Combine harvester digunakan untuk melakukan panen secara mekanis.'},
+{q:'Menurut materi PM-AAS ini, panen dilakukan saat sekitar berapa persen bulir telah matang?',a:['25–30%','50–60%','70–75%','85–90%'],c:3,why:'Materi yang diberikan menyebut panen mekanis saat tingkat kematangan bulir sekitar 85–90%.'},
+{q:'Mengapa pematang sawah perlu diperbaiki sebelum tanam?',a:['Agar air dan pupuk tidak mudah hilang','Agar benih tidak perlu direndam','Agar gulma tumbuh lebih cepat','Agar tidak perlu pengaturan air'],c:0,why:'Pematang yang baik membantu menahan air dan mengurangi kehilangan pupuk.'},
+{q:'Apa yang dimaksud tanam benih langsung (Tabela)?',a:['Memindahkan bibit dari persemaian','Menanam benih langsung di lahan','Menanam hanya dengan stek','Menanam setelah panen menggunakan combine'],c:1,why:'Tabela menempatkan benih langsung di lahan tanpa tahap pindah tanam bibit.'},
+{q:'Bagaimana drone dapat dimanfaatkan dalam budidaya PM-AAS?',a:['Sebagai pengganti semua kegiatan penyuluhan','Membantu pemupukan pada skala lahan luas bila sesuai kebutuhan','Untuk menggantikan varietas benih','Untuk memperbaiki pematang'],c:1,why:'Materi menyebut drone sebagai opsi bantuan pemupukan pada skala lahan luas.'},
+{q:'Apa langkah penting menjelang panen mekanis?',a:['Menggenangi sawah setinggi mungkin','Mengeringkan sawah agar mesin lebih mudah beroperasi','Menambah benih','Menutup saluran keluar permanen'],c:1,why:'Pengeringan menjelang panen membantu operasional mesin panen.'},
+{q:'Dalam komunikasi penyuluhan, cara yang baik untuk memastikan petani memahami materi adalah…',a:['Mengajak diskusi dan memberi kesempatan bertanya','Membaca materi secepat mungkin','Menghindari pertanyaan','Hanya membagikan selebaran tanpa penjelasan'],c:0,why:'Komunikasi dua arah membantu penyuluh memeriksa pemahaman dan kebutuhan petani.'}
 ];
+let questions=[];
+function pickQuizQuestions(){const pool=[...questionBank];for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}questions=pool.slice(0,5);}
 function renderQuestion(){const q=questions[state.questionIndex];$('questionCount').textContent=`Soal ${state.questionIndex+1} dari ${questions.length}`;$('questionText').textContent=q.q;$('quizFeedback').textContent='';$('nextQuestionButton').classList.add('hidden');$('answerList').innerHTML='';q.a.forEach((a,i)=>{const b=document.createElement('button');b.className='answer-option';b.textContent=String.fromCharCode(65+i)+'. '+a;b.addEventListener('click',()=>{const all=$('answerList').querySelectorAll('button');all.forEach(x=>x.disabled=true);if(i===q.c){b.classList.add('correct');$('quizFeedback').textContent='Benar! '+q.why;state.quizScore++;state.correctQuizCount++;reward(10,3);}else{b.classList.add('wrong');all[q.c].classList.add('correct');$('quizFeedback').textContent='Belum tepat. '+q.why;}$('nextQuestionButton').classList.remove('hidden');});$('answerList').appendChild(b);});}
-$('nextQuestionButton').addEventListener('click',()=>{state.questionIndex++;if(state.questionIndex<questions.length){renderQuestion();}else{$('questionText').textContent=`Kuis selesai! Skor kamu ${state.quizScore} dari ${questions.length}.`;$('answerList').innerHTML='';$('quizFeedback').textContent='Terus belajar dan tingkatkan kemampuan penyuluhanmu!';$('nextQuestionButton').textContent='Ulangi kuis';$('nextQuestionButton').onclick=()=>{state.questionIndex=0;state.quizScore=0;$('nextQuestionButton').textContent='Soal berikutnya →';$('nextQuestionButton').onclick=null;renderQuestion();};}});
+$('nextQuestionButton').addEventListener('click',()=>{state.questionIndex++;if(state.questionIndex<questions.length){renderQuestion();}else{$('questionText').textContent=`Kuis selesai! Skor kamu ${state.quizScore} dari ${questions.length}.`;$('answerList').innerHTML='';$('quizFeedback').textContent='Terus belajar dan tingkatkan kemampuan penyuluhanmu!';$('nextQuestionButton').textContent='Ulangi kuis';$('nextQuestionButton').onclick=()=>{state.questionIndex=0;state.quizScore=0;pickQuizQuestions();$('nextQuestionButton').textContent='Soal berikutnya →';$('nextQuestionButton').onclick=null;renderQuestion();};}});
 })();
