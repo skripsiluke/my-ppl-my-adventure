@@ -665,7 +665,21 @@ function mineInteract(){
 function enterMine(){state.returnPosition={x:state.player.x,y:state.player.y};state.scene='mine';state.player={x:canvas.width*.5,y:canvas.height-180};if(!state.mineNodes.length||state.mineNodes.every(x=>x===null))state.mineNodes=[[canvas.width*.28,canvas.height*.38],[canvas.width*.72,canvas.height*.34],[canvas.width*.5,canvas.height*.68],[canvas.width*.82,canvas.height*.7],[canvas.width*.18,canvas.height*.72]];save();}
 function nearestNpc(){let best=null,dist=Infinity;for(const n of npcs){const d=Math.hypot(n.x-state.player.x,n.y-state.player.y);if(d<dist){dist=d;best=n;}}return best;}
 function blocked(x,y){if(state.scene==='mine')return false;if(obstacles.some(o=>x>o.x-18&&x<o.x+o.w+18&&y>o.y-10&&y<o.y+o.h+10))return true;const trunks=[[90,160],[450,130],[900,170],[1080,250],[1700,220],[850,850],[650,960],[1750,850],[920,1080],[1660,1120],[500,920],[1320,1110],[1770,390],[610,260],[880,760],[1720,500],[1320,80],[250,1120]];if(trunks.some(([tx,ty])=>Math.hypot(x-tx,y-(ty+18))<22))return true;return npcs.some(n=>Math.hypot(x-n.x,y-n.y)<22);}
-function movePlayer(dx,dy){if(!dx&&!dy)return;const len=Math.hypot(dx,dy)||1;dx/=len;dy/=len;const speed=3.4;const maxX=state.scene==='mine'?canvas.width-35:WORLD.w-25,maxY=state.scene==='mine'?canvas.height-90:WORLD.h-30;const nx=Math.max(25,Math.min(maxX,state.player.x+dx*speed));const ny=Math.max(80,Math.min(maxY,state.player.y+dy*speed));if(!blocked(nx,state.player.y))state.player.x=nx;if(!blocked(state.player.x,ny))state.player.y=ny;}
+function movePlayer(dx,dy){
+ if(!dx&&!dy)return;
+ const len=Math.hypot(dx,dy)||1;dx/=len;dy/=len;
+ const speed=3.4;
+ const maxX=state.scene==='mine'?canvas.width-35:WORLD.w-25;
+ const maxY=state.scene==='mine'?canvas.height-90:WORLD.h-30;
+ const startX=state.player.x,startY=state.player.y;
+ const startBlocked=blocked(startX,startY);
+ const nx=Math.max(25,Math.min(maxX,startX+dx*speed));
+ const ny=Math.max(80,Math.min(maxY,startY+dy*speed));
+ // If a newly-added fence/building surrounds a previously saved player position,
+ // allow movement out of the overlap instead of trapping the player permanently.
+ if(startBlocked || !blocked(nx,startY))state.player.x=nx;
+ if(startBlocked || !blocked(state.player.x,ny))state.player.y=ny;
+}
 function loop(ts){const dt=Math.min((ts-last)/16||1,2);last=ts;let dx=(state.keys.ArrowRight||state.keys.d?1:0)-(state.keys.ArrowLeft||state.keys.a?1:0);let dy=(state.keys.ArrowDown||state.keys.s?1:0)-(state.keys.ArrowUp||state.keys.w?1:0);dx+=state.analog.x;dy+=state.analog.y;if(dx||dy)movePlayer(dx*dt,dy*dt);if(state.catOwned&&state.scene==='village'){const len=Math.hypot(dx,dy)||1,tx=state.player.x-(dx/len)*27,ty=state.player.y-(dy/len)*20;state.catFollower.x+=(tx-state.catFollower.x)*.16;state.catFollower.y+=(ty-state.catFollower.y)*.16;}drawWorld(ts);raf=requestAnimationFrame(loop);}
 function startWorld(){stopWorld();last=0;drawWorld();raf=requestAnimationFrame(loop);}
 function stopWorld(){if(raf)cancelAnimationFrame(raf);raf=0;state.keys={};}
