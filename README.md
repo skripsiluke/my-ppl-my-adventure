@@ -211,3 +211,9 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Tombol tanam menampilkan jenis benih aktif, misalnya Tanam Padi.
 - Benih dengan stok nol tidak dapat dipilih.
 - Pemilihan benih disimpan pada progres kebun.
+
+
+## Versi 0.19.2
+- Kebun Sawit terkunci sampai pemain mencapai Level 5 — Penyuluh Pertanian Ahli Pertama.
+- Pemain di bawah Level 5 menerima notifikasi saat mencoba masuk; gerbang menampilkan status terkunci.
+- Progres permainan dan penyimpanan lama tetap dipertahankan.
