@@ -2,6 +2,8 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const KEY = 'myPplMyAdventure.save.v1';
+const TUTORIAL_KEY='myPplMyAdventure.tutorial.v1';
+
 const FIRST_LEVEL_XP=150, XP_PER_LEVEL=250;
 function xpThreshold(level){return level<=1?0:FIRST_LEVEL_XP+(level-2)*XP_PER_LEVEL;}
 function levelFromXP(xp){let level=1;while(xp>=xpThreshold(level+1))level++;return level;}
@@ -427,8 +429,9 @@ $('mobileControlSelect').addEventListener('change',e=>{
 $('resetButton').addEventListener('click',()=>{if(confirm('Yakin ingin menghapus seluruh progres permainan? XP, koin, misi, dan pencapaian akan direset.')){localStorage.removeItem(KEY);location.reload();}});
 
 loadAudioSettings();applyMobileControl();
+const tutorialSteps=[{icon:'👤',title:'Kenali profilmu',description:'Di foto avatar, kamu bisa melihat profil penyuluh, level, XP, koin, dan lencana. Tekan tombol Ganti Avatar untuk memilih tampilan karakter yang kamu suka.',target:'#avatarProfileButton'},{icon:'🗺️',title:'Menu Adventure',description:'Jelajahi Desa Sukamaju, berjalan menggunakan keyboard atau joystick di HP, temui warga, dan selesaikan berbagai misi penyuluhan untuk mendapatkan XP dan koin.',target:'.adventure-card'},{icon:'🌾',title:'Menu Farm Simulator',description:'Kelola kebunmu dengan menanam benih, menyiram tanaman, merawat pertumbuhan, lalu memanen hasilnya. Setiap aktivitas membantumu memperoleh hadiah.',target:'.farm-card'},{icon:'🧠',title:'Menu Quiz Challenge',description:'Uji pengetahuan tentang pertanian dan penyuluhan melalui lima soal acak. Jawaban benar memberikan XP dan koin. Selamat bermain dan belajar!',target:'.quiz-card'}];let tutorialIndex=0;function renderTutorial(){const step=tutorialSteps[tutorialIndex];document.querySelectorAll('.tutorial-highlight').forEach(el=>el.classList.remove('tutorial-highlight'));$('tutorialStepLabel').textContent='PANDUAN '+(tutorialIndex+1)+' DARI '+tutorialSteps.length;$('tutorialIcon').textContent=step.icon;$('tutorialTitle').textContent=step.title;$('tutorialDescription').textContent=step.description;document.querySelectorAll('.tutorial-dots i').forEach((dot,i)=>dot.classList.toggle('active',i===tutorialIndex));$('tutorialBack').disabled=tutorialIndex===0;$('tutorialNext').textContent=tutorialIndex===tutorialSteps.length-1?'Mulai bermain ✓':'Lanjutkan →';const target=document.querySelector(step.target);if(target)target.classList.add('tutorial-highlight');$('tutorialOverlay').classList.remove('hidden');}function finishTutorial(){document.querySelectorAll('.tutorial-highlight').forEach(el=>el.classList.remove('tutorial-highlight'));$('tutorialOverlay').classList.add('hidden');localStorage.setItem(TUTORIAL_KEY,'completed');}function startTutorial(){tutorialIndex=0;renderTutorial();}$('tutorialNext').addEventListener('click',()=>{if(tutorialIndex<tutorialSteps.length-1){tutorialIndex++;renderTutorial();}else finishTutorial();});$('tutorialBack').addEventListener('click',()=>{if(tutorialIndex>0){tutorialIndex--;renderTutorial();}});$('tutorialSkip').addEventListener('click',finishTutorial);
 load();updateStats();checkAchievements();$('playerName').value=state.name==='Penyuluh Muda'?'':state.name;
-$('startButton').addEventListener('click',()=>{startBgm();const n=$('playerName').value.trim();if(n)state.name=n;$('welcomeName').textContent=state.name+'!';showScreen('menuScreen');updateProfile();save();});
+$('startButton').addEventListener('click',()=>{startBgm();const n=$('playerName').value.trim();if(n)state.name=n;$('welcomeName').textContent=state.name+'!';showScreen('menuScreen');updateProfile();save();if(localStorage.getItem(TUTORIAL_KEY)!=='completed')startTutorial();});
 
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>openMode(b.dataset.mode)));
 $('backButton').addEventListener('click',()=>{stopWorld();showScreen('menuScreen');});

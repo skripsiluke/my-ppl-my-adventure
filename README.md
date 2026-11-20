@@ -158,3 +158,15 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Pemain dapat masuk melalui mulut tambang emas dan berpindah ke layar tambang bawah tanah. Terdapat lima bongkahan emas yang dapat ditambang dengan tombol E atau INTERAKSI.
 - Saat kembali melalui pintu keluar tambang, setiap bongkah emas otomatis dikonversi menjadi 12 XP dan 2 koin. Sisa bongkahan yang belum ditambang tetap tersedia ketika pemain masuk kembali.
 - Data misi peternakan dan hasil tambang disimpan pada save yang sama. Save lama tetap kompatibel dan progres lama tidak direset.
+
+
+## v0.15.2 — Tutorial pemain baru
+- Menambahkan panduan awal empat langkah untuk profil/avatar, Adventure, Farm Simulator, dan Quiz Challenge.
+- Tutorial hanya muncul pada pemain yang belum memiliki data progres dan belum menyelesaikan tutorial.
+- Pilihan tutorial disimpan terpisah agar progres permainan lama tidak berubah.
+
+
+## v0.15.3 — Perbaikan pemicu tutorial pemain baru
+- Tutorial dipicu saat pemain menekan Mulai Petualangan selama penanda tutorial belum berstatus completed.
+- Tidak lagi bergantung pada keberadaan save game, karena proses pemuatan game membuat save awal otomatis.
+- Memperbaiki selector sorotan avatar dan indikator langkah tutorial.
