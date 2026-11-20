@@ -118,7 +118,7 @@ Workflow pada `.github/workflows/deploy.yml` juga disediakan untuk deployment ot
 - Mempertahankan koordinat dunia, NPC, rintangan, sistem interaksi, misi, XP, dan penyimpanan progres.
 
 
-## Pembaruan v0.13.5 — Karakter dan Interaksi Adventure
+## Pembaruan v0.14.0 — Karakter dan Interaksi Adventure
 - Karakter pemain dan NPC kini digambar sebagai petani utuh dengan kepala, badan, tangan, kaki, pakaian, topi, dan bayangan yang solid.
 - Kaki karakter pemain bergerak bergantian saat pemain berjalan.
 - Label nama warga dan petunjuk interaksi diberi latar kontras, ukuran adaptif, dan batas posisi agar lebih mudah dibaca.
@@ -127,13 +127,34 @@ Workflow pada `.github/workflows/deploy.yml` juga disediakan untuk deployment ot
 - Data progres, koordinat NPC, misi, dan sistem permainan tetap dipertahankan.
 
 
-Pembaruan v0.13.5: tempo animasi langkah kaki karakter pemain dipercepat dan ayunan langkah diperjelas.
+Pembaruan v0.14.0: tempo animasi langkah kaki karakter pemain dipercepat dan ayunan langkah diperjelas.
 
 
-Pembaruan v0.13.5: karakter pemain memakai seragam dinas lapangan lengkap terinspirasi referensi pengguna: kemeja olive dengan tanda bahu dan saku, sabuk hitam, celana panjang hijau gelap, dan sepatu hitam. Animasi langkah dipertahankan.
+Pembaruan v0.14.0: karakter pemain memakai seragam dinas lapangan lengkap terinspirasi referensi pengguna: kemeja olive dengan tanda bahu dan saku, sabuk hitam, celana panjang hijau gelap, dan sepatu hitam. Animasi langkah dipertahankan.
 
 
-Pembaruan v0.13.5: frekuensi siklus animasi kaki karakter pemain dipercepat signifikan agar langkah lebih responsif saat bergerak. Kecepatan perpindahan karakter tidak diubah.
+Pembaruan v0.14.0: frekuensi siklus animasi kaki karakter pemain dipercepat signifikan agar langkah lebih responsif saat bergerak. Kecepatan perpindahan karakter tidak diubah.
 
 
-Pembaruan v0.13.5: pengaturan kontrol gerak HP dengan pilihan Analog (joystick virtual) atau Arah Panah. Preferensi tersimpan di pengaturan perangkat; keyboard desktop tetap tersedia.
+Pembaruan v0.14.0: pengaturan kontrol gerak HP dengan pilihan Analog (joystick virtual) atau Arah Panah. Preferensi tersimpan di pengaturan perangkat; keyboard desktop tetap tersedia.
+
+
+Pembaruan v0.14.0: status bergerak untuk animasi karakter kini juga membaca input joystick analog, sehingga siklus langkah kaki aktif saat joystick digerakkan. Ambang input kecil digunakan untuk mencegah animasi saat joystick diam.
+
+
+Pembaruan v0.14.0: peta Adventure diperkaya dengan petak tanaman, kebun kecil, bangku, peti, dan bunga. Ditambahkan satu misi spesial yang ditempatkan secara acak pada NPC; setelah diselesaikan pemain memperoleh kucing peliharaan yang mengikuti karakter. Kepemilikan kucing dan NPC pemberi misi disimpan pada save lama tanpa menghapus progres.
+
+
+## Perbaikan v0.14.1 — Animasi Joystick HP
+
+Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input joystick analog di perangkat HP. Animasi kaki kini aktif ketika joystick digeser, dan berhenti ketika joystick dilepas atau kembali ke posisi tengah. Pergerakan karakter, kontrol keyboard, serta data progres permainan tidak diubah.
+
+
+## Pembaruan v0.15.0 — Desa, Peternakan, dan Tambang Emas
+- Peta Adventure diperluas dengan area peternakan, kandang ternak, ilustrasi sapi/kambing, tempat pakan, papan petunjuk, dan mulut tambang emas.
+- Tulisan “JALAN DESA” dipindahkan ke tengah jalan utama agar terbaca sebagai penanda jalan.
+- Perbaikan collision: pemain tertahan oleh bangunan, petak kebun, area kandang, pepohonan, dan NPC sehingga tidak menembus atau bertumpuk dengan objek utama.
+- Ditambahkan NPC Pak Asep di area peternakan dengan misi perawatan ternak. Hadiah misi: 30 XP dan 15 koin.
+- Pemain dapat masuk melalui mulut tambang emas dan berpindah ke layar tambang bawah tanah. Terdapat lima bongkahan emas yang dapat ditambang dengan tombol E atau INTERAKSI.
+- Saat kembali melalui pintu keluar tambang, setiap bongkah emas otomatis dikonversi menjadi 12 XP dan 2 koin. Sisa bongkahan yang belum ditambang tetap tersedia ketika pemain masuk kembali.
+- Data misi peternakan dan hasil tambang disimpan pada save yang sama. Save lama tetap kompatibel dan progres lama tidak direset.
