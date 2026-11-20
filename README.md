@@ -1,3 +1,8 @@
+## Update v0.17.0
+- Farm Simulator redesigned into one compact interactive gameplay canvas.
+- Seed selection, farming actions, and shop / inventory / market buildings are clickable inside the game area.
+- Canvas backing resolution increased to 2x for sharper rendering while keeping the same saved-game data.
+
 # My PPL My Adventure
 
 Game edukasi 2D bertema petualangan penyuluhan pertanian untuk mahasiswa.

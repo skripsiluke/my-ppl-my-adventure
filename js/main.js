@@ -823,53 +823,39 @@ if(joystick&&joystickKnob){
 
 $('interactButton').addEventListener('click',interact);
 /* Farm Simulator v0.16.0 — walkable field + management panels */
-const farmCanvas=$('farmCanvas'),farmCtx=farmCanvas.getContext('2d');
+const farmCanvas=$('farmCanvas'),farmCtx=farmCanvas.getContext('2d');farmCtx.scale(2,2);
 const farmCrops={
  padi:{name:'Padi',emoji:'🌾',seedPrice:5,sell:24,xp:12,grow:16000},
  jagung:{name:'Jagung',emoji:'🌽',seedPrice:7,sell:32,xp:15,grow:19000},
  cabai:{name:'Cabai',emoji:'🌶️',seedPrice:9,sell:42,xp:18,grow:23000},
  tomat:{name:'Tomat',emoji:'🍅',seedPrice:8,sell:36,xp:16,grow:21000}
 };
-const farmPlotCenters=[{x:230,y:190},{x:450,y:190},{x:670,y:190},{x:230,y:335},{x:450,y:335},{x:670,y:335}];
+const farmPlotCenters=[{x:170,y:280},{x:450,y:280},{x:730,y:280},{x:170,y:390},{x:450,y:390},{x:730,y:390}];
+const farmHit={seeds:[],actions:[],buildings:[]};
 let farmRaf=0,farmLastFrame=0,farmUiLast=0,farmHeldDir=null,farmHoldTimer=null;
 function farmPlotReady(plot){return !!plot.crop&&plot.watered&&Date.now()-(plot.plantedAt||0)>=(farmCrops[plot.crop]?.grow||18000)*(plot.fertilized?.65:1);}
 function drawFarmWorld(){
  const c=farmCtx;c.clearRect(0,0,900,510);
- c.fillStyle='#8fc66d';c.fillRect(0,0,900,510);
- // grass texture
- for(let i=0;i<95;i++){let x=(i*97)%900,y=(i*61)%510;c.fillStyle=i%2?'#82bb63':'#a0d27c';c.fillRect(x,y,12,3);}
- // paths and pond
- c.fillStyle='#d9c18c';c.beginPath();c.moveTo(0,420);c.lineTo(900,420);c.lineTo(900,510);c.lineTo(0,510);c.fill();
- c.fillStyle='#6db8d1';c.beginPath();c.ellipse(810,95,62,36,-.2,0,Math.PI*2);c.fill();
- c.fillStyle='#d9e9a0';c.fillRect(0,0,900,38);
- c.fillStyle='#315b35';c.font='bold 16px Nunito, sans-serif';c.fillText('KEBUN BELAJAR • DESA SUKAMAJU',18,25);
- // shed, trees, scarecrow
- c.fillStyle='#9b6844';c.fillRect(35,70,100,72);c.fillStyle='#78462e';c.beginPath();c.moveTo(25,75);c.lineTo(85,32);c.lineTo(145,75);c.fill();c.fillStyle='#f0d49a';c.font='12px Nunito';c.fillText('GUDANG',57,162);
- [[175,70],[735,70],[845,260],[75,275]].forEach(([x,y])=>{c.fillStyle='#795238';c.fillRect(x-5,y,10,24);c.fillStyle='#347d3c';c.beginPath();c.arc(x,y,22,0,Math.PI*2);c.fill();c.fillStyle='#69a94c';c.beginPath();c.arc(x-9,y-8,11,0,Math.PI*2);c.fill();});
+ const grad=c.createLinearGradient(0,0,900,510);grad.addColorStop(0,'#a8d987');grad.addColorStop(1,'#78b75f');c.fillStyle=grad;c.fillRect(0,0,900,510);
+ for(let i=0;i<125;i++){const x=(i*97)%900,y=(i*61)%510;c.fillStyle=i%2?'#8bc56e':'#b4df8d';c.globalAlpha=.65;c.fillRect(x,y,10,3);}c.globalAlpha=1;
+ // tidy village paths
+ c.fillStyle='#d8bd88';c.fillRect(0,205,900,12);c.fillRect(0,445,900,65);c.fillStyle='#c9ad78';c.fillRect(0,452,900,4);
+ c.fillStyle='#eaf5d9';c.fillRect(0,0,900,34);c.fillStyle='#315b35';c.font='bold 15px Nunito, sans-serif';c.textAlign='left';c.fillText('KEBUN BELAJAR',16,22);
+ // crop selection icons
+ farmHit.seeds=[];let sx=260;Object.entries(farmCrops).forEach(([id,cr],n)=>{const x=sx+n*150,y=17,w=136,h=48,selected=state.farmSelectedCrop===id,stock=state.farmSeeds[id]||0;c.fillStyle=stock<=0?'#d8e3d0':selected?'#fff0a8':'#f4f9e9';roundRect(c,x,y,w,h,12);c.fill();c.strokeStyle=selected?'#397e42':'#d2e5c9';c.lineWidth=selected?3:1;c.stroke();c.textAlign='center';c.font='22px serif';c.fillStyle=stock<=0?'#9aab98':'#315b35';c.fillText(cr.emoji,x+34,y+30);c.font='bold 15px Nunito';c.fillText(String(stock),x+91,y+29);if(selected){c.font='bold 8px Nunito';c.fillText('DIPILIH',x+91,y+41);}farmHit.seeds.push({id,x,y,w,h});});
+ // buildings with clear signboards
+ farmHit.buildings=[];const buildings=[{id:'shop',x:85,emoji:'🏪',name:'TOKO BENIH',sub:'Beli benih'},{id:'inventory',x:365,emoji:'🏚️',name:'GUDANG',sub:'Inventaris'},{id:'market',x:645,emoji:'🛒',name:'PASAR',sub:'Jual panen'}];
+ buildings.forEach(b=>{c.fillStyle='#8a5636';c.fillRect(b.x,100,170,82);c.fillStyle='#b8794d';c.beginPath();c.moveTo(b.x-8,105);c.lineTo(b.x+85,55);c.lineTo(b.x+178,105);c.fill();c.fillStyle='#f5dfb1';c.fillRect(b.x+12,111,146,60);c.fillStyle='#7a4b2c';c.fillRect(b.x+65,133,40,38);c.textAlign='center';c.font='25px serif';c.fillText(b.emoji,b.x+85,130);c.font='bold 11px Nunito';c.fillText(b.name,b.x+85,151);c.font='9px Nunito';c.fillText(b.sub,b.x+85,164);farmHit.buildings.push({id,x:b.x-8,y:55,w:186,h:127});});
  // field plots
- farmPlotCenters.forEach((p,i)=>{
-   const plot=state.farmPlots[i]||{crop:null,stage:0},locked=i>=state.farmUnlockedPlots;
-   c.fillStyle=state.farmSelectedPlot===i?'#f4d45b':'#8a5935';c.fillRect(p.x-86,p.y-48,172,96);
-   c.fillStyle=locked?'#6c6c55':'#9e7047';c.fillRect(p.x-80,p.y-42,160,84);
-   for(let r=0;r<3;r++){c.fillStyle=locked?'#62624e':'#805432';c.fillRect(p.x-70,p.y-27+r*27,140,5);}
-   c.textAlign='center';
-   if(locked){
-     c.fillStyle='#fff8df';c.font='25px serif';c.fillText('🔒',p.x,p.y-2);
-     c.font='bold 10px Nunito';c.fillText('BELI LAHAN',p.x,p.y+27);
-     c.font='9px Nunito';c.fillText(''+farmLandPrice(i)+' koin',p.x,p.y+40);
-   }else if(plot.crop){
-     const crop=farmCrops[plot.crop],ready=farmPlotReady(plot);
-     c.font='27px serif';const icon=ready?crop.emoji:(plot.stage===1?'🌱':'🌿');
-     for(let j=0;j<5;j++)c.fillText(icon,p.x-48+j*24,p.y-4+(j%2)*17);
-     if(!plot.watered){c.fillStyle='#fff4dc';c.fillRect(p.x-35,p.y-43,70,16);c.fillStyle='#68482d';c.font='bold 9px Nunito';c.fillText('BUTUH AIR',p.x,p.y-32);}
-     else if(ready){c.fillStyle='#fff4dc';c.fillRect(p.x-29,p.y-43,58,16);c.fillStyle='#426c32';c.font='bold 9px Nunito';c.fillText('SIAP PANEN',p.x,p.y-32);}
-   }else{c.fillStyle='#f5e6c9';c.font='bold 11px Nunito';c.fillText('PETAK '+(i+1),p.x,p.y+5);}
-   if(state.farmSelectedPlot===i){c.strokeStyle='#fff6a5';c.lineWidth=4;c.strokeRect(p.x-89,p.y-51,178,102);}
- });
+ farmPlotCenters.forEach((p,i)=>{const plot=state.farmPlots[i]||{crop:null,stage:0},locked=i>=state.farmUnlockedPlots;c.fillStyle=state.farmSelectedPlot===i?'#f4d45b':'#8a5935';c.fillRect(p.x-83,p.y-43,166,86);c.fillStyle=locked?'#6c6c55':'#9e7047';c.fillRect(p.x-78,p.y-38,156,76);for(let r=0;r<3;r++){c.fillStyle=locked?'#62624e':'#805432';c.fillRect(p.x-68,p.y-25+r*24,136,4);}c.textAlign='center';if(locked){c.fillStyle='#fff8df';c.font='23px serif';c.fillText('🔒',p.x,p.y-2);c.font='bold 10px Nunito';c.fillText('BUKA '+farmLandPrice(i)+' KOIN',p.x,p.y+26);}else if(plot.crop){const crop=farmCrops[plot.crop],ready=farmPlotReady(plot),icon=ready?crop.emoji:(plot.stage===1?'🌱':'🌿');c.font='25px serif';for(let j=0;j<5;j++)c.fillText(icon,p.x-46+j*23,p.y-2+(j%2)*14);c.font='bold 9px Nunito';c.fillStyle='#fff5d8';c.fillText(!plot.watered?'BUTUH AIR':ready?'SIAP PANEN':'TUMBUH',p.x,p.y-27);}else{c.fillStyle='#f5e6c9';c.font='bold 11px Nunito';c.fillText('PETAK '+(i+1),p.x,p.y+5);}if(state.farmSelectedPlot===i){c.strokeStyle='#fff6a5';c.lineWidth=4;c.strokeRect(p.x-86,p.y-46,172,92);}});
+ // compact action dock in the play area
+ farmHit.actions=[];const actions=[['plant','🌱','TANAM'],['water','💧','SIRAM'],['fertilize','🧪','PUPUK'],['harvest','🧺','PANEN'],['unlock','🔓','BUKA LAHAN']];
+ actions.forEach((a,i)=>{const x=12+i*177,y=462,w=165,h=38;c.fillStyle=i===0?'#17643e':'#f5f7e9';roundRect(c,x,y,w,h,10);c.fill();c.strokeStyle=i===0?'#d4edc7':'#d6e3c9';c.lineWidth=1;c.stroke();c.textAlign='center';c.fillStyle=i===0?'#fff':'#315b35';c.font='bold 12px Nunito';c.fillText(a[1]+' '+a[2],x+w/2,y+24);farmHit.actions.push({id:a[0],x,y,w,h});});
  // player
- const p=state.farmPlayer||{x:450,y:430};c.fillStyle='#29442b55';c.beginPath();c.ellipse(p.x,p.y+15,16,6,0,0,Math.PI*2);c.fill();
- c.fillStyle='#244e36';c.fillRect(p.x-9,p.y-7,18,22);c.fillStyle='#f0bd91';c.beginPath();c.arc(p.x,p.y-15,9,0,Math.PI*2);c.fill();c.fillStyle='#d9b45d';c.beginPath();c.arc(p.x,p.y-21,12,Math.PI,Math.PI*2);c.fill();c.fillStyle='#172b1c';c.fillRect(p.x-6,p.y+13,5,8);c.fillRect(p.x+2,p.y+13,5,8);
+ const p=state.farmPlayer||{x:450,y:430};c.fillStyle='#29442b55';c.beginPath();c.ellipse(p.x,p.y+15,16,6,0,0,Math.PI*2);c.fill();c.fillStyle='#244e36';c.fillRect(p.x-9,p.y-7,18,22);c.fillStyle='#f0bd91';c.beginPath();c.arc(p.x,p.y-15,9,0,Math.PI*2);c.fill();c.fillStyle='#d9b45d';c.beginPath();c.arc(p.x,p.y-21,12,Math.PI,Math.PI*2);c.fill();c.fillStyle='#172b1c';c.fillRect(p.x-6,p.y+13,5,8);c.fillRect(p.x+2,p.y+13,5,8);
+ c.textAlign='left';c.fillStyle='#315b35';c.font='bold 10px Nunito';c.fillText('Pilih ikon benih • Tap bangunan • Pilih petak • Gerakkan karakter',14,435);
 }
+function roundRect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
 function farmDrawLoop(t){if(t-farmLastFrame>25){farmLastFrame=t;drawFarmWorld();}if(t-farmUiLast>500){farmUiLast=t;updateFarm();}if(state.farmTarget){const p=state.farmPlayer,dx=state.farmTarget.x-p.x,dy=state.farmTarget.y-p.y,d=Math.hypot(dx,dy);if(d>2){const step=Math.min(2.7,d);p.x+=dx/d*step;p.y+=dy/d*step;}else state.farmTarget=null;}farmRaf=requestAnimationFrame(farmDrawLoop);}
 function startFarm(){if(farmRaf)cancelAnimationFrame(farmRaf);farmRaf=requestAnimationFrame(farmDrawLoop);updateFarm();}
 function stopFarm(){if(farmRaf)cancelAnimationFrame(farmRaf);farmRaf=0;state.farmTarget=null;}
@@ -883,7 +869,7 @@ function farmToast(title,message,icon='🎉'){
 function updateFarm(){
  if(!$('farmPanel'))return;
  $('farmCoins').textContent=state.coins;
- $('farmSeedStocks').innerHTML='<p class="farm-seed-hint">Pilih benih yang ingin ditanam dengan mengetuk salah satu jenis berikut:</p>'+Object.entries(farmCrops).map(([id,c])=>'<button type="button" class="farm-seed-chip '+(state.farmSelectedCrop===id?'selected':'')+'" data-select-farm-seed="'+id+'" aria-pressed="'+(state.farmSelectedCrop===id?'true':'false')+'" '+(!(state.farmSeeds[id]>0)?'disabled':'')+'>'+c.emoji+' '+c.name+'<b>'+(state.farmSeeds[id]||0)+' benih</b></button>').join('');
+ $('farmSeedStocks').innerHTML='';
  $('farmSeedStocks').querySelectorAll('[data-select-farm-seed]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.selectFarmSeed;if(!(state.farmSeeds[id]>0))return;state.farmSelectedCrop=id;updateFarm();save();farmToast('Benih dipilih',farmCrops[id].name+' dipilih. Tekan tombol Tanam untuk menanam benih ini.','🌱');}));
  $('farmWeather').textContent='Cuaca '+state.farmLastWeather+' • Hari '+state.farmDay;
  const i=state.farmSelectedPlot||0,plot=state.farmPlots[i],locked=i>=state.farmUnlockedPlots,crop=plot?.crop?farmCrops[plot.crop]:null,ready=plot&&farmPlotReady(plot);
@@ -940,8 +926,12 @@ function openFarmDialog(kind){
 }
 $('farmCanvas').addEventListener('click',e=>{
  const r=farmCanvas.getBoundingClientRect(),x=(e.clientX-r.left)*900/r.width,y=(e.clientY-r.top)*510/r.height;
+ const hit=(arr)=>arr.find(a=>x>=a.x&&x<=a.x+a.w&&y>=a.y&&y<=a.y+a.h);
+ const seed=hit(farmHit.seeds);if(seed){if(!(state.farmSeeds[seed.id]>0))return farmToast('Stok benih habis','Beli benih di Toko Benih.','🌱');state.farmSelectedCrop=seed.id;updateFarm();save();farmToast('Benih dipilih',farmCrops[seed.id].name+' siap ditanam.','🌱');return;}
+ const action=hit(farmHit.actions);if(action){if(action.id==='unlock')unlockFarmPlot();else farmAct(action.id);return;}
+ const building=hit(farmHit.buildings);if(building){openFarmDialog(building.id);return;}
  let nearest=-1,dist=Infinity;farmPlotCenters.forEach((p,i)=>{const d=Math.hypot(x-p.x,y-p.y);if(d<dist){dist=d;nearest=i;}});
- if(dist<94)farmSelectPlot(nearest);else{state.farmTarget={x:Math.max(20,Math.min(880,x)),y:Math.max(45,Math.min(475,y))};}
+ if(dist<94)farmSelectPlot(nearest);else if(y>215&&y<445){state.farmTarget={x:Math.max(20,Math.min(880,x)),y:Math.max(220,Math.min(440,y))};}
 });
 $('farmUnlock').addEventListener('click',unlockFarmPlot);$('farmPlant').addEventListener('click',()=>farmAct('plant'));$('farmWater').addEventListener('click',()=>farmAct('water'));$('farmFertilize').addEventListener('click',()=>farmAct('fertilize'));$('farmHarvest').addEventListener('click',()=>farmAct('harvest'));
 $('farmShop').addEventListener('click',()=>openFarmDialog('shop'));$('farmInventory').addEventListener('click',()=>openFarmDialog('inventory'));$('farmMarket').addEventListener('click',()=>openFarmDialog('market'));
