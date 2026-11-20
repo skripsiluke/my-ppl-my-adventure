@@ -6,7 +6,7 @@ const FIRST_LEVEL_XP=150, XP_PER_LEVEL=250;
 function xpThreshold(level){return level<=1?0:FIRST_LEVEL_XP+(level-2)*XP_PER_LEVEL;}
 function levelFromXP(xp){let level=1;while(xp>=xpThreshold(level+1))level++;return level;}
 function levelProgress(xp){const level=levelFromXP(xp);return {level,progress:xp-xpThreshold(level),needed:level===1?FIRST_LEVEL_XP:XP_PER_LEVEL};}
-const state = {name:'Penyuluh Muda',avatarIndex:0,xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},analog:{x:0,y:0},interact:false};
+const state = {name:'Penyuluh Muda',avatarIndex:0,xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},analog:{x:0,y:0},interact:false,catOwned:false,catQuestNpcId:null,catFollower:{x:120,y:410}};
 const screens=['homeScreen','menuScreen','gameScreen'];
 function save(){
   localStorage.setItem(KEY, JSON.stringify({
@@ -28,7 +28,10 @@ function save(){
     highestLevelReached:state.highestLevelReached,
     missionFlags:state.missionFlags,
     pmaas:state.pmaas,
-    player:state.player
+    player:state.player,
+    catOwned:!!state.catOwned,
+    catQuestNpcId:state.catQuestNpcId,
+    catFollower:state.catFollower
   }));
 }
 function load(){
@@ -56,6 +59,7 @@ function load(){
   state.pmaas.stages=state.pmaas.stages&&typeof state.pmaas.stages==='object'?state.pmaas.stages:{};
   state.pmaas.milestones=Array.isArray(state.pmaas.milestones)?state.pmaas.milestones:[];
   state.pmaas.farmers=Number(state.pmaas.farmers)||0;state.pmaas.groups=Number(state.pmaas.groups)||0;state.pmaas.xpEarned=Number(state.pmaas.xpEarned)||0;state.pmaas.drumSeederCompleted=!!state.pmaas.drumSeederCompleted;state.pmaas.adopterProgress=state.pmaas.adopterProgress&&typeof state.pmaas.adopterProgress==='object'?state.pmaas.adopterProgress:{};
+  state.catOwned=!!state.catOwned; state.catFollower=state.catFollower&&typeof state.catFollower==='object'?state.catFollower:{x:state.player.x-24,y:state.player.y+18};
   save();
 }
 function showScreen(id){screens.forEach(s=>$(s).classList.toggle('hidden',s!==id));}
@@ -436,6 +440,7 @@ const npcs=[
 {id:'ketua',name:'Pak Ketua',x:760,y:690,emoji:'🧑‍🌾',role:'Ketua kelompok tani',kind:'mission'},
 ...extraMissions.map(m=>({...m,kind:'mission'}))
 ];
+if(!state.catQuestNpcId || !npcs.some(n=>n.id===state.catQuestNpcId)){state.catQuestNpcId=npcs[Math.floor(Math.random()*npcs.length)].id;save();}
 const buildings=[
 {x:220,y:210,w:150,h:110,name:'Rumah Bu Rina',roof:'#a65f3e',wall:'#f1dfb7',door:'#6b986b'},
 {x:600,y:150,w:170,h:125,name:'Balai Kelompok Tani',roof:'#9b5638',wall:'#f4e5bd',door:'#5d8c63'},
@@ -527,6 +532,15 @@ function drawFarmer(x,y,palette,phase=0,moving=false,isPlayer=false){
  ctx.restore();
 }
 
+
+function drawPetCat(x,y,t=0){
+ ctx.save();const bob=Math.sin(t/120)*1.2;ctx.fillStyle='rgba(35,45,30,.22)';ctx.beginPath();ctx.ellipse(x,y+10,13,4,0,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='#d18b45';ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x+9,y+2+bob);ctx.quadraticCurveTo(x+19,y-7+Math.sin(t/150)*4,x+15,y-13+Math.sin(t/150)*4);ctx.stroke();
+ ctx.fillStyle='#e5a65e';ctx.beginPath();ctx.ellipse(x,y+2+bob,11,7,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(x-7,y-5+bob,7,0,Math.PI*2);ctx.fill();
+ ctx.beginPath();ctx.moveTo(x-12,y-9+bob);ctx.lineTo(x-13,y-17+bob);ctx.lineTo(x-7,y-12+bob);ctx.fill();ctx.beginPath();ctx.moveTo(x-5,y-11+bob);ctx.lineTo(x-1,y-17+bob);ctx.lineTo(x,y-8+bob);ctx.fill();
+ ctx.fillStyle='#342a24';ctx.beginPath();ctx.arc(x-9,y-6+bob,1,0,Math.PI*2);ctx.arc(x-4,y-6+bob,1,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f4d6a8';ctx.beginPath();ctx.ellipse(x+2,y+4+bob,6,4,0,0,Math.PI*2);ctx.fill();ctx.restore();
+}
+
 function drawWorld(t=0){
  const camX=Math.max(0,Math.min(WORLD.w-canvas.width,state.player.x-canvas.width/2));
  const camY=Math.max(0,Math.min(WORLD.h-canvas.height,state.player.y-canvas.height/2));
@@ -567,24 +581,36 @@ function drawWorld(t=0){
  // decorative shrubs, flower beds and trees
  [[90,160],[450,130],[900,170],[1080,250],[1700,220],[850,850],[650,960],[1750,850],[300,650],[920,1080],[1660,1120],[500,920],[1320,1110],[1770,390]].forEach(p=>drawTree(...p));
  for(let i=0;i<42;i++){const x=(i*149+60)%1760,y=(i*97+95)%1160;if((x>960&&x<1630&&y>690&&y<1060)||(x>110&&x<570&&y>780&&y<1050))continue;ctx.fillStyle=i%2?'#e9d778':'#f0e9bd';ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);ctx.fill();}
+
+ // More village life: crop beds, orchard trees, benches, crates and flower borders.
+ [[70,350],[470,760],[820,360],[1260,350],[1660,700],[610,1030],[340,180],[1510,1120]].forEach(([x,y],i)=>{
+   roundedRect(ctx,x,y,116,66,9,'#8b6948');roundedRect(ctx,x+5,y+5,106,56,6,i%2?'#a77e4e':'#b58a56');
+   for(let row=0;row<2;row++)for(let col=0;col<6;col++){const px=x+15+col*17,py=y+20+row*25;ctx.strokeStyle=i%3===0?'#397a3d':'#4d8d43';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(px,py+8);ctx.lineTo(px-4,py-2);ctx.moveTo(px,py+8);ctx.lineTo(px+5,py-3);ctx.stroke();ctx.fillStyle='#a7d568';ctx.beginPath();ctx.arc(px-4,py-2,2.5,0,Math.PI*2);ctx.arc(px+5,py-3,2.5,0,Math.PI*2);ctx.fill();}
+ });
+ [[70,900],[610,260],[880,760],[1720,500],[1320,80],[250,1120]].forEach(([x,y],i)=>{drawTree(x,y);ctx.fillStyle='#c7a36a';ctx.fillRect(x-4,y+19,8,18);if(i%2===0){ctx.fillStyle='#e6b94f';[[x-10,y-12],[x+9,y-17],[x+2,y+1]].forEach(([fx,fy])=>{ctx.beginPath();ctx.arc(fx,fy,3,0,Math.PI*2);ctx.fill();});}});
+ [[500,460],[840,650],[300,620],[1510,390],[720,990]].forEach(([x,y])=>{ctx.fillStyle='rgba(52,48,35,.2)';ctx.fillRect(x-17,y+10,38,5);ctx.fillStyle='#765033';ctx.fillRect(x-18,y-2,36,7);ctx.fillRect(x-14,y+5,4,10);ctx.fillRect(x+10,y+5,4,10);});
+ [[430,470],[875,630],[1350,420],[1750,980],[70,700]].forEach(([x,y])=>{ctx.fillStyle='#9b7045';ctx.fillRect(x-10,y-10,20,20);ctx.strokeStyle='#e0bd83';ctx.lineWidth=2;ctx.strokeRect(x-10,y-10,20,20);ctx.beginPath();ctx.moveTo(x-8,y-8);ctx.lineTo(x+8,y+8);ctx.moveTo(x+8,y-8);ctx.lineTo(x-8,y+8);ctx.stroke();});
+ for(let i=0;i<90;i++){const x=(i*173+95)%1760,y=(i*211+140)%1140;if((x>960&&x<1630&&y>690&&y<1060)||(x>110&&x<570&&y>780&&y<1050))continue;ctx.fillStyle=['#e7d16d','#e9a5a0','#f3e6ba','#d7b5e2'][i%4];ctx.beginPath();ctx.arc(x,y,3.2,0,Math.PI*2);ctx.fill();ctx.fillStyle='#4b8b43';ctx.fillRect(x-1,y+3,2,5);}
+
  // area labels with subtle backing
  ctx.textAlign='left';ctx.font='900 20px Nunito';ctx.fillStyle='rgba(255,255,235,.72)';ctx.fillText('DESA SUKAMAJU',43,54);ctx.fillStyle='#315c37';ctx.fillText('DESA SUKAMAJU',40,51);
  ctx.font='bold 16px Nunito';ctx.fillStyle='#315c37';ctx.fillText('AREA PERSAWAHAN',1190,690);ctx.fillText('JALAN DESA',420,530);
  // Karakter NPC digambar solid dengan badan, tangan, kaki, dan pakaian.
- npcs.forEach((n,i)=>{const done=missionDone(n.id);ctx.font='bold 12px Nunito';drawFarmer(n.x,n.y,{shirt:['#3979b9','#bd6686','#3f8a57','#c58a38'][i%4],pants:'#394d43',hat:['#d6a34d','#d8b86d','#6b8e57'][i%3]},i*.8,false);const labelW=Math.max(76,Math.min(132,ctx.measureText(n.name).width+22));roundedRect(ctx,n.x-labelW/2,n.y+28,labelW,23,10,'rgba(255,255,245,.98)');ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillStyle='#23452c';ctx.fillText(n.name,n.x,n.y+44);if(n.kind==='mission'){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(n.x,n.y-43,14,0,Math.PI*2);ctx.fill();ctx.strokeStyle=done?'#23834b':'#d88b1f';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=done?'#23834b':'#d88b1f';ctx.font='bold 17px Nunito';ctx.fillText(done?'✓':'!',n.x,n.y-37);}});
+ npcs.forEach((n,i)=>{const done=missionDone(n.id);ctx.font='bold 12px Nunito';drawFarmer(n.x,n.y,{shirt:['#3979b9','#bd6686','#3f8a57','#c58a38'][i%4],pants:'#394d43',hat:['#d6a34d','#d8b86d','#6b8e57'][i%3]},i*.8,false);const labelW=Math.max(76,Math.min(132,ctx.measureText(n.name).width+22));roundedRect(ctx,n.x-labelW/2,n.y+28,labelW,23,10,'rgba(255,255,245,.98)');ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillStyle='#23452c';ctx.fillText(n.name,n.x,n.y+44);if(n.kind==='mission'){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(n.x,n.y-43,14,0,Math.PI*2);ctx.fill();ctx.strokeStyle=done?'#23834b':'#d88b1f';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=done?'#23834b':'#d88b1f';ctx.font='bold 17px Nunito';ctx.fillText(n.id===state.catQuestNpcId&&!state.catOwned?'🐾':(done?'✓':'!'),n.x,n.y-37);}});
+ if(state.catOwned)drawPetCat(state.catFollower.x,state.catFollower.y,t);
  // Pemain: badan penuh, dua kaki dan animasi langkah saat bergerak.
  const moving=!!(state.keys.ArrowRight||state.keys.ArrowLeft||state.keys.ArrowUp||state.keys.ArrowDown||state.keys.w||state.keys.a||state.keys.s||state.keys.d);
  drawFarmer(state.player.x,state.player.y,{shirt:'#287b49',pants:'#344b3a',hat:'#d8ad4e'},t/105,moving,true);
  const near=nearestNpc();if(near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<88){const mobile=window.matchMedia('(max-width: 760px)').matches;const hint=mobile?'Tap tombol INTERAKSI':'Tekan E untuk bicara';ctx.font='bold 12px Nunito';const bw=Math.max(138,ctx.measureText(hint).width+24),bx=Math.max(8,Math.min(WORLD.w-bw-8,state.player.x-bw/2)),by=state.player.y-91;roundedRect(ctx,bx,by,bw,28,12,'rgba(255,255,245,.98)');ctx.strokeStyle='#d8e6ce';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='#174d32';ctx.textAlign='center';ctx.fillText(hint,bx+bw/2,by+18);}
  ctx.restore();
- $('worldLocation').textContent=near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<100?'📍 '+near.name:'📍 Desa Sukamaju';
+ $('worldLocation').textContent=(near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<100?'📍 '+near.name:'📍 Desa Sukamaju')+(state.catOwned?' • 🐈 Kucing menemani':'');
  const hintEl=$('canvasHint');if(hintEl)hintEl.textContent=window.matchMedia('(max-width: 760px)').matches?'Gunakan tombol arah untuk bergerak • Dekati warga lalu tap INTERAKSI':'Gunakan WASD / tombol panah untuk bergerak • Dekati warga lalu tekan E atau Spasi untuk bicara';
  const next=nextMission();$('worldObjective').textContent=next?'🎯 '+next.text:'⭐ Semua misi desa selesai';
 }
 function nearestNpc(){let best=null,dist=Infinity;for(const n of npcs){const d=Math.hypot(n.x-state.player.x,n.y-state.player.y);if(d<dist){dist=d;best=n;}}return best;}
 function blocked(x,y){return obstacles.some(o=>x>o.x-18&&x<o.x+o.w+18&&y>o.y-10&&y<o.y+o.h+10);}
 function movePlayer(dx,dy){if(!dx&&!dy)return;const len=Math.hypot(dx,dy)||1;dx/=len;dy/=len;const speed=3.4;const nx=Math.max(25,Math.min(WORLD.w-25,state.player.x+dx*speed));const ny=Math.max(55,Math.min(WORLD.h-30,state.player.y+dy*speed));if(!blocked(nx,state.player.y))state.player.x=nx;if(!blocked(state.player.x,ny))state.player.y=ny;}
-function loop(ts){const dt=Math.min((ts-last)/16||1,2);last=ts;let dx=(state.keys.ArrowRight||state.keys.d?1:0)-(state.keys.ArrowLeft||state.keys.a?1:0);let dy=(state.keys.ArrowDown||state.keys.s?1:0)-(state.keys.ArrowUp||state.keys.w?1:0);dx+=state.analog.x;dy+=state.analog.y;if(dx||dy)movePlayer(dx*dt,dy*dt);drawWorld(ts);raf=requestAnimationFrame(loop);}
+function loop(ts){const dt=Math.min((ts-last)/16||1,2);last=ts;let dx=(state.keys.ArrowRight||state.keys.d?1:0)-(state.keys.ArrowLeft||state.keys.a?1:0);let dy=(state.keys.ArrowDown||state.keys.s?1:0)-(state.keys.ArrowUp||state.keys.w?1:0);dx+=state.analog.x;dy+=state.analog.y;if(dx||dy)movePlayer(dx*dt,dy*dt);if(state.catOwned){const len=Math.hypot(dx,dy)||1,tx=state.player.x-(dx/len)*27,ty=state.player.y-(dy/len)*20;state.catFollower.x+=(tx-state.catFollower.x)*.16;state.catFollower.y+=(ty-state.catFollower.y)*.16;}drawWorld(ts);raf=requestAnimationFrame(loop);}
 function startWorld(){stopWorld();last=0;drawWorld();raf=requestAnimationFrame(loop);}
 function stopWorld(){if(raf)cancelAnimationFrame(raf);raf=0;state.keys={};}
 function interact(){
@@ -598,7 +624,16 @@ function interact(){
 }
 function openNpcDialog(n){
   stopWorld();dialogOpen=true;$('dialog').classList.remove('hidden');$('dialogEmoji').textContent=n.emoji;$('dialogEyebrow').textContent=n.role.toUpperCase();$('dialogChoices').innerHTML='';$('closeDialog').classList.add('hidden');
- if(n.id==='pak'){
+ if(n.id===state.catQuestNpcId){
+   $('dialogTitle').textContent=state.catOwned?'Misi Kucing: Persahabatan Baru':'Misi Spesial: Tolong Rawat Anak Kucing';
+   $('dialogText').textContent=state.catOwned?'Terima kasih sudah merawat anak kucing itu. Sekarang ia selalu menemanimu menjelajahi Desa Sukamaju.':'“Saya menemukan seekor anak kucing sendirian di dekat kebun. Sepertinya ia lapar dan butuh tempat aman. Maukah kamu merawatnya?”';
+   if(state.catOwned){addChoice('Senang sekali punya teman baru!',true,()=>{$('dialogText').textContent='Anak kucingmu mengeong riang dan siap menemanimu berkeliling desa.';});}
+   else{
+     addChoice('Tentu! Saya akan memberinya makan dan tempat yang aman.',true,()=>{state.catOwned=true;state.catFollower={x:state.player.x-28,y:state.player.y+20};reward(35,20);save();$('dialogText').textContent='Meong! Anak kucing itu kini menjadi teman setiamu. Kamu mendapat 35 XP, 20 koin, dan seekor kucing peliharaan! Ia akan mengikuti ke mana pun kamu berjalan.';});
+     addChoice('Saya belum bisa merawat hewan.',false,()=>{$('dialogText').textContent='Tidak apa-apa. Kamu bisa kembali kapan saja untuk menerima anak kucing ini.';});
+   }
+ }
+ else if(n.id==='pak'){
    $('dialogTitle').textContent='Pak Tani membutuhkan bantuan';
    $('dialogText').textContent=state.missionDone?'Misi Pak Tani sudah selesai. Hadiah sebelumnya sudah diterima.':'“Daun padi saya menguning dan ada bercak. Apa langkah pertama yang sebaiknya dilakukan?”';
    const choices=[['Langsung menyemprot pestisida dosis tinggi',false],['Mengamati gejala dan mengidentifikasi penyebabnya',true],['Membiarkan tanaman sampai panen',false]];
