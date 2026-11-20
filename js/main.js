@@ -8,7 +8,7 @@ const FIRST_LEVEL_XP=150, XP_PER_LEVEL=250;
 function xpThreshold(level){return level<=1?0:FIRST_LEVEL_XP+(level-2)*XP_PER_LEVEL;}
 function levelFromXP(xp){let level=1;while(xp>=xpThreshold(level+1))level++;return level;}
 function levelProgress(xp){const level=levelFromXP(xp);return {level,progress:xp-xpThreshold(level),needed:level===1?FIRST_LEVEL_XP:XP_PER_LEVEL};}
-const state = {name:'Penyuluh Muda',avatarIndex:0,xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},analog:{x:0,y:0},interact:false,catOwned:false,catQuestNpcId:null,catFollower:{x:120,y:410},scene:'village',mineGold:0,mineNodes:[],returnPosition:{x:145,y:390},ranchMissionDone:false,farmPlots:[],farmSeeds:{padi:3,jagung:2,cabai:1},farmProduce:{},farmSelectedPlot:0,farmSelectedCrop:'padi',farmPlayer:{x:450,y:430},farmTarget:null,farmDay:1,farmLastWeather:'Cerah',farmUnlockedPlots:1,farmPesticides:0};
+const state = {name:'Penyuluh Muda',avatarIndex:0,xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},analog:{x:0,y:0},interact:false,catOwned:false,catQuestNpcId:null,catFollower:{x:120,y:410},scene:'village',mineGold:0,mineNodes:[],returnPosition:{x:145,y:390},ranchMissionDone:false,farmPlots:[],farmSeeds:{padi:3,jagung:2,cabai:1},farmProduce:{},farmSelectedPlot:0,farmSelectedCrop:'padi',farmPlayer:{x:450,y:430},farmTarget:null,farmDay:1,farmLastWeather:'Cerah',farmUnlockedPlots:1,farmPesticides:0,farmPesticideStarterGranted:false};
 const screens=['homeScreen','menuScreen','gameScreen'];
 function save(){
   localStorage.setItem(KEY, JSON.stringify({
@@ -35,7 +35,7 @@ function save(){
     catQuestNpcId:state.catQuestNpcId,
     catFollower:state.catFollower,
     scene:state.scene||'village',mineGold:Number(state.mineGold)||0,mineNodes:Array.isArray(state.mineNodes)?state.mineNodes:[],returnPosition:state.returnPosition||{x:145,y:390},ranchMissionDone:!!state.ranchMissionDone,
-    farmPlots:state.farmPlots,farmSeeds:state.farmSeeds,farmProduce:state.farmProduce,farmSelectedPlot:state.farmSelectedPlot,farmSelectedCrop:state.farmSelectedCrop,farmPlayer:state.farmPlayer,farmDay:state.farmDay,farmLastWeather:state.farmLastWeather,farmUnlockedPlots:state.farmUnlockedPlots,farmPesticides:state.farmPesticides
+    farmPlots:state.farmPlots,farmSeeds:state.farmSeeds,farmProduce:state.farmProduce,farmSelectedPlot:state.farmSelectedPlot,farmSelectedCrop:state.farmSelectedCrop,farmPlayer:state.farmPlayer,farmDay:state.farmDay,farmLastWeather:state.farmLastWeather,farmUnlockedPlots:state.farmUnlockedPlots,farmPesticides:state.farmPesticides,farmPesticideStarterGranted:state.farmPesticideStarterGranted
   }));
 }
 function load(){
@@ -67,7 +67,7 @@ function load(){
   state.scene='village';state.mineGold=Number(state.mineGold)||0;state.mineNodes=Array.isArray(state.mineNodes)?state.mineNodes:[];state.returnPosition=state.returnPosition||{x:state.player.x,y:state.player.y};state.ranchMissionDone=!!state.ranchMissionDone;
   state.farmPlots=Array.isArray(state.farmPlots)?state.farmPlots:Array.from({length:6},()=>({crop:null,stage:0,watered:false,fertilized:false,plantedAt:0}));
   while(state.farmPlots.length<6)state.farmPlots.push({crop:null,stage:0,watered:false,fertilized:false,plantedAt:0});
-  state.farmSeeds=state.farmSeeds&&typeof state.farmSeeds==='object'?state.farmSeeds:{padi:3,jagung:2,cabai:1};state.farmPesticides=Math.max(0,Number(state.farmPesticides)||0);
+  state.farmSeeds=state.farmSeeds&&typeof state.farmSeeds==='object'?state.farmSeeds:{padi:3,jagung:2,cabai:1};state.farmPesticides=Math.max(0,Number(state.farmPesticides)||0);if(!state.farmPesticideStarterGranted){state.farmPesticides+=2;state.farmPesticideStarterGranted=true;}
   state.farmProduce=state.farmProduce&&typeof state.farmProduce==='object'?state.farmProduce:{};
   state.farmPlayer=state.farmPlayer&&typeof state.farmPlayer==='object'?state.farmPlayer:{x:450,y:430};
   state.farmDay=Number(state.farmDay)||1;state.farmLastWeather=state.farmLastWeather||'Cerah';
@@ -840,7 +840,7 @@ function drawFarmWorld(){
  for(let i=0;i<125;i++){const x=(i*97)%900,y=(i*61)%510;c.fillStyle=i%2?'#8bc56e':'#b4df8d';c.globalAlpha=.65;c.fillRect(x,y,10,3);}c.globalAlpha=1;
  // tidy village paths
  c.fillStyle='#d8bd88';c.fillRect(0,205,900,12);c.fillRect(0,445,900,65);c.fillStyle='#c9ad78';c.fillRect(0,452,900,4);
- c.fillStyle='#eaf5d9';c.fillRect(0,0,900,34);c.fillStyle='#315b35';c.font='bold 15px Nunito, sans-serif';c.textAlign='left';c.fillText('KEBUN BELAJAR',16,18);c.font='bold 9px Nunito';c.fillText('Pilih benih • Ketuk bangunan • Pilih petak • Gerakkan karakter',16,30);
+ c.fillStyle='#eaf5d9';c.fillRect(0,0,900,34);c.fillStyle='#315b35';c.font='bold 15px Nunito, sans-serif';c.textAlign='left';c.fillText('KEBUN BELAJAR',16,18);
  // crop selection icons
  farmHit.seeds=[];let sx=260;Object.entries(farmCrops).forEach(([id,cr],n)=>{const x=sx+n*150,y=17,w=136,h=48,selected=state.farmSelectedCrop===id,stock=state.farmSeeds[id]||0;c.fillStyle=stock<=0?'#d8e3d0':selected?'#fff0a8':'#f4f9e9';roundRect(c,x,y,w,h,12);c.fill();c.strokeStyle=selected?'#397e42':'#d2e5c9';c.lineWidth=selected?3:1;c.stroke();c.textAlign='center';c.font='22px serif';c.fillStyle=stock<=0?'#9aab98':'#315b35';c.fillText(cr.emoji,x+34,y+30);c.font='bold 15px Nunito';c.fillText(String(stock),x+91,y+29);if(selected){c.font='bold 8px Nunito';c.fillText('DIPILIH',x+91,y+41);}farmHit.seeds.push({id,x,y,w,h});});
  // Three distinct, proportionate buildings with readable interaction labels
@@ -891,21 +891,27 @@ function drawFarmWorld(){
   farmHit.buildings.push({id:b.id,x:x-3,y:y-9,w:176,h:124});
  });
  // field plots
- farmPlotCenters.forEach((p,i)=>{const plot=state.farmPlots[i]||{crop:null,stage:0},locked=i>=state.farmUnlockedPlots;c.fillStyle=state.farmSelectedPlot===i?'#f4d45b':'#8a5935';c.fillRect(p.x-83,p.y-43,166,86);c.fillStyle=locked?'#6c6c55':'#9e7047';c.fillRect(p.x-78,p.y-38,156,76);for(let r=0;r<3;r++){c.fillStyle=locked?'#62624e':'#805432';c.fillRect(p.x-68,p.y-25+r*24,136,4);}c.textAlign='center';if(locked){c.fillStyle='#fff8df';c.font='23px serif';c.fillText('🔒',p.x,p.y-2);c.font='bold 10px Nunito';c.fillText('BUKA '+farmLandPrice(i)+' KOIN',p.x,p.y+26);}else if(plot.crop){const crop=farmCrops[plot.crop],ready=farmPlotReady(plot),icon=ready?crop.emoji:(plot.stage===1?'🌱':'🌿');c.font='25px serif';for(let j=0;j<5;j++)c.fillText(icon,p.x-46+j*23,p.y-2+(j%2)*14);c.font='bold 9px Nunito';c.fillStyle='#fff5d8';c.fillText(plot.pest?'⚠ HAMA / PENYAKIT':!plot.watered?'BUTUH AIR':ready?'SIAP PANEN':'TUMBUH',p.x,p.y-27);if(plot.pest){c.font='18px serif';c.fillText('🐛',p.x+56,p.y-20);}}else{c.fillStyle='#f5e6c9';c.font='bold 11px Nunito';c.fillText('PETAK '+(i+1),p.x,p.y+5);}if(state.farmSelectedPlot===i){c.strokeStyle='#fff6a5';c.lineWidth=4;c.strokeRect(p.x-86,p.y-46,172,92);}});
+ farmPlotCenters.forEach((p,i)=>{const plot=state.farmPlots[i]||{crop:null,stage:0},locked=i>=state.farmUnlockedPlots;c.fillStyle=state.farmSelectedPlot===i?'#f4d45b':'#8a5935';c.fillRect(p.x-83,p.y-43,166,86);c.fillStyle=locked?'#6c6c55':'#9e7047';c.fillRect(p.x-78,p.y-38,156,76);for(let r=0;r<3;r++){c.fillStyle=locked?'#62624e':'#805432';c.fillRect(p.x-68,p.y-25+r*24,136,4);}c.textAlign='center';if(locked){c.fillStyle='#fff8df';c.font='23px serif';c.fillText('🔒',p.x,p.y-2);c.font='bold 10px Nunito';c.fillText('BUKA '+farmLandPrice(i)+' KOIN',p.x,p.y+26);}else if(plot.crop){const crop=farmCrops[plot.crop],ready=farmPlotReady(plot),icon=ready?crop.emoji:(plot.stage===1?'🌱':'🌿');c.font='25px serif';for(let j=0;j<5;j++)c.fillText(icon,p.x-46+j*23,p.y-2+(j%2)*14);c.font='bold 9px Nunito';c.fillStyle='#fff5d8';c.fillText(plot.pest?'⚠ SERANGAN '+(plot.pestSeverity||1)+'/5':!plot.watered?'BUTUH AIR':ready?'SIAP PANEN':'TUMBUH',p.x,p.y-27);if(plot.pest){c.font='18px serif';c.fillText('🐛',p.x+56,p.y-20);}}else{c.fillStyle='#f5e6c9';c.font='bold 11px Nunito';c.fillText('PETAK '+(i+1),p.x,p.y+5);}if(state.farmSelectedPlot===i){c.strokeStyle='#fff6a5';c.lineWidth=4;c.strokeRect(p.x-86,p.y-46,172,92);}});
  // compact action dock in the play area
  farmHit.actions=[];const actions=[['plant','🌱','TANAM'],['water','💧','SIRAM'],['fertilize','🧪','PUPUK'],['spray','🧴','SEMPROT'],['harvest','🧺','PANEN'],['unlock','🔓','BUKA LAHAN']];
- actions.forEach((a,i)=>{const x=10+i*148,y=462,w=138,h=38;const selected=i===0,pestActive=!!state.farmPlots[state.farmSelectedPlot]?.pest;c.fillStyle=selected?'#17643e':(a[0]==='spray'?(pestActive?'#fff0d5':'#e5eadf'):'#f5f7e9');roundRect(c,x,y,w,h,10);c.fill();c.strokeStyle=i===0?'#d4edc7':'#d6e3c9';c.lineWidth=1;c.stroke();c.textAlign='center';c.fillStyle=selected?'#fff':(a[0]==='spray'&&!pestActive?'#9aa694':'#315b35');c.font='bold 12px Nunito';c.fillText(a[1]+' '+a[2],x+w/2,y+24);farmHit.actions.push({id:a[0],x,y,w,h});});
+ actions.forEach((a,i)=>{const x=10+i*148,y=462,w=138,h=38;const selected=i===0,pestPlot=state.farmPlots[state.farmSelectedPlot],pestActive=!!pestPlot?.pest&&(pestPlot.pestSeverity||1)>FARM_PEST_THRESHOLD;c.fillStyle=selected?'#17643e':(a[0]==='spray'?(pestActive?'#fff0d5':'#e5eadf'):'#f5f7e9');roundRect(c,x,y,w,h,10);c.fill();c.strokeStyle=i===0?'#d4edc7':'#d6e3c9';c.lineWidth=1;c.stroke();c.textAlign='center';c.fillStyle=selected?'#fff':(a[0]==='spray'&&!pestActive?'#9aa694':'#315b35');c.font='bold 12px Nunito';c.fillText(a[1]+' '+a[2],x+w/2,y+24);farmHit.actions.push({id:a[0],x,y,w,h});});
  // player
  const p=state.farmPlayer||{x:450,y:430};c.fillStyle='#29442b55';c.beginPath();c.ellipse(p.x,p.y+15,16,6,0,0,Math.PI*2);c.fill();c.fillStyle='#244e36';c.fillRect(p.x-9,p.y-7,18,22);c.fillStyle='#f0bd91';c.beginPath();c.arc(p.x,p.y-15,9,0,Math.PI*2);c.fill();c.fillStyle='#d9b45d';c.beginPath();c.arc(p.x,p.y-21,12,Math.PI,Math.PI*2);c.fill();c.fillStyle='#172b1c';c.fillRect(p.x-6,p.y+13,5,8);c.fillRect(p.x+2,p.y+13,5,8);
  
 }
 function roundRect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+const FARM_PEST_THRESHOLD=3;
 function farmCheckPests(){
  const now=Date.now();
  state.farmPlots.forEach((plot,i)=>{
-  if(!plot||!plot.crop||plot.pest||plot.pestChecked||!plot.watered)return;
+  if(!plot||!plot.crop||!plot.watered)return;
+  if(plot.pest){
+   if((plot.pestSeverity||1)<5&&now-(plot.pestSeverityAt||plot.pestAt||now)>12000){plot.pestSeverity=Math.min(5,(plot.pestSeverity||1)+1);plot.pestSeverityAt=now;save();}
+   return;
+  }
+  if(plot.pestChecked)return;
   const duration=farmCrops[plot.crop].grow*(plot.fertilized?.65:1),elapsed=now-(plot.plantedAt||now),phase=elapsed/duration;
-  if(phase>=.22&&phase<=.88){plot.pestChecked=true;if(Math.random()<.34){plot.pest=true;plot.pestType=Math.random()<.5?'hama':'penyakit';plot.pestAt=now;farmToast('Peringatan tanaman!','Petak '+(i+1)+' terserang '+plot.pestType+'. Beli pestisida di Toko Benih, lalu lakukan penyemprotan.','🐛');save();}}
+  if(phase>=.22&&phase<=.88){plot.pestChecked=true;if(Math.random()<.34){plot.pest=true;plot.pestType=Math.random()<.5?'hama':'penyakit';plot.pestSeverity=1+Math.floor(Math.random()*5);plot.pestAt=now;plot.pestSeverityAt=now;farmToast('Peringatan tanaman!','Petak '+(i+1)+' terserang '+plot.pestType+'. Intensitas awal '+plot.pestSeverity+'/5. Pantau sebelum menyemprot.','🐛');save();}}
  });
 }
 let farmPestCheckAt=0;
@@ -950,7 +956,7 @@ function farmAct(action){
  }else if(action==='fertilize'){
    if(!plot.crop||plot.fertilized||state.coins<4)return;state.coins-=4;plot.fertilized=true;farmNotify('Pupuk diberikan. Pertumbuhan lebih cepat.');farmToast('Pemupukan berhasil','Biaya 4 koin. Pertumbuhan tanaman lebih cepat.','🧪');
  }else if(action==='spray'){
-   if(!plot.pest)return farmNotify('Tidak ada hama atau penyakit pada petak ini.');if(!(state.farmPesticides>0)){farmNotify('Stok pestisida habis. Beli pestisida di Toko Benih.');openFarmDialog('shop');return;}state.farmPesticides--;plot.pest=false;plot.pestType=null;plot.pestChecked=true;reward(4,0);farmToast('Penyemprotan berhasil','Serangan berhasil dikendalikan. Sisa pestisida: '+state.farmPesticides+'. +4 XP','🧴');
+   if(!plot.pest)return farmNotify('Tidak ada hama atau penyakit pada petak ini.');if((plot.pestSeverity||1)<=FARM_PEST_THRESHOLD)return farmNotify('Intensitas serangan '+(plot.pestSeverity||1)+'/5 belum melebihi ambang batas '+FARM_PEST_THRESHOLD+'/5. Pantau populasi/intensitas terlebih dahulu; penyemprotan belum dianjurkan.');if(!window.confirm('Pengingat PHT: pastikan populasi/intensitas serangan benar-benar MELEBIHI ambang batas (lebih dari '+FARM_PEST_THRESHOLD+'/5). Apakah hasil pengamatan sudah memenuhi ambang batas dan penyemprotan diperlukan?'))return;if(!(state.farmPesticides>0)){farmNotify('Stok pestisida habis. Beli pestisida di Toko Benih.');openFarmDialog('shop');return;}state.farmPesticides--;plot.pest=false;plot.pestType=null;plot.pestChecked=true;reward(4,0);farmToast('Penyemprotan berhasil','Serangan berhasil dikendalikan. Sisa pestisida: '+state.farmPesticides+'. +4 XP','🧴');
  }else if(action==='harvest'){
    if(!farmPlotReady(plot))return farmNotify('Tanaman belum siap dipanen.');
    const crop=farmCrops[plot.crop];state.farmProduce[plot.crop]=(state.farmProduce[plot.crop]||0)+1;state.harvestCount++;reward(crop.xp,0);farmNotify('Panen '+crop.name+' berhasil! Hasil masuk inventaris.');farmToast('Selamat! Panen berhasil','Kamu memperoleh 1 '+crop.name+'. +'+crop.xp+' XP','🏆');
@@ -969,7 +975,7 @@ function openFarmDialog(kind){
  const title=$('farmDialogTitle'),body=$('farmDialogBody');let content='';
  if(kind==='shop'){
   title.textContent='🏪 Toko Benih';
-  content='<p class="farm-dialog-note">Pilih benih untuk dibeli. Harga menggunakan koin permainan.</p><div class="farm-shop-list">'+Object.entries(farmCrops).map(([id,c])=>'<div class="farm-shop-item"><span>'+c.emoji+' <b>'+c.name+'</b><br>Stok: '+(state.farmSeeds[id]||0)+' benih<br>Harga '+c.seedPrice+' koin • Jual '+c.sell+' koin</span><button data-buy-seed="'+id+'">Beli 1</button></div>').join('')+'</div><div class="farm-shop-item"><span>🧴 <b>Pestisida</b><br>Stok: '+state.farmPesticides+' botol<br>Harga 12 koin • Untuk mengendalikan hama dan penyakit</span><button data-buy-pesticide>Beli 1</button></div>';
+  content='<p class="farm-dialog-note">Pilih benih untuk dibeli. Harga menggunakan koin permainan.</p><div class="farm-shop-list">'+Object.entries(farmCrops).map(([id,c])=>'<div class="farm-shop-item"><span>'+c.emoji+' <b>'+c.name+'</b><br>Stok: '+(state.farmSeeds[id]||0)+' benih<br>Harga '+c.seedPrice+' koin • Jual '+c.sell+' koin</span><button data-buy-seed="'+id+'">Beli 1</button></div>').join('')+'</div><div class="farm-shop-item"><span>🧴 <b>Pestisida</b><br>Stok: '+state.farmPesticides+' botol<br>Harga 12 koin • Gunakan hanya jika intensitas serangan melewati ambang batas</span><button data-buy-pesticide>Beli 1</button></div>';
  }else if(kind==='inventory'){
   title.textContent='🎒 Inventaris';content='<h4>Benih</h4><div class="farm-inventory-list">'+Object.entries(farmCrops).map(([id,c])=>'<div class="farm-inventory-item">'+c.emoji+' '+c.name+': <b>'+(state.farmSeeds[id]||0)+'</b></div>').join('')+'</div><h4>Hasil panen</h4><div class="farm-inventory-list">'+Object.entries(farmCrops).map(([id,c])=>'<div class="farm-inventory-item">'+c.emoji+' '+c.name+': <b>'+(state.farmProduce[id]||0)+'</b></div>').join('')+'</div>';
  }else{
