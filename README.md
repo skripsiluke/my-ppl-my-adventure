@@ -248,3 +248,10 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Boss memiliki 100 HP dan membutuhkan 20 pukulan kapak; setiap pukulan mengurangi 5 HP dengan jeda 0,5 detik. Serangan dilakukan saat pemain dekat boss menggunakan E/Spasi atau tombol INTERAKSI.
 - Sentuhan Boss mengurangi 20 XP (tidak sampai negatif). Setelah boss dikalahkan, pemain mendapat 100 XP dan 50 koin.
 - Save game lama tetap kompatibel; status kapak dan pertarungan boss berlaku selama sesi berada di tambang.
+
+
+## v0.20.7 — Perbaikan Karakter Terkunci Setelah Terkena Kelabang
+- Memperbaiki penanganan tabrakan kelabang biasa setelah pemain mengambil kapak.
+- Saat terkena kelabang, pemain tetap menerima penalti -10 XP dan kelabang menghilang seperti sebelumnya.
+- Karakter mendapat dorongan menjauh singkat dan input gerak yang tertahan dilepas agar kontrol dapat digunakan kembali.
+- Fitur kapak dan Boss Kelabang tetap dipertahankan.
