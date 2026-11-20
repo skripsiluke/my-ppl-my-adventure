@@ -57,6 +57,32 @@
 .tutorial-actions .button:disabled{opacity:.45;cursor:not-allowed}
 @media(max-width:520px){.tutorial-card{padding:14px 15px;width:min(calc(100vw - 28px),390px)}.tutorial-card h2{font-size:19px}.tutorial-card #tutorialDescription{font-size:12px;min-height:42px}.tutorial-illustration{width:42px;height:42px;font-size:28px}}
 @media(max-width:520px){.tutorial-card{padding:19px}.tutorial-card h2{font-size:21px}}
+
+
+/* Farm Simulator v0.16.0 */
+.farm-hud{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 15px;border-radius:15px;background:#edf6e7;margin-bottom:12px;color:#245337}
+.farm-hud>div:first-child{display:grid;gap:3px}.farm-hud strong{font-size:17px}.farm-hud small{font-size:11px;color:#67816a}.farm-kicker{font-size:9px;letter-spacing:1.5px;font-weight:900;color:#67915e}
+.farm-wallet{display:flex;gap:12px;font-size:13px;white-space:nowrap}
+.farm-world-wrap{position:relative;overflow:hidden;border:3px solid #8eaf72;border-radius:17px;background:#91c56f}
+#farmCanvas{display:block;width:100%;height:auto;aspect-ratio:900/510;touch-action:manipulation}
+.farm-world-tip{position:absolute;left:10px;bottom:9px;padding:6px 9px;border-radius:9px;background:#173c2dcc;color:#fff;font-size:10px;pointer-events:none}
+.farm-player-hud{display:flex;justify-content:space-between;gap:8px;padding:10px 3px;color:#46684b;font-size:11px;font-weight:800}
+.farm-action-bar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:8px 0}
+.farm-action-bar .button{padding:10px 5px;font-size:12px;min-height:42px}.farm-action-bar .button:disabled{opacity:.42}
+.farm-management-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:12px}
+.farm-manage-card{border:1px solid #dce9d3;border-radius:13px;background:#f5faef;padding:12px 7px;color:#28563a;display:grid;gap:4px;justify-items:center;font-size:20px;cursor:pointer}
+.farm-manage-card b{font-size:12px}.farm-manage-card small{font-size:10px;color:#718270;text-align:center}
+.farm-mobile-controls{display:none;justify-content:center;margin:14px auto 4px}
+.farm-mobile-controls>div{display:grid;grid-template-columns:repeat(3,43px);grid-template-rows:repeat(2,40px);gap:4px}
+.farm-mobile-controls button{border:1px solid #cbdcc3;border-radius:10px;background:#edf5e8;color:#28563a;font-weight:900;touch-action:none}
+.farm-mobile-controls>div button:nth-child(1){grid-column:2}.farm-mobile-controls>div button:nth-child(2){grid-column:1;grid-row:2}.farm-mobile-controls>div button:nth-child(3){grid-column:2;grid-row:2}.farm-mobile-controls>div button:nth-child(4){grid-column:3;grid-row:2}
+.farm-dialog{position:fixed;inset:0;z-index:11000;background:#102b1dbb;display:grid;place-items:center;padding:15px}
+.farm-dialog.hidden{display:none}.farm-dialog-card{position:relative;width:min(100%,440px);max-height:82vh;overflow:auto;padding:20px;border-radius:20px;background:#fbfff7;box-shadow:0 18px 60px #0005;color:#294e35}
+.farm-dialog-card h3{margin:0 35px 14px 0}.farm-dialog-close{position:absolute;right:14px;top:13px;border:0;border-radius:50%;width:32px;height:32px;background:#e8f2e1;color:#31583a;font-weight:900}
+.farm-shop-list{display:grid;gap:9px}.farm-shop-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px;border:1px solid #dce9d3;border-radius:12px;background:#f6faef}.farm-shop-item span{font-size:12px}.farm-shop-item button{border:0;border-radius:9px;padding:8px 10px;background:#287b49;color:white;font-weight:800;font-size:11px}
+.farm-inventory-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}.farm-inventory-item{padding:11px;border-radius:11px;background:#f0f6e9;font-size:12px}
+.farm-dialog-note{font-size:12px;line-height:1.6;color:#647665}
+@media(max-width:600px){.farm-mobile-controls{display:flex}.farm-action-bar{grid-template-columns:repeat(2,minmax(0,1fr))}.farm-player-hud{font-size:10px}.farm-hud strong{font-size:15px}.farm-management-grid{gap:6px}.farm-manage-card{padding:10px 4px}}
   </style>
 </head>
 <body>
@@ -168,7 +194,16 @@
         <button id="interactButton" class="interact-button">INTERAKSI</button>
       </div>
     </div>
-    <div id="farmPanel" class="game-panel hidden"><div class="farm-scene"><div class="farm-sky">☀️ &nbsp; Kebun Belajar</div><div class="farm-plot" id="farmPlot"><span id="cropEmoji">🟫</span></div><p id="farmStatus">Lahan masih kosong. Mulai dengan menanam benih.</p></div><div class="action-row"><button id="plantButton" class="button button-primary">🌱 Tanam benih</button><button id="waterButton" class="button button-secondary" disabled>💧 Siram</button><button id="harvestButton" class="button button-secondary" disabled>🧺 Panen</button></div><p class="muted small">Simulasi sederhana: tanam → siram → panen.</p></div>
+    <div id="farmPanel" class="game-panel hidden">
+      <div class="farm-hud"><div><span class="farm-kicker">FARM SIMULATOR</span><strong>🌤️ Kebun Belajar</strong><small id="farmWeather">Cuaca cerah • Hari 1</small></div><div class="farm-wallet"><span>🪙 <b id="farmCoins">0</b></span><span>🌱 <b id="farmSeedCount">0</b></span></div></div>
+      <div class="farm-world-wrap"><canvas id="farmCanvas" width="900" height="510" aria-label="Area kebun. Ketuk petak untuk memilih, ketuk area untuk berjalan."></canvas><div class="farm-world-tip">Ketuk petak untuk memilih • Ketuk area untuk berjalan</div></div>
+      <div class="farm-player-hud"><span id="farmPlayerStatus">Pilih petak untuk mulai bertani.</span><span id="farmSelectedLabel">Belum ada petak dipilih</span></div>
+      <div class="farm-action-bar"><button id="farmPlant" class="button button-primary">🌱 Tanam</button><button id="farmWater" class="button button-secondary">💧 Siram</button><button id="farmFertilize" class="button button-secondary">🧪 Pupuk</button><button id="farmHarvest" class="button button-secondary">🧺 Panen</button></div>
+      <div class="farm-management-grid"><button id="farmShop" class="farm-manage-card">🏪 <b>Toko Benih</b><small>Beli benih tanaman</small></button><button id="farmInventory" class="farm-manage-card">🎒 <b>Inventaris</b><small>Lihat benih & hasil panen</small></button><button id="farmMarket" class="farm-manage-card">🧺 <b>Pasar</b><small>Jual hasil panen</small></button></div>
+      <div class="farm-mobile-controls"><button data-farm-dir="up">▲</button><div><button data-farm-dir="left">◀</button><button data-farm-dir="down">▼</button><button data-farm-dir="right">▶</button></div></div>
+      <p class="muted small">Berjalan dengan WASD/tombol panah atau tombol arah di HP. Pilih petak untuk mengolah kebun.</p>
+      <div id="farmDialog" class="farm-dialog hidden"><div class="farm-dialog-card"><button id="farmDialogClose" class="farm-dialog-close">✕</button><h3 id="farmDialogTitle">Toko Benih</h3><div id="farmDialogBody"></div></div></div>
+    </div>
     <div id="quizPanel" class="game-panel hidden"><div class="quiz-top"><span class="status-pill">KUIS PERTANIAN</span><span id="questionCount">Soal 1 dari 5</span></div><h3 id="questionText">Apa tujuan utama penyuluhan pertanian?</h3><div id="answerList" class="answer-list"></div><p id="quizFeedback" class="quiz-feedback" aria-live="polite"></p><button id="nextQuestionButton" class="button button-primary hidden">Soal berikutnya →</button></div>
   </section>
 

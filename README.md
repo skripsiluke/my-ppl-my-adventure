@@ -176,3 +176,17 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Pemain baru langsung diarahkan ke beranda game setelah memulai, lalu tutorial menyorot avatar dan kartu menu satu per satu.
 - Latar belakang diredupkan dengan spotlight terang di sekitar elemen yang dijelaskan.
 - Kotak tutorial berwarna terang berpindah posisi mengikuti letak elemen, dengan tombol Lanjutkan dan Lewati tetap tersedia.
+
+
+## v0.15.5 — Penyempurnaan visual tutorial
+- Kotak tutorial dibuat semi-transparan dengan efek blur agar menu di belakang tetap terlihat.
+- Area sorotan mengikuti ukuran elemen menu/avatar yang sedang dijelaskan, bukan lingkaran tetap.
+- Posisi kartu tutorial otomatis memilih sisi berlawanan dari elemen target agar tidak menutup menu.
+- Ukuran kartu dipadatkan agar lebih nyaman pada layar HP.
+
+
+## v0.16.0 — Farm Simulator hybrid
+- Kebun 2D yang dapat dijelajahi dengan klik/tap, WASD/tombol panah, dan tombol arah di HP.
+- Enam petak lahan, empat jenis tanaman, toko benih, inventaris, pasar hasil panen.
+- Tanam, siram, pupuk, tunggu pertumbuhan, dan panen dengan hadiah XP/koin.
+- Data kebun disimpan pada save game yang sama; progres dan fitur versi sebelumnya tetap dipertahankan.
