@@ -255,3 +255,10 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Saat terkena kelabang, pemain tetap menerima penalti -10 XP dan kelabang menghilang seperti sebelumnya.
 - Karakter mendapat dorongan menjauh singkat dan input gerak yang tertahan dilepas agar kontrol dapat digunakan kembali.
 - Fitur kapak dan Boss Kelabang tetap dipertahankan.
+
+
+## v0.20.8 — Perbaikan Kontrol Setelah Tabrakan Kelabang
+- Menghapus reset objek input keyboard, joystick, dan status interaksi dari proses tabrakan kelabang biasa.
+- Setelah terkena kelabang, XP tetap berkurang 10, kelabang menghilang sementara, dan karakter terdorong menjauh.
+- Input gerak yang sedang aktif tidak lagi dihapus dari dalam game loop, sehingga kontrol sentuh/keyboard tetap tersambung.
+- Sistem kapak, Boss Kelabang, tambang emas, dan kompatibilitas save tetap dipertahankan.

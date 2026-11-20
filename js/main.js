@@ -841,13 +841,13 @@ function drawMine(t=0){
    for(let i=8;i>=0;i--){const x=-i*10;ctx.fillStyle=i%2?'#a91420':'#d92731';ctx.beginPath();ctx.ellipse(x,Math.sin(t/100+i*.8)*3,8,12-i*.35,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#ff6b62';ctx.lineWidth=1.5;ctx.stroke();ctx.strokeStyle='#f3a39a';ctx.lineWidth=2;for(const side of [-1,1]){ctx.beginPath();ctx.moveTo(x,side*5);ctx.lineTo(x-5,side*14);ctx.stroke();}}
    ctx.fillStyle='#f04438';ctx.beginPath();ctx.arc(5,0,10,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ffe7b0';ctx.beginPath();ctx.arc(8,-4,2.3,0,Math.PI*2);ctx.arc(8,4,2.3,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#ff8b78';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(9,-7);ctx.lineTo(17,-13);ctx.moveTo(9,7);ctx.lineTo(17,13);ctx.stroke();ctx.restore();
    if(dist<27&&t>=mineHitCooldown){
-     // Hindari kondisi karakter terasa terkunci setelah terkena kelabang: beri efek terpental singkat,
-     // lepaskan input gerak yang mungkin tertahan, lalu hapus monster seperti perilaku semula.
+     // Penalti tabrakan tidak boleh mengubah atau mengganti objek input global.
+     // Mengosongkan state.keys/analog di dalam loop dapat memutus pointer/joystick
+     // yang masih aktif pada perangkat sentuh dan membuat kontrol terasa macet.
      state.xp=Math.max(0,state.xp-10);updateStats();save();mineHitCooldown=t+1800;
-     const push=34;state.player.x=Math.max(35,Math.min(w-35,state.player.x+(dx/dist)*push));state.player.y=Math.max(100,Math.min(h-105,state.player.y+(dy/dist)*push));
-     state.keys={};state.analog={x:0,y:0};state.interact=false;
+     const push=48;state.player.x=Math.max(35,Math.min(w-35,state.player.x+(dx/dist)*push));state.player.y=Math.max(100,Math.min(h-105,state.player.y+(dy/dist)*push));
      mineMonster=null;mineNextMonsterAt=t+7000;
-     const md=$('missionDescription');if(md)md.textContent='⚠️ Kamu terkena kelabang merah! XP berkurang 10. Karakter terpental—gerakkan kembali untuk melanjutkan.';
+     const md=$('missionDescription');if(md)md.textContent='⚠️ Kamu terkena kelabang merah! XP berkurang 10. Kelabang menghilang sementara—kontrol tetap aktif, lanjutkan bergerak!';
    }
  }
  // Boss kelabang merah raksasa dan bar HP.
