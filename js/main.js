@@ -883,12 +883,14 @@ function farmToast(title,message,icon='🎉'){
 function updateFarm(){
  if(!$('farmPanel'))return;
  $('farmCoins').textContent=state.coins;
- $('farmSeedStocks').innerHTML=Object.entries(farmCrops).map(([id,c])=>'<div class="farm-seed-chip">'+c.emoji+' '+c.name+'<b>'+(state.farmSeeds[id]||0)+' benih</b></div>').join('');
+ $('farmSeedStocks').innerHTML='<p class="farm-seed-hint">Pilih benih yang ingin ditanam dengan mengetuk salah satu jenis berikut:</p>'+Object.entries(farmCrops).map(([id,c])=>'<button type="button" class="farm-seed-chip '+(state.farmSelectedCrop===id?'selected':'')+'" data-select-farm-seed="'+id+'" aria-pressed="'+(state.farmSelectedCrop===id?'true':'false')+'" '+(!(state.farmSeeds[id]>0)?'disabled':'')+'>'+c.emoji+' '+c.name+'<b>'+(state.farmSeeds[id]||0)+' benih</b></button>').join('');
+ $('farmSeedStocks').querySelectorAll('[data-select-farm-seed]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.selectFarmSeed;if(!(state.farmSeeds[id]>0))return;state.farmSelectedCrop=id;updateFarm();save();farmToast('Benih dipilih',farmCrops[id].name+' dipilih. Tekan tombol Tanam untuk menanam benih ini.','🌱');}));
  $('farmWeather').textContent='Cuaca '+state.farmLastWeather+' • Hari '+state.farmDay;
  const i=state.farmSelectedPlot||0,plot=state.farmPlots[i],locked=i>=state.farmUnlockedPlots,crop=plot?.crop?farmCrops[plot.crop]:null,ready=plot&&farmPlotReady(plot);
  $('farmSelectedLabel').textContent='Petak '+(i+1)+(locked?' • Terkunci':crop?' • '+crop.name:' • Kosong');
- $('farmPlayerStatus').textContent=locked?'Lahan terkunci. Beli lahan ini menggunakan koin hasil penjualan panen.':!plot?.crop?'Lahan siap diolah. Pilih benih lalu tanam.':!plot.watered?'Tanaman membutuhkan air.':ready?'Tanaman siap dipanen!':'Tanaman sedang tumbuh. Kembali sebentar lagi.';
+ $('farmPlayerStatus').textContent=locked?'Lahan terkunci. Beli lahan ini menggunakan koin hasil penjualan panen.':!plot?.crop?'Lahan siap diolah. Benih terpilih: '+(farmCrops[state.farmSelectedCrop]?.name||'belum dipilih')+'. Tekan Tanam untuk memulai.':!plot.watered?'Tanaman membutuhkan air.':ready?'Tanaman siap dipanen!':'Tanaman sedang tumbuh. Kembali sebentar lagi.';
  $('farmPlant').disabled=locked||!!plot?.crop||!(state.farmSeeds[state.farmSelectedCrop]>0);
+ $('farmPlant').textContent='🌱 Tanam '+(farmCrops[state.farmSelectedCrop]?.name||'Benih');
  $('farmWater').disabled=locked||!plot?.crop||plot.watered;
  $('farmFertilize').disabled=locked||!plot?.crop||plot.fertilized||state.coins<4;
  $('farmHarvest').disabled=locked||!ready;

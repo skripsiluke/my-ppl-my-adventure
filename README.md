@@ -198,3 +198,11 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Hanya petak pertama yang terbuka di awal. Petak berikutnya dibeli berurutan menggunakan koin.
 - Harga pembukaan lahan: 35, 55, 80, 110, dan 150 koin.
 - Save lama tetap dibaca; petak lama yang sudah memiliki tanaman tetap dibuka agar tanaman/progres tidak hilang. Data lahan, stok benih, hasil panen, dan lahan terbuka kini ikut disimpan.
+
+
+## v0.16.2 — Pemilihan benih sebelum menanam
+- Stok tiap jenis benih kini berupa tombol yang dapat diketuk/diklik.
+- Benih terpilih ditandai dengan highlight dan label DIPILIH.
+- Tombol tanam menampilkan jenis benih aktif, misalnya Tanam Padi.
+- Benih dengan stok nol tidak dapat dipilih.
+- Pemilihan benih disimpan pada progres kebun.
