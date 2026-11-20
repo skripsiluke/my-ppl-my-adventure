@@ -67,3 +67,10 @@ Workflow pada `.github/workflows/deploy.yml` juga disediakan untuk deployment ot
 - Status penyelesaian misi disimpan bersama progres PM-AAS yang sudah ada.
 - Progres versi sebelumnya, pengaturan musik, dan penyimpanan LocalStorage tetap menggunakan kunci yang sama.
 - Ilustrasi rakitan merupakan penyederhanaan edukatif berdasarkan contoh drum seeder, bukan panduan servis untuk semua tipe alat.
+
+
+## Versi 0.9.1 — Komponen Drum Seeder Bergambar
+- Mengganti daftar komponen berbasis ikon menjadi kartu gambar roda, drum penjatah benih, poros, rangka utama, dan pegangan.
+- Setiap slot perakitan menampilkan gambar komponen setelah berhasil dipasang.
+- Drag-and-drop di komputer dan metode ketuk-komponen/ketuk-slot di ponsel tetap didukung.
+- Memperjelas urutan perakitan dan mempertahankan hadiah serta status penyelesaian misi.
