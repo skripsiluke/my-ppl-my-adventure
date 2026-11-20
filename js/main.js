@@ -731,20 +731,27 @@ function enterPalm(){
  state.player={x:canvas.width*.5,y:canvas.height-135};palmGhost=null;palmNextGhostAt=performance.now()+1800;save();showPalmToast('MISI KEBUN SAWIT: Kejar dan tangkap hantu yang muncul. Dekati hantu lalu tekan E / INTERAKSI untuk mendapat 2 koin!');
 }
 function palmInteract(){
- if(palmGhost&&Math.hypot(state.player.x-palmGhost.x,state.player.y-palmGhost.y)<68){
-  const caught=palmGhost.type;palmGhost=null;state.palmGhostCaught=(Number(state.palmGhostCaught)||0)+1;reward(0,2);save();
-  showPalmToast('🎉 Berhasil menangkap '+caught+'! Kamu mendapat 2 koin. Total tertangkap: '+state.palmGhostCaught+'.');
-  return;
- }
- if(palmGhost&&Math.hypot(state.player.x-palmGhost.x,state.player.y-palmGhost.y)>=68){
-  showPalmToast('👻 Hantu masih jauh! Kejar dan dekati hantunya untuk menangkap, lalu tekan E / INTERAKSI.');
-  return;
- }
  const exit={x:canvas.width*.5,y:canvas.height-90};
- if(Math.hypot(state.player.x-exit.x,state.player.y-exit.y)<92){
+ const exitDistance=Math.hypot(state.player.x-exit.x,state.player.y-exit.y);
+ const ghostDistance=palmGhost?Math.hypot(state.player.x-palmGhost.x,state.player.y-palmGhost.y):Infinity;
+ if(palmGhost&&ghostDistance<118){
+  const caught=palmGhost.type;
+  palmGhost=null;
+  state.palmGhostCaught=(Number(state.palmGhostCaught)||0)+1;
+  reward(0,2);
+  save();
+  showPalmToast('🎉 Berhasil menangkap '+caught+'! +2 koin. Total hantu tertangkap: '+state.palmGhostCaught+'.');
+  palmNextGhostAt=performance.now()+4500;
+  return;
+ }
+ if(exitDistance<100){
   state.scene='village';state.player={...state.returnPosition};save();return;
  }
- $('missionDescription').textContent='Hutan sawit terasa sunyi. Cari jalan kembali ke gerbang.';
+ if(palmGhost){
+  showPalmToast('👻 Kejar '+palmGhost.type+'! Dekati sampai muncul petunjuk tangkap, lalu tekan E / INTERAKSI.');
+  return;
+ }
+ showPalmToast('🌫️ Belum ada hantu. Tunggu sebentar, hantu akan muncul.');
 }
 function drawPalm(t=0){
  const w=canvas.width,h=canvas.height;
@@ -766,15 +773,24 @@ function drawPalm(t=0){
  }
  // dark vignette
  const vg=ctx.createRadialGradient(w/2,h/2,80,w/2,h/2,w*.72);vg.addColorStop(.35,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.62)');ctx.fillStyle=vg;ctx.fillRect(0,0,w,h);
- // ghost appears periodically, translucent and drifting
- const cycle=(t%12000),visible=cycle>1800&&cycle<6200;
- if(visible){
-  const phase=(cycle-1800)/4400, gx=w*(.25+phase*.5), gy=h*(.34+Math.sin(phase*Math.PI*2)*.055);
-  ctx.save();ctx.globalAlpha=.25+.13*Math.sin(t/210);
-  ctx.shadowColor='#d9f4ef';ctx.shadowBlur=26;ctx.fillStyle='#dceeea';
-  ctx.beginPath();ctx.ellipse(gx,gy,24,34,0,0,Math.PI*2);ctx.fill();
-  ctx.beginPath();ctx.moveTo(gx-22,gy+17);ctx.quadraticCurveTo(gx-38,gy+49,gx-15,gy+56);ctx.quadraticCurveTo(gx,gy+43,gx+12,gy+58);ctx.quadraticCurveTo(gx+36,gy+38,gx+21,gy+14);ctx.closePath();ctx.fill();
-  ctx.globalAlpha=.42;ctx.fillStyle='#526b68';ctx.beginPath();ctx.arc(gx-8,gy-4,3,0,Math.PI*2);ctx.arc(gx+8,gy-4,3,0,Math.PI*2);ctx.fill();ctx.restore();
+ // Hantu bergantian muncul dengan bentuk berbeda; setiap kemunculan bisa dikejar.
+ if(!palmGhost&&t>=palmNextGhostAt){
+  spawnPalmGhost(t);
+  palmNextGhostAt=t+9000+Math.random()*5000;
+ }
+ if(palmGhost){
+  // Melayang perlahan menyilang, tidak terus mengikuti pemain.
+  palmGhost.x+=Math.sin(t/700+palmGhost.phase)*.65;
+  palmGhost.y+=Math.cos(t/900+palmGhost.phase)*.28;
+  palmGhost.x=Math.max(55,Math.min(w-55,palmGhost.x));
+  palmGhost.y=Math.max(90,Math.min(h-150,palmGhost.y));
+  drawPalmGhost(palmGhost,t);
+  const ghostDist=Math.hypot(state.player.x-palmGhost.x,state.player.y-palmGhost.y);
+  if(ghostDist<112){
+   const label=window.matchMedia('(max-width: 760px)').matches?'Dekat! Tap INTERAKSI untuk menangkap':'Dekat! Tekan E / Spasi untuk menangkap';
+   ctx.save();ctx.font='bold 12px Nunito';const bw=Math.max(205,ctx.measureText(label).width+24),bx=Math.max(8,Math.min(w-bw-8,state.player.x-bw/2)),by=Math.max(8,state.player.y-102);
+   roundedRect(ctx,bx,by,bw,30,12,'rgba(255,248,225,.96)');ctx.fillStyle='#263528';ctx.textAlign='center';ctx.fillText(label,bx+bw/2,by+19);ctx.restore();
+  }
  }
  // entrance glow and exit sign
  ctx.fillStyle='rgba(225,210,145,.14)';ctx.beginPath();ctx.ellipse(w/2,h-82,80,45,0,0,Math.PI*2);ctx.fill();
