@@ -286,7 +286,7 @@ $('pmaasTargets').addEventListener('click',e=>{const b=e.target.closest('[data-p
 const achievementList=[
  {id:'missions',icon:'🌾',name:'Sahabat Petani',desc:'Selesaikan 3 misi Adventure',check:()=>missionTotal()>=3},
  {id:'explorer',icon:'🧭',name:'Penjelajah Desa',desc:'Selesaikan 6 misi Adventure',check:()=>missionTotal()>=6},
- {id:'mastermission',icon:'🏅',name:'Pahlawan Sukamaju',desc:'Selesaikan seluruh 11 misi Adventure',check:()=>missionTotal()>=missionInfo.length},
+ {id:'mastermission',icon:'🏅',name:'Pahlawan Sukamaju',desc:`Selesaikan seluruh ${missionInfo.length} misi Adventure`,check:()=>missionTotal()>=missionInfo.length},
  {id:'level5',icon:'⭐',name:'Penyuluh Berprestasi',desc:'Capai Level 5 (1.000 XP)',check:()=>state.xp>=1000},
  {id:'harvest10',icon:'🧺',name:'Petani Produktif',desc:'Panen tanaman 10 kali',check:()=>state.harvestCount>=10},
  {id:'quiz10',icon:'🧠',name:'Ahli Pertanian',desc:'Jawab 10 soal kuis dengan benar',check:()=>state.correctQuizCount>=10}
@@ -487,9 +487,12 @@ const npcs=[
 {id:'bu',name:'Bu Rina',x:390,y:330,emoji:'👩‍🌾',role:'Anggota kelompok tani',kind:'mission'},
 {id:'ketua',name:'Pak Ketua',x:760,y:690,emoji:'🧑‍🌾',role:'Ketua kelompok tani',kind:'mission'},
 {id:'peternak',name:'Pak Asep',x:1450,y:420,emoji:'👨‍🌾',role:'Peternak Desa',kind:'mission'},
-...extraMissions.map(m=>({...m,kind:'mission'}))
+...extraMissions.map(m=>({...m,kind:'mission'})),
+{id:'catcaretaker',name:'Penjaga Anak Kucing',x:930,y:600,emoji:'🐱',role:'Misi spesial • Adopsi kucing',kind:'special'}
 ];
-if(!state.catQuestNpcId || !npcs.some(n=>n.id===state.catQuestNpcId)){const catQuestCandidates=npcs.filter(n=>n.id!=='peternak');state.catQuestNpcId=catQuestCandidates[Math.floor(Math.random()*catQuestCandidates.length)].id;save();}
+// Misi adopsi kucing memiliki NPC dan lokasi tersendiri, tidak lagi menempel
+// pada NPC misi reguler. catQuestNpcId lama dipertahankan hanya untuk kompatibilitas save.
+if(state.catQuestNpcId!=='catcaretaker'){state.catQuestNpcId='catcaretaker';save();}
 const buildings=[
 {x:220,y:210,w:150,h:110,name:'Rumah Bu Rina',roof:'#a65f3e',wall:'#f1dfb7',door:'#6b986b'},
 {x:600,y:150,w:170,h:125,name:'Balai Kelompok Tani',roof:'#9b5638',wall:'#f4e5bd',door:'#5d8c63'},
@@ -670,7 +673,7 @@ function drawWorld(t=0){
  ctx.textAlign='left';ctx.font='900 20px Nunito';ctx.fillStyle='rgba(255,255,235,.72)';ctx.fillText('DESA SUKAMAJU',43,54);ctx.fillStyle='#315c37';ctx.fillText('DESA SUKAMAJU',40,51);
  ctx.font='bold 16px Nunito';ctx.fillStyle='#315c37';ctx.fillText('AREA PERSAWAHAN',1190,690);ctx.textAlign='center';ctx.font='900 17px Nunito';ctx.lineWidth=4;ctx.strokeStyle='rgba(95,70,43,.48)';ctx.strokeText('JALAN DESA',900,575);ctx.fillStyle='#fff4d8';ctx.fillText('JALAN DESA',900,575);
  // Karakter NPC digambar solid dengan badan, tangan, kaki, dan pakaian.
- npcs.forEach((n,i)=>{const done=missionDone(n.id);ctx.font='bold 12px Nunito';drawFarmer(n.x,n.y,{shirt:['#3979b9','#bd6686','#3f8a57','#c58a38'][i%4],pants:'#394d43',hat:['#d6a34d','#d8b86d','#6b8e57'][i%3]},i*.8,false);const labelW=Math.max(76,Math.min(132,ctx.measureText(n.name).width+22));roundedRect(ctx,n.x-labelW/2,n.y+28,labelW,23,10,'rgba(255,255,245,.98)');ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillStyle='#23452c';ctx.fillText(n.name,n.x,n.y+44);if(n.kind==='mission'){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(n.x,n.y-43,14,0,Math.PI*2);ctx.fill();ctx.strokeStyle=done?'#23834b':'#d88b1f';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=done?'#23834b':'#d88b1f';ctx.font='bold 17px Nunito';ctx.fillText(n.id===state.catQuestNpcId&&!state.catOwned?'🐾':(done?'✓':'!'),n.x,n.y-37);}});
+ npcs.forEach((n,i)=>{const done=missionDone(n.id);ctx.font='bold 12px Nunito';drawFarmer(n.x,n.y,{shirt:['#3979b9','#bd6686','#3f8a57','#c58a38'][i%4],pants:'#394d43',hat:['#d6a34d','#d8b86d','#6b8e57'][i%3]},i*.8,false);const labelW=Math.max(76,Math.min(132,ctx.measureText(n.name).width+22));roundedRect(ctx,n.x-labelW/2,n.y+28,labelW,23,10,'rgba(255,255,245,.98)');ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillStyle='#23452c';ctx.fillText(n.name,n.x,n.y+44);if(n.kind==='mission'||n.kind==='special'){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(n.x,n.y-43,14,0,Math.PI*2);ctx.fill();ctx.strokeStyle=done?'#23834b':'#d88b1f';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=done?'#23834b':'#d88b1f';ctx.font='bold 17px Nunito';ctx.fillText(n.kind==='special'?(state.catOwned?'✓':'🐾'):(done?'✓':'!'),n.x,n.y-37);}});
  if(state.catOwned)drawPetCat(state.catFollower.x,state.catFollower.y,t);
  // Pemain: badan penuh, dua kaki dan animasi langkah saat bergerak.
  const moving=!!(state.keys.ArrowRight||state.keys.ArrowLeft||state.keys.ArrowUp||state.keys.ArrowDown||state.keys.w||state.keys.a||state.keys.s||state.keys.d||Math.hypot(state.analog.x,state.analog.y)>.12);
@@ -899,7 +902,7 @@ function openNpcDialog(n){
    addChoice('Menyediakan pakan dan air bersih, menjaga kandang, serta mengamati kesehatan ternak',true,()=>{if(!state.ranchMissionDone){state.ranchMissionDone=true;reward(30,15);save();}$('dialogText').textContent='Bagus! Perawatan rutin, pakan dan air bersih, kebersihan kandang, serta pengamatan kesehatan penting bagi ternak. Hadiah 30 XP dan 15 koin telah diterima.';});
    addChoice('Membiarkan kandang kotor dan memberi pakan sesekali',false,()=>{$('dialogText').textContent='Belum tepat. Ternak memerlukan pakan, air bersih, kandang yang terjaga, dan pemantauan kesehatan.';});
  }
- else if(n.id===state.catQuestNpcId){
+ else if(n.id==='catcaretaker'){
    $('dialogTitle').textContent=state.catOwned?'Misi Kucing: Persahabatan Baru':'Misi Spesial: Tolong Rawat Anak Kucing';
    $('dialogText').textContent=state.catOwned?'Terima kasih sudah merawat anak kucing itu. Sekarang ia selalu menemanimu menjelajahi Desa Sukamaju.':'“Saya menemukan seekor anak kucing sendirian di dekat kebun. Sepertinya ia lapar dan butuh tempat aman. Maukah kamu merawatnya?”';
    if(state.catOwned){addChoice('Senang sekali punya teman baru!',true,()=>{$('dialogText').textContent='Anak kucingmu mengeong riang dan siap menemanimu berkeliling desa.';});}
