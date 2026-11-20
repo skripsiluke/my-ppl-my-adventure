@@ -3,7 +3,7 @@
 const $ = id => document.getElementById(id);
 const KEY = 'myPplMyAdventure.save.v1';
 const XP_PER_LEVEL=250;
-const state = {name:'Penyuluh Muda',xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false},player:{x:145,y:390},keys:{},interact:false};
+const state = {name:'Penyuluh Muda',xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},interact:false};
 const screens=['homeScreen','menuScreen','gameScreen'];
 function save(){
   localStorage.setItem(KEY, JSON.stringify({
@@ -48,10 +48,10 @@ function load(){
   state.achievementRewardsClaimed=Array.isArray(state.achievementRewardsClaimed)?state.achievementRewardsClaimed:[];
   state.highestLevelReached=Math.max(1,Math.min(Number(state.highestLevelReached)||Math.floor(state.xp/XP_PER_LEVEL)+1,Math.floor(state.xp/XP_PER_LEVEL)+1));
   state.missionFlags=state.missionFlags&&typeof state.missionFlags==='object'?state.missionFlags:{};
-  state.pmaas=state.pmaas&&typeof state.pmaas==='object'?state.pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false};
+  state.pmaas=state.pmaas&&typeof state.pmaas==='object'?state.pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}};
   state.pmaas.stages=state.pmaas.stages&&typeof state.pmaas.stages==='object'?state.pmaas.stages:{};
   state.pmaas.milestones=Array.isArray(state.pmaas.milestones)?state.pmaas.milestones:[];
-  state.pmaas.farmers=Number(state.pmaas.farmers)||0;state.pmaas.groups=Number(state.pmaas.groups)||0;state.pmaas.xpEarned=Number(state.pmaas.xpEarned)||0;state.pmaas.drumSeederCompleted=!!state.pmaas.drumSeederCompleted;
+  state.pmaas.farmers=Number(state.pmaas.farmers)||0;state.pmaas.groups=Number(state.pmaas.groups)||0;state.pmaas.xpEarned=Number(state.pmaas.xpEarned)||0;state.pmaas.drumSeederCompleted=!!state.pmaas.drumSeederCompleted;state.pmaas.adopterProgress=state.pmaas.adopterProgress&&typeof state.pmaas.adopterProgress==='object'?state.pmaas.adopterProgress:{};
   save();
 }
 function showScreen(id){screens.forEach(s=>$(s).classList.toggle('hidden',s!==id));}
@@ -98,6 +98,41 @@ const pmaasMilestoneList=[
  {id:'m12',at:12,xp:150,label:'12 adopter'}
 ];
 function pmaasAdoptionCount(){return state.pmaas.farmers+state.pmaas.groups;}
+const pmaasCurriculum=[
+ {title:'1. Persiapan Lahan',icon:'🚜',tasks:[
+  {title:'Kembalikan jerami dan genangi lahan',desc:'Sebarkan/kembalikan jerami ke sawah, lalu genangi lahan sebelum pengolahan tanah.',action:'Lahan dan jerami disiapkan'},
+  {title:'Olah tanah dengan traktor atau rotari',desc:'Lakukan pengolahan tanah agar jerami tercampur dan tanah siap ditata.',action:'Pengolahan tanah selesai'},
+  {title:'Perbaiki pematang, inlet, dan outlet',desc:'Periksa pematang serta saluran masuk dan keluar air agar air dan pupuk tidak mudah hilang.',action:'Pematang dan saluran diperbaiki'},
+  {title:'Rapikan kondisi menjelang tanam',desc:'Buat lahan lembab tanpa genangan, bersihkan gulma, buat parit keliling. Herbisida pratumbuh 3–5 hari sebelum tanam hanya bila diperlukan dan sesuai label.',action:'Lahan siap untuk tanam'}
+ ]},
+ {title:'2. Pemilihan Benih dan Tanam Tabela',icon:'🌱',tasks:[
+  {title:'Pilih varietas unggul bermutu',desc:'Pilih benih yang sesuai kondisi setempat, dengan batang kokoh, malai lebat, dan tahan rebah.',action:'Varietas dan benih dipilih'},
+  {title:'Rendam dan peram benih',desc:'Lakukan perendaman dan pemeraman benih selama sekitar 12 jam sesuai petunjuk teknis benih.',action:'Benih siap ditanam'},
+  {title:'Siapkan drum seeder / direct seeder',desc:'Periksa alat tanam benih langsung. Pastikan komponen terpasang dan alat berfungsi baik.',action:'Alat Tabela siap'},
+  {title:'Lakukan tanam Tabela jajar legowo',desc:'Gunakan drum seeder atau direct seeder untuk menanam benih langsung dengan pola jajar legowo.',action:'Penanaman Tabela selesai'}
+ ]},
+ {title:'3. Pemeliharaan Tanaman: Air dan Pemupukan',icon:'💧',tasks:[
+  {title:'Pasang dan baca pipa pemantau AWD',desc:'Gunakan pipa pemantau untuk melihat kondisi air dan menentukan waktu pengairan.',action:'Pemantauan AWD dilakukan'},
+  {title:'Atur siklus basah-kering dan pemupukan',desc:'Awali dengan kondisi macak-macak, lanjutkan wetting-drying bergantian sesuai fase tanaman, dan lakukan pengeringan akhir menjelang panen. Pemupukan mengikuti uji tanah atau rekomendasi spesifik; drone dapat digunakan pada lahan luas.',action:'Air dan pemupukan dikelola'}
+ ]},
+ {title:'4. Pengendalian Gulma dan OPT',icon:'🔎',tasks:[
+  {title:'Lakukan pengendalian gulma',desc:'Pilih pengendalian mekanis atau herbisida purnatumbuh pada periode awal pertumbuhan sesuai kebutuhan dan label produk.',action:'Gulma dikendalikan'},
+  {title:'Amati dan kendalikan OPT terpadu',desc:'Pantau tanaman secara berkala, kenali organisme pengganggu tumbuhan, dan lakukan pengendalian terpadu sesuai kondisi lapangan.',action:'Pengamatan dan pengendalian OPT dilakukan'}
+ ]},
+ {title:'5. Panen dan Pascapanen',icon:'🌾',tasks:[
+  {title:'Keringkan sawah menjelang panen',desc:'Atur pengeringan lahan agar kondisi sawah mendukung operasional mesin panen.',action:'Lahan siap untuk panen'},
+  {title:'Panen mekanis dan evaluasi hasil',desc:'Panen menggunakan combine harvester ketika sekitar 85–90% bulir telah matang. Lanjutkan dengan evaluasi hasil dan penanganan pascapanen.',action:'Panen dan evaluasi selesai'}
+ ]}
+];
+const pmaasTaskCount=pmaasCurriculum.reduce((n,s)=>n+s.tasks.length,0);
+function pmaasProgress(p,id){
+ if(!p.adopterProgress||typeof p.adopterProgress!=='object')p.adopterProgress={};
+ if(p.adopterProgress[id]==null){
+  const legacy=Number(p.stages[id])||0;
+  p.adopterProgress[id]=legacy>=3?pmaasTaskCount:0;
+ }
+ return Math.max(0,Math.min(pmaasTaskCount,Number(p.adopterProgress[id])||0));
+}
 function renderPMAAS(){
  const p=state.pmaas;if(!$('pmaasTargets'))return;
  const count=pmaasAdoptionCount();
@@ -106,28 +141,38 @@ function renderPMAAS(){
  $('pmaasFarmers').textContent=p.farmers;$('pmaasGroups').textContent=p.groups;$('pmaasTotal').textContent=count+'/12';
  $('pmaasMilestones').innerHTML=pmaasMilestoneList.map(m=>{const done=p.milestones.includes(m.id);return `<div class="pmaas-milestone ${done?'done':''}"><b>${done?'✓ ':''}${m.at}</b><small>${m.label}<br>+${m.xp} XP</small></div>`;}).join('');
  $('pmaasTargets').innerHTML=pmaasTargets.map(t=>{
-  const stage=Number(p.stages[t.id])||0;
-  const stageNames=['Belum dimulai','Sosialisasi selesai','Demonstrasi / pendampingan selesai','Sudah menerapkan ✓'];
-  const next=['Mulai sosialisasi','Lanjut demonstrasi','Konfirmasi penerapan','Adopsi tercatat ✓'];
+  const progress=pmaasProgress(p,t.id),adopted=progress>=pmaasTaskCount;
+  const stageIndex=pmaasCurriculum.findIndex(s=>{let before=0;for(const x of pmaasCurriculum){if(x===s)return progress<before+x.tasks.length;before+=x.tasks.length;}return false;});
+  const currentStage=stageIndex<0?4:stageIndex;
+  const doneCount=pmaasCurriculum.slice(0,currentStage).reduce((n,s)=>n+s.tasks.length,0);
+  const taskIndex=progress-doneCount;
+  const stage=pmaasCurriculum[currentStage];
+  const task=adopted?null:stage.tasks[taskIndex];
   const detail=t.type==='group'?'Kelompok tani • bonus adopsi lebih besar':'Petani perorangan';
-  return `<article class="pmaas-target"><b>${t.type==='group'?'👥':'🧑‍🌾'} ${t.name}</b><small>${detail}<br>Fokus: ${t.topic}</small><div class="pmaas-stage">${stageNames[stage]}</div><button data-pmaas-id="${t.id}" ${stage>=3?'disabled':''}>${next[stage]}${stage===2?' • +'+(t.type==='group'?90:25)+' XP':''}</button></article>`;
+  const pct=Math.round(progress/pmaasTaskCount*100);
+  const activeTask=task?`<div class="adopter-current"><b>${stage.icon} ${stage.title}</b><h5>${task.title}</h5><p>${task.desc}</p><button data-adopter-step="${t.id}" ${adopted?'disabled':''}>Selesaikan langkah ini</button></div>`:'';
+  return `<article class="pmaas-target"><b>${t.type==='group'?'👥':'🧑‍🌾'} ${t.name}</b><small>${detail}<br>Fokus: ${t.topic}</small><div class="adopter-progress"><span style="width:${pct}%"></span></div><div class="pmaas-stage">${adopted?'Seluruh tahapan PM-AAS selesai ✓':`Tahap ${currentStage+1}/5 • ${progress}/${pmaasTaskCount} langkah`}</div>${activeTask}<small class="adopter-percent">${pct}% selesai</small></article>`;
  }).join('');
 }
 function advancePMAASTarget(id){
  const t=pmaasTargets.find(x=>x.id===id);if(!t)return;
- const current=Number(state.pmaas.stages[id])||0;if(current>=3)return;
- const next=current+1;state.pmaas.stages[id]=next;
- let xp=next===1?5:next===2?10:(t.type==='group'?90:25);
- let coins=next===1?1:next===2?2:(t.type==='group'?12:5);
- if(next===3){if(t.type==='group')state.pmaas.groups++;else state.pmaas.farmers++;}
- state.pmaas.xpEarned+=xp;
- reward(xp,coins);
- if(next===3){
+ const p=state.pmaas,progress=pmaasProgress(p,id);if(progress>=pmaasTaskCount)return;
+ const next=progress+1;p.adopterProgress[id]=next;
+ const stageIndex=pmaasCurriculum.findIndex((s,i)=>{const before=pmaasCurriculum.slice(0,i).reduce((n,x)=>n+x.tasks.length,0);return next===before+s.tasks.length;});
+ const taskXP=2;
+ p.xpEarned+=taskXP;reward(taskXP,0);
+ if(stageIndex>=0){
+  const phaseXP=[8,12,15,15,20][stageIndex];
+  p.xpEarned+=phaseXP;reward(phaseXP,Math.max(1,Math.round(phaseXP/5)));
+  $('missionDescription').textContent=t.name+' menyelesaikan '+pmaasCurriculum[stageIndex].title+'.';
+ }
+ if(next===pmaasTaskCount){
+  if(t.type==='group')p.groups++;else p.farmers++;
+  const adoptionXP=t.type==='group'?90:25,coins=t.type==='group'?12:5;
+  p.xpEarned+=adoptionXP;reward(adoptionXP,coins);
   const total=pmaasAdoptionCount();
-  pmaasMilestoneList.forEach(m=>{if(total>=m.at&&!state.pmaas.milestones.includes(m.id)){state.pmaas.milestones.push(m.id);state.pmaas.xpEarned+=m.xp;reward(m.xp,Math.round(m.xp/10));}});
-  $('missionDescription').textContent=t.name+' berhasil menerapkan PM-AAS! Adopsi tercatat dalam event.';
- }else{
-  $('missionDescription').textContent=t.name+': tahap '+next+'/3 selesai. Lanjutkan pendampingan sampai penerapan.';
+  pmaasMilestoneList.forEach(milestone=>{if(total>=milestone.at&&!p.milestones.includes(milestone.id)){p.milestones.push(milestone.id);p.xpEarned+=milestone.xp;reward(milestone.xp,Math.round(milestone.xp/10));}});
+  $('missionDescription').textContent=t.name+' menuntaskan lima tahapan PM-AAS. Adopsi berhasil dicatat!';
  }
  renderPMAAS();save();
 }
@@ -205,7 +250,7 @@ $('drumSeederCheck').addEventListener('click',()=>{
 
 $('pmaasOpen').addEventListener('click',()=>{$('pmaasPanel').classList.remove('hidden');renderPMAAS();renderDrumSeeder();$('pmaasPanel').scrollIntoView({behavior:'smooth',block:'start'});});
 $('pmaasClose').addEventListener('click',()=>$('pmaasPanel').classList.add('hidden'));
-$('pmaasTargets').addEventListener('click',e=>{const b=e.target.closest('[data-pmaas-id]');if(b)advancePMAASTarget(b.dataset.pmaasId);});
+$('pmaasTargets').addEventListener('click',e=>{const b=e.target.closest('[data-pmaas-id]');if(b)advancePMAASTarget(b.dataset.pmaasId);const step=e.target.closest('[data-adopter-step]');if(step)advancePMAASTarget(step.dataset.adopterStep);});
 
 const achievementList=[
  {id:'missions',icon:'🌾',name:'Sahabat Petani',desc:'Selesaikan 3 misi Adventure',check:()=>missionTotal()>=3},
