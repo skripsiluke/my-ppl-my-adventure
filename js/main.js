@@ -521,9 +521,9 @@ const canvas=$('worldCanvas'),ctx=canvas.getContext('2d');
 const WORLD={w:1800,h:1200};let raf=0,last=0,dialogOpen=false;
 const npcs=[
 {id:'pak',name:'Pak Tani',x:1160,y:510,emoji:'👨‍🌾',role:'Petani padi',kind:'mission'},
-{id:'bu',name:'Bu Rina',x:390,y:330,emoji:'👩‍🌾',role:'Anggota kelompok tani',kind:'mission'},
+{id:'bu',name:'Bu Rina',x:390,y:365,emoji:'👩‍🌾',role:'Anggota kelompok tani',kind:'mission'},
 {id:'ketua',name:'Pak Ketua',x:760,y:690,emoji:'🧑‍🌾',role:'Ketua kelompok tani',kind:'mission'},
-{id:'peternak',name:'Pak Asep',x:1450,y:420,emoji:'👨‍🌾',role:'Peternak Desa',kind:'mission'},
+{id:'peternak',name:'Pak Asep',x:1195,y:430,emoji:'👨‍🌾',role:'Peternak Desa',kind:'mission'},
 ...extraMissions.map(m=>({...m,kind:'mission'})),
 {id:'catcaretaker',name:'Penjaga Anak Kucing',x:930,y:600,emoji:'🐱',role:'Misi spesial • Adopsi kucing',kind:'special'}
 ];
@@ -531,17 +531,17 @@ const npcs=[
 // pada NPC misi reguler. catQuestNpcId lama dipertahankan hanya untuk kompatibilitas save.
 if(state.catQuestNpcId!=='catcaretaker'){state.catQuestNpcId='catcaretaker';save();}
 const buildings=[
-{x:220,y:210,w:150,h:110,name:'Rumah Bu Rina',roof:'#a65f3e',wall:'#f1dfb7',door:'#6b986b'},
-{x:600,y:150,w:170,h:125,name:'Balai Kelompok Tani',roof:'#9b5638',wall:'#f4e5bd',door:'#5d8c63'},
+{x:180,y:235,w:150,h:110,name:'Rumah Bu Rina',roof:'#a65f3e',wall:'#f1dfb7',door:'#6b986b'},
+{x:830,y:170,w:170,h:125,name:'Balai Kelompok Tani',roof:'#9b5638',wall:'#f4e5bd',door:'#5d8c63'},
 {x:1420,y:180,w:150,h:110,name:'Kios Pertanian',roof:'#b36c3e',wall:'#f5e6c7',door:'#638e68'},
-{x:835,y:365,w:210,h:120,name:'Koperasi Desa Merah Putih Sukamaju',type:'kopdes',roof:'#b9c4c8',wall:'#f0f1ed',door:'#a8322c'}
+{x:1120,y:390,w:210,h:120,name:'Koperasi Desa Merah Putih Sukamaju',type:'kopdes',roof:'#b9c4c8',wall:'#f0f1ed',door:'#a8322c'}
 ];
 const obstacles=[...buildings.map(b=>({x:b.x-5,y:b.y-15,w:b.w+10,h:b.h+20})),{x:990,y:720,w:600,h:280},
  // Pagar kandang, kandang ternak, kebun berpagar, dan pepohonan besar
- {x:1330,y:475,w:280,h:165},{x:1350,y:500,w:95,h:85},{x:1500,y:500,w:95,h:85},
- {x:45,y:200,w:120,h:75},{x:445,y:745,w:145,h:88},{x:805,y:345,w:130,h:80},{x:1245,y:335,w:130,h:80},
+ {x:1050,y:295,w:280,h:165},{x:1070,y:320,w:95,h:85},{x:1220,y:320,w:95,h:85},
+ {x:45,y:200,w:120,h:75},{x:445,y:745,w:145,h:88},{x:1245,y:335,w:130,h:80},
  {x:1650,y:685,w:130,h:80},{x:590,y:1015,w:130,h:80},{x:320,y:165,w:45,h:45},{x:1490,y:1110,w:45,h:45},
- {x:82,y:142,w:38,h:38},{x:442,y:112,w:38,h:38},{x:892,y:152,w:38,h:38},{x:1072,y:232,w:38,h:38},{x:1692,y:202,w:38,h:38},{x:828,y:350,w:224,h:150}];
+ {x:82,y:142,w:38,h:38},{x:442,y:112,w:38,h:38},{x:892,y:152,w:38,h:38},{x:1072,y:232,w:38,h:38},{x:1692,y:202,w:38,h:38}];
 function roundedRect(c,x,y,w,h,r,fill){c.fillStyle=fill;c.beginPath();c.roundRect(x,y,w,h,r);c.fill();}
 function drawTree(x,y){
  // soft shadow, layered canopy and small highlights
@@ -681,27 +681,27 @@ function drawWorld(t=0){
  for(let y=744;y<1010;y+=38){ctx.strokeStyle='rgba(240,249,196,.62)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(1005,y);ctx.lineTo(1585,y+4);ctx.stroke();}
  for(let row=0;row<6;row++){for(let col=0;col<15;col++){const x=1018+col*39+(row%2)*8,y=758+row*43;ctx.strokeStyle='#4c8a43';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,y+8);ctx.lineTo(x-5,y-3);ctx.moveTo(x,y+8);ctx.lineTo(x+5,y-4);ctx.moveTo(x,y+8);ctx.lineTo(x,y-8);ctx.stroke();ctx.fillStyle='#b5d86c';ctx.beginPath();ctx.arc(x-5,y-3,2,0,Math.PI*2);ctx.arc(x+5,y-4,2,0,Math.PI*2);ctx.fill();}}
  // demonstration plot with beds and vegetable seedlings
- roundedRect(ctx,112,790,446,252,16,'#806344');roundedRect(ctx,123,801,424,230,11,'#c6a36a');
- ctx.fillStyle='#547c3f';ctx.font='bold 18px Nunito';ctx.textAlign='left';ctx.fillText('LAHAN DEMONSTRASI',145,831);
- for(let row=0;row<3;row++){ctx.strokeStyle='#8b6945';ctx.lineWidth=17;ctx.beginPath();ctx.moveTo(150,875+row*48);ctx.lineTo(520,875+row*48);ctx.stroke();for(let x=170;x<510;x+=43){ctx.strokeStyle='#4d8d42';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,880+row*48);ctx.lineTo(x-5,866+row*48);ctx.moveTo(x,880+row*48);ctx.lineTo(x+6,866+row*48);ctx.stroke();ctx.fillStyle='#8fc65a';ctx.beginPath();ctx.arc(x,866+row*48,5,0,Math.PI*2);ctx.fill();}}
+ roundedRect(ctx,112,650,446,252,16,'#806344');roundedRect(ctx,123,661,424,230,11,'#c6a36a');
+ ctx.fillStyle='#547c3f';ctx.font='bold 18px Nunito';ctx.textAlign='left';ctx.fillText('LAHAN DEMONSTRASI',145,691);
+ for(let row=0;row<3;row++){ctx.strokeStyle='#8b6945';ctx.lineWidth=17;ctx.beginPath();ctx.moveTo(150,735+row*48);ctx.lineTo(520,735+row*48);ctx.stroke();for(let x=170;x<510;x+=43){ctx.strokeStyle='#4d8d42';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,740+row*48);ctx.lineTo(x-5,726+row*48);ctx.moveTo(x,740+row*48);ctx.lineTo(x+6,726+row*48);ctx.stroke();ctx.fillStyle='#8fc65a';ctx.beginPath();ctx.arc(x,726+row*48,5,0,Math.PI*2);ctx.fill();}}
  // small fences around plots and houses
- ctx.strokeStyle='#e7d4a9';ctx.lineWidth=6;for(let x=105;x<565;x+=42){ctx.beginPath();ctx.moveTo(x,775);ctx.lineTo(x,789);ctx.stroke();}ctx.beginPath();ctx.moveTo(105,782);ctx.lineTo(565,782);ctx.stroke();
+ ctx.strokeStyle='#e7d4a9';ctx.lineWidth=6;for(let x=105;x<565;x+=42){ctx.beginPath();ctx.moveTo(x,635);ctx.lineTo(x,649);ctx.stroke();}ctx.beginPath();ctx.moveTo(105,642);ctx.lineTo(565,642);ctx.stroke();
  // stepping stones near village paths
  for(let i=0;i<8;i++){ctx.fillStyle='#c9c2a6';ctx.beginPath();ctx.ellipse(800+i*28,615+(i%2)*5,10,6,.15,0,Math.PI*2);ctx.fill();}
  buildings.forEach(drawHouse);
  // signboards and lamp posts
- ctx.fillStyle='#68482e';ctx.fillRect(678,98,5,34);roundedRect(ctx,625,88,112,25,5,'#f2dfad');ctx.fillStyle='#315b39';ctx.font='bold 11px Nunito';ctx.textAlign='center';ctx.fillText('BALAI KELOMPOK TANI',681,105);
+ ctx.fillStyle='#68482e';ctx.fillRect(908,118,5,34);roundedRect(ctx,855,108,112,25,5,'#f2dfad');ctx.fillStyle='#315b39';ctx.font='bold 11px Nunito';ctx.textAlign='center';ctx.fillText('BALAI KELOMPOK TANI',911,125);
  ctx.fillStyle='#68482e';ctx.fillRect(1590,495,5,60);ctx.fillStyle='#f7e4a8';ctx.beginPath();ctx.arc(1592,490,10,0,Math.PI*2);ctx.fill();
  // Peternakan desa: kandang sapi/kambing, pagar, jerami dan tempat pakan.
- roundedRect(ctx,1322,466,296,176,12,'#d8c18d');
- ctx.strokeStyle='#8b6039';ctx.lineWidth=7;ctx.strokeRect(1330,475,280,165);
- for(let fx=1342;fx<1605;fx+=28){ctx.beginPath();ctx.moveTo(fx,475);ctx.lineTo(fx,640);ctx.stroke();}
- ctx.fillStyle='#a85e3c';ctx.fillRect(1350,500,94,82);ctx.fillStyle='#f0d9a7';ctx.fillRect(1358,510,78,64);
- ctx.fillStyle='#8e4f34';ctx.fillRect(1500,500,94,82);ctx.fillStyle='#f0d9a7';ctx.fillRect(1508,510,78,64);
- ctx.fillStyle='#6e472e';ctx.font='bold 14px Nunito';ctx.textAlign='center';ctx.fillText('KANDANG TERNAK',1470,626);
+ roundedRect(ctx,1042,286,296,176,12,'#d8c18d');
+ ctx.strokeStyle='#8b6039';ctx.lineWidth=7;ctx.strokeRect(1050,295,280,165);
+ for(let fx=1062;fx<1325;fx+=28){ctx.beginPath();ctx.moveTo(fx,295);ctx.lineTo(fx,460);ctx.stroke();}
+ ctx.fillStyle='#a85e3c';ctx.fillRect(1070,320,94,82);ctx.fillStyle='#f0d9a7';ctx.fillRect(1078,330,78,64);
+ ctx.fillStyle='#8e4f34';ctx.fillRect(1220,320,94,82);ctx.fillStyle='#f0d9a7';ctx.fillRect(1228,330,78,64);
+ ctx.fillStyle='#6e472e';ctx.font='bold 14px Nunito';ctx.textAlign='center';ctx.fillText('KANDANG TERNAK',1190,446);
  // Ilustrasi ternak sederhana di dalam kandang.
- [[1385,544,'#f4eee0'],[1537,544,'#f1eee4']].forEach(([ax,ay,col],i)=>{ctx.fillStyle=col;ctx.beginPath();ctx.ellipse(ax,ay,23,15,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(ax+17,ay-9,10,0,Math.PI*2);ctx.fill();ctx.fillStyle='#544337';ctx.fillRect(ax-12,ay+10,4,13);ctx.fillRect(ax+8,ay+10,4,13);ctx.fillStyle='#4a392d';ctx.beginPath();ctx.arc(ax+20,ay-11,1.5,0,Math.PI*2);ctx.fill();if(i===0){ctx.strokeStyle='#6b4d35';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(ax+13,ay-17);ctx.lineTo(ax+8,ay-25);ctx.moveTo(ax+22,ay-17);ctx.lineTo(ax+28,ay-25);ctx.stroke();}});
- roundedRect(ctx,1620,500,58,36,5,'#b68a4e');ctx.fillStyle='#e4c17b';ctx.fillRect(1625,505,48,25);ctx.font='bold 11px Nunito';ctx.fillStyle='#65472d';ctx.fillText('PAKAN',1649,520);
+ [[1105,364,'#f4eee0'],[1257,364,'#f1eee4']].forEach(([ax,ay,col],i)=>{ctx.fillStyle=col;ctx.beginPath();ctx.ellipse(ax,ay,23,15,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(ax+17,ay-9,10,0,Math.PI*2);ctx.fill();ctx.fillStyle='#544337';ctx.fillRect(ax-12,ay+10,4,13);ctx.fillRect(ax+8,ay+10,4,13);ctx.fillStyle='#4a392d';ctx.beginPath();ctx.arc(ax+20,ay-11,1.5,0,Math.PI*2);ctx.fill();if(i===0){ctx.strokeStyle='#6b4d35';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(ax+13,ay-17);ctx.lineTo(ax+8,ay-25);ctx.moveTo(ax+22,ay-17);ctx.lineTo(ax+28,ay-25);ctx.stroke();}});
+ roundedRect(ctx,1340,320,58,36,5,'#b68a4e');ctx.fillStyle='#e4c17b';ctx.fillRect(1345,325,48,25);ctx.font='bold 11px Nunito';ctx.fillStyle='#65472d';ctx.fillText('PAKAN',1369,340);
  // Mulut tambang emas dengan papan petunjuk dan jalur masuk.
  ctx.fillStyle='#705039';ctx.beginPath();ctx.ellipse(300,640,58,38,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#241f1b';ctx.beginPath();ctx.ellipse(300,636,43,27,0,0,Math.PI*2);ctx.fill();
  ctx.strokeStyle='#9a7046';ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(257,635);ctx.lineTo(257,610);ctx.lineTo(343,610);ctx.lineTo(343,635);ctx.stroke();
