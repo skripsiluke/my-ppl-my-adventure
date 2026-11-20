@@ -234,7 +234,7 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Progres permainan dan sistem monster kelabang tetap dipertahankan.
 
 
-## v0.20.2 — Akses Tambang dan Tantangan Kelabang
+## v0.20.3 — Akses Tambang dan Tantangan Kelabang
 - Tambang Emas terkunci sampai pemain mencapai Level 2 — Penyuluh Pertanian Terampil (400 XP). Pemain yang belum memenuhi syarat menerima notifikasi saat mencoba masuk.
 - Regenerasi titik emas diperlambat menjadi sekitar 12 detik setelah ditambang.
 - Sentuhan kelabang merah mengurangi 10 XP (tidak sampai nilai XP negatif).
