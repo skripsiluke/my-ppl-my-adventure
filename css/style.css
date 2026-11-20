@@ -110,3 +110,25 @@
   .drum-slot small{font-size:7px;line-height:1.2}
   .slot-number{left:3px;top:3px;width:15px;height:15px;font-size:8px}
 }
+
+/* v0.12.0: avatar picker and responsive level card */
+.level-card>div:first-child{position:relative;z-index:1;padding-right:92px;min-width:0}
+.level-card h3{overflow-wrap:normal;word-break:normal;line-height:1.18}
+.level-icon{z-index:0;right:18px;top:18px;opacity:.92;pointer-events:none}
+.avatar-bubble{position:relative;overflow:visible;padding:0}
+.avatar-bubble img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.avatar-chevron{position:absolute;right:-2px;bottom:-2px;width:23px;height:23px;border:2px solid #fff;border-radius:50%;display:grid;place-items:center;background:#287a45;color:#fff;font-size:17px;line-height:1;font-weight:900}
+.profile-avatar{overflow:hidden;padding:0}
+.profile-avatar img{width:100%;height:100%;object-fit:cover}
+.change-avatar-button{margin-top:10px;border:0;border-radius:9px;padding:8px 12px;background:#e8f2e4;color:#23643b;font-weight:800;font-size:12px;cursor:pointer}
+.avatar-chooser{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;width:100%;padding-top:14px;border-top:1px solid #e3ece0}
+.avatar-choice{aspect-ratio:1;border:2px solid transparent;border-radius:13px;overflow:hidden;padding:0;background:#edf5e9;cursor:pointer}
+.avatar-choice img{display:block;width:100%;height:100%;object-fit:cover}
+.avatar-choice.selected{border-color:#287a45;box-shadow:0 0 0 2px #cfe6c6}
+@media(max-width:520px){
+ .level-card{padding:22px 18px}
+ .level-card>div:first-child{padding-right:82px}
+ .level-card h3{font-size:clamp(18px,5vw,22px)}
+ .level-icon{right:12px;top:20px;font-size:48px}
+ .avatar-chooser{gap:7px}
+}

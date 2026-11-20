@@ -97,3 +97,15 @@ Workflow pada `.github/workflows/deploy.yml` juga disediakan untuk deployment ot
 - Level 1 membutuhkan 150 XP; level berikutnya masing-masing membutuhkan 250 XP.
 - Kuis tetap berisi 5 soal per sesi, tetapi diambil secara acak dari bank 20 pertanyaan, termasuk topik PM-AAS, Tabela, drum seeder, AWD, pemupukan, pengendalian OPT, dan panen.
 - Pengaturan musik, progres misi, event, serta penyimpanan lokal tetap dipertahankan.
+
+
+## Versi 0.11.1 — Tata Letak Drum Seeder untuk HP
+- Kolom gambar komponen dan kolom tempat pemasangan tetap berdampingan pada layar handphone.
+- Ukuran kartu, gambar, label, dan jarak disesuaikan agar dua kolom tetap muat di layar kecil.
+
+
+## Pembaruan v0.12.0
+- Memperbaiki tata letak kartu level agar ilustrasi daun tidak menimpa teks pada layar ponsel.
+- Menambahkan indikator panah pada avatar profil.
+- Menambahkan 10 pilihan ilustrasi avatar petani pria dan wanita.
+- Avatar pilihan disimpan bersama progres lokal pemain; progres lama tetap dipertahankan.

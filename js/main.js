@@ -6,11 +6,12 @@ const FIRST_LEVEL_XP=150, XP_PER_LEVEL=250;
 function xpThreshold(level){return level<=1?0:FIRST_LEVEL_XP+(level-2)*XP_PER_LEVEL;}
 function levelFromXP(xp){let level=1;while(xp>=xpThreshold(level+1))level++;return level;}
 function levelProgress(xp){const level=levelFromXP(xp);return {level,progress:xp-xpThreshold(level),needed:level===1?FIRST_LEVEL_XP:XP_PER_LEVEL};}
-const state = {name:'Penyuluh Muda',xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},interact:false};
+const state = {name:'Penyuluh Muda',avatarIndex:0,xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},interact:false};
 const screens=['homeScreen','menuScreen','gameScreen'];
 function save(){
   localStorage.setItem(KEY, JSON.stringify({
     name:state.name,
+    avatarIndex:state.avatarIndex||0,
     xp:state.xp,
     coins:state.coins,
     missionDone:state.missionDone,
@@ -286,6 +287,9 @@ function updateProfile(){
  if($('profileXp'))$('profileXp').textContent=state.xp;
  if($('profileCoins'))$('profileCoins').textContent=state.coins;
  if($('profileBadges'))$('profileBadges').textContent=(state.unlockedAchievements||[]).length+'/'+achievementList.length;
+ const avatarPath='assets/images/avatars/petani-'+String((Number(state.avatarIndex)||0)+1).padStart(2,'0')+'.webp';
+ if($('avatarButtonImage'))$('avatarButtonImage').src=avatarPath;
+ if($('profileAvatarImage'))$('profileAvatarImage').src=avatarPath;
 }
 function checkAchievements(){
  let newly=[];
@@ -310,7 +314,19 @@ function renderAchievements(){
 }
 $('achievementToggle').addEventListener('click',()=>{const panel=$('achievementPanel');panel.classList.toggle('hidden');renderAchievements();});
 $('avatarProfileButton').addEventListener('click',()=>toggleProfile());
-function toggleProfile(){const panel=$('profilePanel');panel.classList.toggle('hidden');$('avatarProfileButton').setAttribute('aria-expanded',String(!panel.classList.contains('hidden')));}
+$('changeAvatarButton').addEventListener('click',()=>{
+ const chooser=$('avatarChooser');
+ chooser.classList.toggle('hidden');
+ if(!chooser.classList.contains('hidden'))renderAvatarChooser();
+});
+function renderAvatarChooser(){
+ const chooser=$('avatarChooser');if(!chooser)return;
+ chooser.innerHTML=Array.from({length:10},(_,i)=>`<button type="button" class="avatar-choice ${Number(state.avatarIndex||0)===i?'selected':''}" data-avatar-index="${i}" aria-label="Pilih avatar petani ${i+1}" aria-pressed="${Number(state.avatarIndex||0)===i}"><img src="assets/images/avatars/petani-${String(i+1).padStart(2,'0')}.webp" alt="Petani ${i+1}"></button>`).join('');
+ chooser.querySelectorAll('[data-avatar-index]').forEach(btn=>btn.addEventListener('click',()=>{
+  state.avatarIndex=Number(btn.dataset.avatarIndex);updateProfile();save();renderAvatarChooser();
+ }));
+}
+function toggleProfile(){const panel=$('profilePanel');panel.classList.toggle('hidden');$('avatarProfileButton').setAttribute('aria-expanded',String(!panel.classList.contains('hidden')));if(!panel.classList.contains('hidden'))updateProfile();}
 $('closeLevelUp').addEventListener('click',()=>$('levelUpOverlay').classList.add('hidden'));
 function showLevelUp(level,bonus){
  $('levelUpTitle').textContent='LEVEL '+level+'!';$('levelUpRank').textContent=levelName(level);$('levelUpBonus').textContent='Bonus kenaikan level: +'+bonus+' koin';
