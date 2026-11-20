@@ -6,7 +6,7 @@ const FIRST_LEVEL_XP=150, XP_PER_LEVEL=250;
 function xpThreshold(level){return level<=1?0:FIRST_LEVEL_XP+(level-2)*XP_PER_LEVEL;}
 function levelFromXP(xp){let level=1;while(xp>=xpThreshold(level+1))level++;return level;}
 function levelProgress(xp){const level=levelFromXP(xp);return {level,progress:xp-xpThreshold(level),needed:level===1?FIRST_LEVEL_XP:XP_PER_LEVEL};}
-const state = {name:'Penyuluh Muda',avatarIndex:0,xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},analog:{x:0,y:0},interact:false,catOwned:false,catQuestNpcId:null,catFollower:{x:120,y:410}};
+const state = {name:'Penyuluh Muda',avatarIndex:0,xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},analog:{x:0,y:0},interact:false,catOwned:false,catQuestNpcId:null,catFollower:{x:120,y:410},scene:'village',mineGold:0,mineNodes:[],returnPosition:{x:145,y:390},ranchMissionDone:false};
 const screens=['homeScreen','menuScreen','gameScreen'];
 function save(){
   localStorage.setItem(KEY, JSON.stringify({
@@ -31,7 +31,8 @@ function save(){
     player:state.player,
     catOwned:!!state.catOwned,
     catQuestNpcId:state.catQuestNpcId,
-    catFollower:state.catFollower
+    catFollower:state.catFollower,
+    scene:state.scene||'village',mineGold:Number(state.mineGold)||0,mineNodes:Array.isArray(state.mineNodes)?state.mineNodes:[],returnPosition:state.returnPosition||{x:145,y:390},ranchMissionDone:!!state.ranchMissionDone
   }));
 }
 function load(){
@@ -60,6 +61,7 @@ function load(){
   state.pmaas.milestones=Array.isArray(state.pmaas.milestones)?state.pmaas.milestones:[];
   state.pmaas.farmers=Number(state.pmaas.farmers)||0;state.pmaas.groups=Number(state.pmaas.groups)||0;state.pmaas.xpEarned=Number(state.pmaas.xpEarned)||0;state.pmaas.drumSeederCompleted=!!state.pmaas.drumSeederCompleted;state.pmaas.adopterProgress=state.pmaas.adopterProgress&&typeof state.pmaas.adopterProgress==='object'?state.pmaas.adopterProgress:{};
   state.catOwned=!!state.catOwned; state.catFollower=state.catFollower&&typeof state.catFollower==='object'?state.catFollower:{x:state.player.x-24,y:state.player.y+18};
+  state.scene='village';state.mineGold=Number(state.mineGold)||0;state.mineNodes=Array.isArray(state.mineNodes)?state.mineNodes:[];state.returnPosition=state.returnPosition||{x:state.player.x,y:state.player.y};state.ranchMissionDone=!!state.ranchMissionDone;
   save();
 }
 function showScreen(id){screens.forEach(s=>$(s).classList.toggle('hidden',s!==id));}
@@ -78,7 +80,7 @@ const missionInfo=[
  {id:'pak',done:()=>state.missionDone,text:'Temui Pak Tani dan amati gejala pada tanaman padi.',reward:'+20 XP'},
  {id:'bu',done:()=>state.buMissionDone,text:'Bantu Bu Rina memahami pencatatan kelompok tani.',reward:'+25 XP'},
  {id:'ketua',done:()=>state.ketuaMissionDone,text:'Bantu Pak Ketua mengidentifikasi kebutuhan anggota.',reward:'+30 XP'},
- ...extraMissions.map(m=>({id:m.id,done:()=>!!state.missionFlags[m.id],text:'Temui '+m.name+': '+m.title.replace(/^Misi [^:]+: /,''),reward:'+'+m.xp+' XP'}))
+ ...extraMissions.map(m=>({id:m.id,done:()=>!!state.missionFlags[m.id],text:'Temui '+m.name+': '+m.title.replace(/^Misi [^:]+: /,''),reward:'+'+m.xp+' XP'})),{id:'peternak',done:()=>!!state.ranchMissionDone,text:'Bantu Pak Asep merawat ternak',reward:'+30 XP'}
 ];
 function missionDone(id){const m=missionInfo.find(x=>x.id===id);return m?m.done():false;}
 function missionTotal(){return missionInfo.filter(m=>m.done()).length;}
@@ -438,15 +440,21 @@ const npcs=[
 {id:'pak',name:'Pak Tani',x:1160,y:510,emoji:'👨‍🌾',role:'Petani padi',kind:'mission'},
 {id:'bu',name:'Bu Rina',x:390,y:330,emoji:'👩‍🌾',role:'Anggota kelompok tani',kind:'mission'},
 {id:'ketua',name:'Pak Ketua',x:760,y:690,emoji:'🧑‍🌾',role:'Ketua kelompok tani',kind:'mission'},
+{id:'peternak',name:'Pak Asep',x:1450,y:420,emoji:'👨‍🌾',role:'Peternak Desa',kind:'mission'},
 ...extraMissions.map(m=>({...m,kind:'mission'}))
 ];
-if(!state.catQuestNpcId || !npcs.some(n=>n.id===state.catQuestNpcId)){state.catQuestNpcId=npcs[Math.floor(Math.random()*npcs.length)].id;save();}
+if(!state.catQuestNpcId || !npcs.some(n=>n.id===state.catQuestNpcId)){const catQuestCandidates=npcs.filter(n=>n.id!=='peternak');state.catQuestNpcId=catQuestCandidates[Math.floor(Math.random()*catQuestCandidates.length)].id;save();}
 const buildings=[
 {x:220,y:210,w:150,h:110,name:'Rumah Bu Rina',roof:'#a65f3e',wall:'#f1dfb7',door:'#6b986b'},
 {x:600,y:150,w:170,h:125,name:'Balai Kelompok Tani',roof:'#9b5638',wall:'#f4e5bd',door:'#5d8c63'},
 {x:1420,y:180,w:150,h:110,name:'Kios Pertanian',roof:'#b36c3e',wall:'#f5e6c7',door:'#638e68'}
 ];
-const obstacles=[...buildings.map(b=>({x:b.x-5,y:b.y-15,w:b.w+10,h:b.h+20})),{x:990,y:720,w:600,h:280}];
+const obstacles=[...buildings.map(b=>({x:b.x-5,y:b.y-15,w:b.w+10,h:b.h+20})),{x:990,y:720,w:600,h:280},
+ // Pagar kandang, kandang ternak, kebun berpagar, dan pepohonan besar
+ {x:1330,y:475,w:280,h:165},{x:1350,y:500,w:95,h:85},{x:1500,y:500,w:95,h:85},
+ {x:45,y:200,w:120,h:75},{x:445,y:745,w:145,h:88},{x:805,y:345,w:130,h:80},{x:1245,y:335,w:130,h:80},
+ {x:1650,y:685,w:130,h:80},{x:590,y:1015,w:130,h:80},{x:320,y:165,w:45,h:45},{x:1490,y:1110,w:45,h:45},
+ {x:82,y:142,w:38,h:38},{x:442,y:112,w:38,h:38},{x:892,y:152,w:38,h:38},{x:1072,y:232,w:38,h:38},{x:1692,y:202,w:38,h:38}];
 function roundedRect(c,x,y,w,h,r,fill){c.fillStyle=fill;c.beginPath();c.roundRect(x,y,w,h,r);c.fill();}
 function drawTree(x,y){
  // soft shadow, layered canopy and small highlights
@@ -542,6 +550,7 @@ function drawPetCat(x,y,t=0){
 }
 
 function drawWorld(t=0){
+ if(state.scene==='mine'){drawMine(t);return;}
  const camX=Math.max(0,Math.min(WORLD.w-canvas.width,state.player.x-canvas.width/2));
  const camY=Math.max(0,Math.min(WORLD.h-canvas.height,state.player.y-canvas.height/2));
  ctx.clearRect(0,0,canvas.width,canvas.height);ctx.save();ctx.translate(-camX,-camY);
@@ -578,43 +587,92 @@ function drawWorld(t=0){
  // signboards and lamp posts
  ctx.fillStyle='#68482e';ctx.fillRect(678,98,5,34);roundedRect(ctx,625,88,112,25,5,'#f2dfad');ctx.fillStyle='#315b39';ctx.font='bold 11px Nunito';ctx.textAlign='center';ctx.fillText('BALAI KELOMPOK TANI',681,105);
  ctx.fillStyle='#68482e';ctx.fillRect(1590,495,5,60);ctx.fillStyle='#f7e4a8';ctx.beginPath();ctx.arc(1592,490,10,0,Math.PI*2);ctx.fill();
+ // Peternakan desa: kandang sapi/kambing, pagar, jerami dan tempat pakan.
+ roundedRect(ctx,1322,466,296,176,12,'#d8c18d');
+ ctx.strokeStyle='#8b6039';ctx.lineWidth=7;ctx.strokeRect(1330,475,280,165);
+ for(let fx=1342;fx<1605;fx+=28){ctx.beginPath();ctx.moveTo(fx,475);ctx.lineTo(fx,640);ctx.stroke();}
+ ctx.fillStyle='#a85e3c';ctx.fillRect(1350,500,94,82);ctx.fillStyle='#f0d9a7';ctx.fillRect(1358,510,78,64);
+ ctx.fillStyle='#8e4f34';ctx.fillRect(1500,500,94,82);ctx.fillStyle='#f0d9a7';ctx.fillRect(1508,510,78,64);
+ ctx.fillStyle='#6e472e';ctx.font='bold 14px Nunito';ctx.textAlign='center';ctx.fillText('KANDANG TERNAK',1470,626);
+ // Ilustrasi ternak sederhana di dalam kandang.
+ [[1385,544,'#f4eee0'],[1537,544,'#f1eee4']].forEach(([ax,ay,col],i)=>{ctx.fillStyle=col;ctx.beginPath();ctx.ellipse(ax,ay,23,15,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(ax+17,ay-9,10,0,Math.PI*2);ctx.fill();ctx.fillStyle='#544337';ctx.fillRect(ax-12,ay+10,4,13);ctx.fillRect(ax+8,ay+10,4,13);ctx.fillStyle='#4a392d';ctx.beginPath();ctx.arc(ax+20,ay-11,1.5,0,Math.PI*2);ctx.fill();if(i===0){ctx.strokeStyle='#6b4d35';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(ax+13,ay-17);ctx.lineTo(ax+8,ay-25);ctx.moveTo(ax+22,ay-17);ctx.lineTo(ax+28,ay-25);ctx.stroke();}});
+ roundedRect(ctx,1620,500,58,36,5,'#b68a4e');ctx.fillStyle='#e4c17b';ctx.fillRect(1625,505,48,25);ctx.font='bold 11px Nunito';ctx.fillStyle='#65472d';ctx.fillText('PAKAN',1649,520);
+ // Mulut tambang emas dengan papan petunjuk dan jalur masuk.
+ ctx.fillStyle='#705039';ctx.beginPath();ctx.ellipse(300,640,58,38,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#241f1b';ctx.beginPath();ctx.ellipse(300,636,43,27,0,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='#9a7046';ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(257,635);ctx.lineTo(257,610);ctx.lineTo(343,610);ctx.lineTo(343,635);ctx.stroke();
+ ctx.fillStyle='#f1d38d';ctx.fillRect(252,572,96,24);ctx.fillStyle='#5b3d25';ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillText('TAMBANG EMAS',300,588);
+ ctx.fillStyle='#e8c66e';ctx.font='bold 12px Nunito';ctx.fillText('Masuk: E',300,690);
  // decorative shrubs, flower beds and trees
- [[90,160],[450,130],[900,170],[1080,250],[1700,220],[850,850],[650,960],[1750,850],[300,650],[920,1080],[1660,1120],[500,920],[1320,1110],[1770,390]].forEach(p=>drawTree(...p));
+ [[90,160],[450,130],[900,170],[1080,250],[1700,220],[850,850],[650,960],[1750,850],[920,1080],[1660,1120],[500,920],[1320,1110],[1770,390]].forEach(p=>drawTree(...p));
  for(let i=0;i<42;i++){const x=(i*149+60)%1760,y=(i*97+95)%1160;if((x>960&&x<1630&&y>690&&y<1060)||(x>110&&x<570&&y>780&&y<1050))continue;ctx.fillStyle=i%2?'#e9d778':'#f0e9bd';ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);ctx.fill();}
 
  // More village life: crop beds, orchard trees, benches, crates and flower borders.
- [[70,350],[470,760],[820,360],[1260,350],[1660,700],[610,1030],[340,180],[1510,1120]].forEach(([x,y],i)=>{
+ [[50,220],[470,760],[820,360],[1260,350],[1660,700],[610,1030],[340,180],[1510,1120]].forEach(([x,y],i)=>{
    roundedRect(ctx,x,y,116,66,9,'#8b6948');roundedRect(ctx,x+5,y+5,106,56,6,i%2?'#a77e4e':'#b58a56');
    for(let row=0;row<2;row++)for(let col=0;col<6;col++){const px=x+15+col*17,py=y+20+row*25;ctx.strokeStyle=i%3===0?'#397a3d':'#4d8d43';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(px,py+8);ctx.lineTo(px-4,py-2);ctx.moveTo(px,py+8);ctx.lineTo(px+5,py-3);ctx.stroke();ctx.fillStyle='#a7d568';ctx.beginPath();ctx.arc(px-4,py-2,2.5,0,Math.PI*2);ctx.arc(px+5,py-3,2.5,0,Math.PI*2);ctx.fill();}
  });
  [[70,900],[610,260],[880,760],[1720,500],[1320,80],[250,1120]].forEach(([x,y],i)=>{drawTree(x,y);ctx.fillStyle='#c7a36a';ctx.fillRect(x-4,y+19,8,18);if(i%2===0){ctx.fillStyle='#e6b94f';[[x-10,y-12],[x+9,y-17],[x+2,y+1]].forEach(([fx,fy])=>{ctx.beginPath();ctx.arc(fx,fy,3,0,Math.PI*2);ctx.fill();});}});
- [[500,460],[840,650],[300,620],[1510,390],[720,990]].forEach(([x,y])=>{ctx.fillStyle='rgba(52,48,35,.2)';ctx.fillRect(x-17,y+10,38,5);ctx.fillStyle='#765033';ctx.fillRect(x-18,y-2,36,7);ctx.fillRect(x-14,y+5,4,10);ctx.fillRect(x+10,y+5,4,10);});
- [[430,470],[875,630],[1350,420],[1750,980],[70,700]].forEach(([x,y])=>{ctx.fillStyle='#9b7045';ctx.fillRect(x-10,y-10,20,20);ctx.strokeStyle='#e0bd83';ctx.lineWidth=2;ctx.strokeRect(x-10,y-10,20,20);ctx.beginPath();ctx.moveTo(x-8,y-8);ctx.lineTo(x+8,y+8);ctx.moveTo(x+8,y-8);ctx.lineTo(x-8,y+8);ctx.stroke();});
+ [[500,460],[840,650],[430,680],[1510,390],[720,990]].forEach(([x,y])=>{ctx.fillStyle='rgba(52,48,35,.2)';ctx.fillRect(x-17,y+10,38,5);ctx.fillStyle='#765033';ctx.fillRect(x-18,y-2,36,7);ctx.fillRect(x-14,y+5,4,10);ctx.fillRect(x+10,y+5,4,10);});
+ [[430,470],[875,630],[1650,420],[1750,980],[70,700]].forEach(([x,y])=>{ctx.fillStyle='#9b7045';ctx.fillRect(x-10,y-10,20,20);ctx.strokeStyle='#e0bd83';ctx.lineWidth=2;ctx.strokeRect(x-10,y-10,20,20);ctx.beginPath();ctx.moveTo(x-8,y-8);ctx.lineTo(x+8,y+8);ctx.moveTo(x+8,y-8);ctx.lineTo(x-8,y+8);ctx.stroke();});
  for(let i=0;i<90;i++){const x=(i*173+95)%1760,y=(i*211+140)%1140;if((x>960&&x<1630&&y>690&&y<1060)||(x>110&&x<570&&y>780&&y<1050))continue;ctx.fillStyle=['#e7d16d','#e9a5a0','#f3e6ba','#d7b5e2'][i%4];ctx.beginPath();ctx.arc(x,y,3.2,0,Math.PI*2);ctx.fill();ctx.fillStyle='#4b8b43';ctx.fillRect(x-1,y+3,2,5);}
 
  // area labels with subtle backing
  ctx.textAlign='left';ctx.font='900 20px Nunito';ctx.fillStyle='rgba(255,255,235,.72)';ctx.fillText('DESA SUKAMAJU',43,54);ctx.fillStyle='#315c37';ctx.fillText('DESA SUKAMAJU',40,51);
- ctx.font='bold 16px Nunito';ctx.fillStyle='#315c37';ctx.fillText('AREA PERSAWAHAN',1190,690);ctx.fillText('JALAN DESA',420,530);
+ ctx.font='bold 16px Nunito';ctx.fillStyle='#315c37';ctx.fillText('AREA PERSAWAHAN',1190,690);ctx.textAlign='center';ctx.font='900 17px Nunito';ctx.lineWidth=4;ctx.strokeStyle='rgba(95,70,43,.48)';ctx.strokeText('JALAN DESA',900,575);ctx.fillStyle='#fff4d8';ctx.fillText('JALAN DESA',900,575);
  // Karakter NPC digambar solid dengan badan, tangan, kaki, dan pakaian.
  npcs.forEach((n,i)=>{const done=missionDone(n.id);ctx.font='bold 12px Nunito';drawFarmer(n.x,n.y,{shirt:['#3979b9','#bd6686','#3f8a57','#c58a38'][i%4],pants:'#394d43',hat:['#d6a34d','#d8b86d','#6b8e57'][i%3]},i*.8,false);const labelW=Math.max(76,Math.min(132,ctx.measureText(n.name).width+22));roundedRect(ctx,n.x-labelW/2,n.y+28,labelW,23,10,'rgba(255,255,245,.98)');ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillStyle='#23452c';ctx.fillText(n.name,n.x,n.y+44);if(n.kind==='mission'){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(n.x,n.y-43,14,0,Math.PI*2);ctx.fill();ctx.strokeStyle=done?'#23834b':'#d88b1f';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=done?'#23834b':'#d88b1f';ctx.font='bold 17px Nunito';ctx.fillText(n.id===state.catQuestNpcId&&!state.catOwned?'🐾':(done?'✓':'!'),n.x,n.y-37);}});
  if(state.catOwned)drawPetCat(state.catFollower.x,state.catFollower.y,t);
  // Pemain: badan penuh, dua kaki dan animasi langkah saat bergerak.
  const moving=!!(state.keys.ArrowRight||state.keys.ArrowLeft||state.keys.ArrowUp||state.keys.ArrowDown||state.keys.w||state.keys.a||state.keys.s||state.keys.d||Math.hypot(state.analog.x,state.analog.y)>.12);
  drawFarmer(state.player.x,state.player.y,{shirt:'#287b49',pants:'#344b3a',hat:'#d8ad4e'},t/105,moving,true);
- const near=nearestNpc();if(near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<88){const mobile=window.matchMedia('(max-width: 760px)').matches;const hint=mobile?'Tap tombol INTERAKSI':'Tekan E untuk bicara';ctx.font='bold 12px Nunito';const bw=Math.max(138,ctx.measureText(hint).width+24),bx=Math.max(8,Math.min(WORLD.w-bw-8,state.player.x-bw/2)),by=state.player.y-91;roundedRect(ctx,bx,by,bw,28,12,'rgba(255,255,245,.98)');ctx.strokeStyle='#d8e6ce';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='#174d32';ctx.textAlign='center';ctx.fillText(hint,bx+bw/2,by+18);}
+ const near=nearestNpc();if(Math.hypot(300-state.player.x,640-state.player.y)<90){ctx.font='bold 12px Nunito';roundedRect(ctx,state.player.x-75,state.player.y-91,150,28,12,'rgba(255,255,245,.98)');ctx.fillStyle='#174d32';ctx.textAlign='center';ctx.fillText('Tekan E: Masuk Tambang',state.player.x,state.player.y-73);}else if(near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<88){const mobile=window.matchMedia('(max-width: 760px)').matches;const hint=mobile?'Tap tombol INTERAKSI':'Tekan E untuk bicara';ctx.font='bold 12px Nunito';const bw=Math.max(138,ctx.measureText(hint).width+24),bx=Math.max(8,Math.min(WORLD.w-bw-8,state.player.x-bw/2)),by=state.player.y-91;roundedRect(ctx,bx,by,bw,28,12,'rgba(255,255,245,.98)');ctx.strokeStyle='#d8e6ce';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='#174d32';ctx.textAlign='center';ctx.fillText(hint,bx+bw/2,by+18);}
  ctx.restore();
  $('worldLocation').textContent=(near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<100?'📍 '+near.name:'📍 Desa Sukamaju')+(state.catOwned?' • 🐈 Kucing menemani':'');
  const hintEl=$('canvasHint');if(hintEl)hintEl.textContent=window.matchMedia('(max-width: 760px)').matches?'Gunakan tombol arah untuk bergerak • Dekati warga lalu tap INTERAKSI':'Gunakan WASD / tombol panah untuk bergerak • Dekati warga lalu tekan E atau Spasi untuk bicara';
  const next=nextMission();$('worldObjective').textContent=next?'🎯 '+next.text:'⭐ Semua misi desa selesai';
 }
+function drawMine(t=0){
+ ctx.clearRect(0,0,canvas.width,canvas.height);ctx.save();
+ const g=ctx.createLinearGradient(0,0,0,canvas.height);g.addColorStop(0,'#302a29');g.addColorStop(1,'#17191b');ctx.fillStyle=g;ctx.fillRect(0,0,canvas.width,canvas.height);
+ // Terowongan batu dan rel tambang.
+ ctx.fillStyle='#51443b';ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(canvas.width,0);ctx.lineTo(canvas.width,115);ctx.quadraticCurveTo(canvas.width/2,35,0,115);ctx.closePath();ctx.fill();
+ for(let i=0;i<75;i++){const x=(i*137+29)%canvas.width,y=(i*83+37)%(canvas.height-100);ctx.fillStyle=i%2?'rgba(194,169,132,.15)':'rgba(0,0,0,.18)';ctx.beginPath();ctx.arc(x,y,2+(i%5),0,Math.PI*2);ctx.fill();}
+ ctx.strokeStyle='#8d765f';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(0,canvas.height-75);ctx.lineTo(canvas.width,canvas.height-75);ctx.moveTo(0,canvas.height-52);ctx.lineTo(canvas.width,canvas.height-52);ctx.stroke();
+ for(let x=25;x<canvas.width;x+=55){ctx.strokeStyle='#6c5948';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x,canvas.height-88);ctx.lineTo(x+18,canvas.height-40);ctx.stroke();}
+ // Vena emas di dinding.
+ [[100,180],[canvas.width-120,170],[canvas.width/2,125],[canvas.width-210,canvas.height-155],[180,canvas.height-180]].forEach(([x,y],i)=>{ctx.fillStyle='#7c6344';ctx.beginPath();ctx.moveTo(x-34,y+18);ctx.lineTo(x-20,y-20);ctx.lineTo(x+18,y-27);ctx.lineTo(x+38,y+12);ctx.closePath();ctx.fill();ctx.fillStyle='#f2c94c';ctx.beginPath();ctx.moveTo(x-17,y+8);ctx.lineTo(x-6,y-14);ctx.lineTo(x+5,y-4);ctx.lineTo(x+17,y-17);ctx.lineTo(x+23,y+10);ctx.closePath();ctx.fill();});
+ const spots=state.mineNodes.length?state.mineNodes:[[canvas.width*.28,canvas.height*.38],[canvas.width*.72,canvas.height*.34],[canvas.width*.5,canvas.height*.68],[canvas.width*.82,canvas.height*.7],[canvas.width*.18,canvas.height*.72]];
+ spots.forEach((pt,i)=>{if(pt===null)return;const [x,y]=pt;ctx.fillStyle='#4b3b2e';ctx.beginPath();ctx.arc(x,y,24,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f4c542';ctx.beginPath();ctx.arc(x-7,y-5,7,0,Math.PI*2);ctx.arc(x+8,y+4,6,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff0a5';ctx.font='bold 11px Nunito';ctx.textAlign='center';ctx.fillText('EMAS',x,y+39);});
+ // Gerobak dan pintu keluar.
+ ctx.fillStyle='#b98a54';ctx.beginPath();ctx.ellipse(canvas.width*.5,canvas.height-70,58,27,0,Math.PI,Math.PI*2);ctx.fill();ctx.fillStyle='#17191b';ctx.beginPath();ctx.ellipse(canvas.width*.5,canvas.height-69,43,19,0,Math.PI,Math.PI*2);ctx.fill();ctx.fillStyle='#fff0c2';ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillText('KELUAR • INTERAKSI',canvas.width*.5,canvas.height-24);
+ ctx.fillStyle='#986a3f';ctx.fillRect(18,20,75,46);ctx.fillStyle='#d8b879';ctx.fillRect(25,26,61,30);ctx.fillStyle='#2d2520';ctx.beginPath();ctx.arc(33,70,8,0,Math.PI*2);ctx.arc(78,70,8,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#fff0c2';ctx.font='bold 15px Nunito';ctx.textAlign='left';ctx.fillText('TAMBANG EMAS BAWAH TANAH',110,43);ctx.font='bold 12px Nunito';ctx.fillText('Dekati bongkahan emas lalu tekan E / INTERAKSI untuk menambang',110,64);
+ const px=state.player.x,py=state.player.y;drawFarmer(px,py,{shirt:'#287b49',pants:'#344b3a'},t/105,false,true);
+ if(state.catOwned)drawPetCat(px-28,py+20,t);
+ ctx.restore();$('worldLocation').textContent='⛏️ Tambang Emas • '+state.mineGold+' bongkah';$('worldObjective').textContent='🎯 Tambang emas lalu kembali ke permukaan untuk menukar menjadi XP';
+ const h=$('canvasHint');if(h)h.textContent='Dekati bongkahan emas dan tekan E / INTERAKSI. Dekati pintu keluar untuk kembali ke desa.';
+}
+function mineInteract(){
+ const exit={x:canvas.width*.5,y:canvas.height-105};
+ if(Math.hypot(state.player.x-exit.x,state.player.y-exit.y)<75){
+   state.scene='village';state.player={...state.returnPosition};
+   if(state.mineGold>0){const mined=state.mineGold,gained=mined*12;state.xp+=gained;state.coins+=mined*2;state.mineGold=0;updateStats();checkAchievements();save();$('missionDescription').textContent='Emas berhasil ditukar! Kamu memperoleh '+gained+' XP dan '+(mined*2)+' koin.';}
+   save();return;
+ }
+ let idx=-1,best=Infinity;state.mineNodes.forEach((pt,i)=>{if(!pt)return;const d=Math.hypot(state.player.x-pt[0],state.player.y-pt[1]);if(d<best){best=d;idx=i;}});
+ if(idx>=0&&best<75){state.mineNodes[idx]=null;state.mineGold++;save();$('worldLocation').textContent='⛏️ Emas terkumpul: '+state.mineGold;}
+}
+function enterMine(){state.returnPosition={x:state.player.x,y:state.player.y};state.scene='mine';state.player={x:canvas.width*.5,y:canvas.height-180};if(!state.mineNodes.length||state.mineNodes.every(x=>x===null))state.mineNodes=[[canvas.width*.28,canvas.height*.38],[canvas.width*.72,canvas.height*.34],[canvas.width*.5,canvas.height*.68],[canvas.width*.82,canvas.height*.7],[canvas.width*.18,canvas.height*.72]];save();}
 function nearestNpc(){let best=null,dist=Infinity;for(const n of npcs){const d=Math.hypot(n.x-state.player.x,n.y-state.player.y);if(d<dist){dist=d;best=n;}}return best;}
-function blocked(x,y){return obstacles.some(o=>x>o.x-18&&x<o.x+o.w+18&&y>o.y-10&&y<o.y+o.h+10);}
-function movePlayer(dx,dy){if(!dx&&!dy)return;const len=Math.hypot(dx,dy)||1;dx/=len;dy/=len;const speed=3.4;const nx=Math.max(25,Math.min(WORLD.w-25,state.player.x+dx*speed));const ny=Math.max(55,Math.min(WORLD.h-30,state.player.y+dy*speed));if(!blocked(nx,state.player.y))state.player.x=nx;if(!blocked(state.player.x,ny))state.player.y=ny;}
-function loop(ts){const dt=Math.min((ts-last)/16||1,2);last=ts;let dx=(state.keys.ArrowRight||state.keys.d?1:0)-(state.keys.ArrowLeft||state.keys.a?1:0);let dy=(state.keys.ArrowDown||state.keys.s?1:0)-(state.keys.ArrowUp||state.keys.w?1:0);dx+=state.analog.x;dy+=state.analog.y;if(dx||dy)movePlayer(dx*dt,dy*dt);if(state.catOwned){const len=Math.hypot(dx,dy)||1,tx=state.player.x-(dx/len)*27,ty=state.player.y-(dy/len)*20;state.catFollower.x+=(tx-state.catFollower.x)*.16;state.catFollower.y+=(ty-state.catFollower.y)*.16;}drawWorld(ts);raf=requestAnimationFrame(loop);}
+function blocked(x,y){if(state.scene==='mine')return false;if(obstacles.some(o=>x>o.x-18&&x<o.x+o.w+18&&y>o.y-10&&y<o.y+o.h+10))return true;const trunks=[[90,160],[450,130],[900,170],[1080,250],[1700,220],[850,850],[650,960],[1750,850],[920,1080],[1660,1120],[500,920],[1320,1110],[1770,390],[610,260],[880,760],[1720,500],[1320,80],[250,1120]];if(trunks.some(([tx,ty])=>Math.hypot(x-tx,y-(ty+18))<22))return true;return npcs.some(n=>Math.hypot(x-n.x,y-n.y)<22);}
+function movePlayer(dx,dy){if(!dx&&!dy)return;const len=Math.hypot(dx,dy)||1;dx/=len;dy/=len;const speed=3.4;const maxX=state.scene==='mine'?canvas.width-35:WORLD.w-25,maxY=state.scene==='mine'?canvas.height-90:WORLD.h-30;const nx=Math.max(25,Math.min(maxX,state.player.x+dx*speed));const ny=Math.max(80,Math.min(maxY,state.player.y+dy*speed));if(!blocked(nx,state.player.y))state.player.x=nx;if(!blocked(state.player.x,ny))state.player.y=ny;}
+function loop(ts){const dt=Math.min((ts-last)/16||1,2);last=ts;let dx=(state.keys.ArrowRight||state.keys.d?1:0)-(state.keys.ArrowLeft||state.keys.a?1:0);let dy=(state.keys.ArrowDown||state.keys.s?1:0)-(state.keys.ArrowUp||state.keys.w?1:0);dx+=state.analog.x;dy+=state.analog.y;if(dx||dy)movePlayer(dx*dt,dy*dt);if(state.catOwned&&state.scene==='village'){const len=Math.hypot(dx,dy)||1,tx=state.player.x-(dx/len)*27,ty=state.player.y-(dy/len)*20;state.catFollower.x+=(tx-state.catFollower.x)*.16;state.catFollower.y+=(ty-state.catFollower.y)*.16;}drawWorld(ts);raf=requestAnimationFrame(loop);}
 function startWorld(){stopWorld();last=0;drawWorld();raf=requestAnimationFrame(loop);}
 function stopWorld(){if(raf)cancelAnimationFrame(raf);raf=0;state.keys={};}
 function interact(){
   if(dialogOpen)return;
+  if(state.scene==='mine'){mineInteract();return;}
+  if(Math.hypot(300-state.player.x,640-state.player.y)<90){enterMine();return;}
   const n=nearestNpc();
   if(!n||Math.hypot(n.x-state.player.x,n.y-state.player.y)>88){
     $('missionDescription').textContent='Belum ada warga di dekatmu. Dekati salah satu warga desa.';
@@ -624,7 +682,13 @@ function interact(){
 }
 function openNpcDialog(n){
   stopWorld();dialogOpen=true;$('dialog').classList.remove('hidden');$('dialogEmoji').textContent=n.emoji;$('dialogEyebrow').textContent=n.role.toUpperCase();$('dialogChoices').innerHTML='';$('closeDialog').classList.add('hidden');
- if(n.id===state.catQuestNpcId){
+ if(n.id==='peternak'&&n.id!==state.catQuestNpcId){
+   $('dialogTitle').textContent='Misi Peternakan: Bantu Pak Asep';
+   $('dialogText').textContent=state.ranchMissionDone?'Misi peternakan sudah selesai. Terima kasih sudah membantu!':'“Saya perlu memastikan ternak tetap sehat. Apa yang harus dilakukan setiap hari agar ternak terawat?”';
+   addChoice('Menyediakan pakan dan air bersih, menjaga kandang, serta mengamati kesehatan ternak',true,()=>{if(!state.ranchMissionDone){state.ranchMissionDone=true;reward(30,15);save();}$('dialogText').textContent='Bagus! Perawatan rutin, pakan dan air bersih, kebersihan kandang, serta pengamatan kesehatan penting bagi ternak. Hadiah 30 XP dan 15 koin telah diterima.';});
+   addChoice('Membiarkan kandang kotor dan memberi pakan sesekali',false,()=>{$('dialogText').textContent='Belum tepat. Ternak memerlukan pakan, air bersih, kandang yang terjaga, dan pemantauan kesehatan.';});
+ }
+ else if(n.id===state.catQuestNpcId){
    $('dialogTitle').textContent=state.catOwned?'Misi Kucing: Persahabatan Baru':'Misi Spesial: Tolong Rawat Anak Kucing';
    $('dialogText').textContent=state.catOwned?'Terima kasih sudah merawat anak kucing itu. Sekarang ia selalu menemanimu menjelajahi Desa Sukamaju.':'“Saya menemukan seekor anak kucing sendirian di dekat kebun. Sepertinya ia lapar dan butuh tempat aman. Maukah kamu merawatnya?”';
    if(state.catOwned){addChoice('Senang sekali punya teman baru!',true,()=>{$('dialogText').textContent='Anak kucingmu mengeong riang dan siap menemanimu berkeliling desa.';});}
