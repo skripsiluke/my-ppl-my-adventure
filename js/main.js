@@ -438,17 +438,22 @@ const tutorialSteps=[{icon:'👤',title:'Kenali profilmu',description:'Di foto a
  overlay.classList.remove('hidden');
  requestAnimationFrame(()=>{
    const target=document.querySelector(step.target);
-   const rect=target?target.getBoundingClientRect():{left:innerWidth/2,top:innerHeight/2,width:0,height:0,bottom:innerHeight/2};
-   const cx=Math.max(45,Math.min(innerWidth-45,rect.left+rect.width/2));
-   const cy=Math.max(55,Math.min(innerHeight-55,rect.top+rect.height/2));
+   const rect=target?target.getBoundingClientRect():{left:innerWidth*.5,top:innerHeight*.5,width:0,height:0,bottom:innerHeight*.5};
+   const cx=Math.max(28,Math.min(innerWidth-28,rect.left+rect.width/2));
+   const cy=Math.max(40,Math.min(innerHeight-40,rect.top+rect.height/2));
+   const rx=Math.min(innerWidth*.42,Math.max(72,rect.width/2+22));
+   const ry=Math.min(innerHeight*.28,Math.max(48,rect.height/2+18));
    overlay.style.setProperty('--spot-x',cx+'px');overlay.style.setProperty('--spot-y',cy+'px');
-   const cardRect=card.getBoundingClientRect(),margin=14;
-   const left=Math.max(margin,Math.min(innerWidth-cardRect.width-margin,cx-cardRect.width/2));
+   overlay.style.setProperty('--spot-rx',rx+'px');overlay.style.setProperty('--spot-ry',ry+'px');
+   const cr=card.getBoundingClientRect(),margin=12;
+   const roomBelow=innerHeight-rect.bottom,roomAbove=rect.top;
    let top;
-   if(rect.bottom+cardRect.height+24<innerHeight)top=rect.bottom+16;
-   else if(rect.top-cardRect.height-16>0)top=rect.top-cardRect.height-16;
-   else top=Math.max(margin,Math.min(innerHeight-cardRect.height-margin,cy+85));
-   top=Math.max(margin,Math.min(innerHeight-cardRect.height-margin,top));
+   if(roomAbove>cr.height+18 && (roomAbove>=roomBelow || roomBelow<cr.height+18)) top=rect.top-cr.height-14;
+   else if(roomBelow>cr.height+18) top=rect.bottom+14;
+   else top=roomAbove>roomBelow?margin:innerHeight-cr.height-margin;
+   top=Math.max(margin,Math.min(innerHeight-cr.height-margin,top));
+   let left=cx-cr.width/2;
+   left=Math.max(margin,Math.min(innerWidth-cr.width-margin,left));
    card.style.left=left+'px';card.style.top=top+'px';
  });
 }
