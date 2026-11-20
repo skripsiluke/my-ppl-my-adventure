@@ -170,3 +170,9 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Tutorial dipicu saat pemain menekan Mulai Petualangan selama penanda tutorial belum berstatus completed.
 - Tidak lagi bergantung pada keberadaan save game, karena proses pemuatan game membuat save awal otomatis.
 - Memperbaiki selector sorotan avatar dan indikator langkah tutorial.
+
+
+## v0.15.4 — Tutorial menyatu dengan beranda
+- Pemain baru langsung diarahkan ke beranda game setelah memulai, lalu tutorial menyorot avatar dan kartu menu satu per satu.
+- Latar belakang diredupkan dengan spotlight terang di sekitar elemen yang dijelaskan.
+- Kotak tutorial berwarna terang berpindah posisi mengikuti letak elemen, dengan tombol Lanjutkan dan Lewati tetap tersedia.

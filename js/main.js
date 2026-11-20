@@ -429,7 +429,34 @@ $('mobileControlSelect').addEventListener('change',e=>{
 $('resetButton').addEventListener('click',()=>{if(confirm('Yakin ingin menghapus seluruh progres permainan? XP, koin, misi, dan pencapaian akan direset.')){localStorage.removeItem(KEY);location.reload();}});
 
 loadAudioSettings();applyMobileControl();
-const tutorialSteps=[{icon:'👤',title:'Kenali profilmu',description:'Di foto avatar, kamu bisa melihat profil penyuluh, level, XP, koin, dan lencana. Tekan tombol Ganti Avatar untuk memilih tampilan karakter yang kamu suka.',target:'#avatarProfileButton'},{icon:'🗺️',title:'Menu Adventure',description:'Jelajahi Desa Sukamaju, berjalan menggunakan keyboard atau joystick di HP, temui warga, dan selesaikan berbagai misi penyuluhan untuk mendapatkan XP dan koin.',target:'.adventure-card'},{icon:'🌾',title:'Menu Farm Simulator',description:'Kelola kebunmu dengan menanam benih, menyiram tanaman, merawat pertumbuhan, lalu memanen hasilnya. Setiap aktivitas membantumu memperoleh hadiah.',target:'.farm-card'},{icon:'🧠',title:'Menu Quiz Challenge',description:'Uji pengetahuan tentang pertanian dan penyuluhan melalui lima soal acak. Jawaban benar memberikan XP dan koin. Selamat bermain dan belajar!',target:'.quiz-card'}];let tutorialIndex=0;function renderTutorial(){const step=tutorialSteps[tutorialIndex];document.querySelectorAll('.tutorial-highlight').forEach(el=>el.classList.remove('tutorial-highlight'));$('tutorialStepLabel').textContent='PANDUAN '+(tutorialIndex+1)+' DARI '+tutorialSteps.length;$('tutorialIcon').textContent=step.icon;$('tutorialTitle').textContent=step.title;$('tutorialDescription').textContent=step.description;document.querySelectorAll('.tutorial-dots i').forEach((dot,i)=>dot.classList.toggle('active',i===tutorialIndex));$('tutorialBack').disabled=tutorialIndex===0;$('tutorialNext').textContent=tutorialIndex===tutorialSteps.length-1?'Mulai bermain ✓':'Lanjutkan →';const target=document.querySelector(step.target);if(target)target.classList.add('tutorial-highlight');$('tutorialOverlay').classList.remove('hidden');}function finishTutorial(){document.querySelectorAll('.tutorial-highlight').forEach(el=>el.classList.remove('tutorial-highlight'));$('tutorialOverlay').classList.add('hidden');localStorage.setItem(TUTORIAL_KEY,'completed');}function startTutorial(){tutorialIndex=0;renderTutorial();}$('tutorialNext').addEventListener('click',()=>{if(tutorialIndex<tutorialSteps.length-1){tutorialIndex++;renderTutorial();}else finishTutorial();});$('tutorialBack').addEventListener('click',()=>{if(tutorialIndex>0){tutorialIndex--;renderTutorial();}});$('tutorialSkip').addEventListener('click',finishTutorial);
+const tutorialSteps=[{icon:'👤',title:'Kenali profilmu',description:'Di foto avatar, kamu bisa melihat profil penyuluh, level, XP, koin, dan lencana. Tekan tombol Ganti Avatar untuk memilih tampilan karakter yang kamu suka.',target:'#avatarProfileButton'},{icon:'🗺️',title:'Menu Adventure',description:'Jelajahi Desa Sukamaju, berjalan menggunakan keyboard atau joystick di HP, temui warga, dan selesaikan berbagai misi penyuluhan untuk mendapatkan XP dan koin.',target:'.adventure-card'},{icon:'🌾',title:'Menu Farm Simulator',description:'Kelola kebunmu dengan menanam benih, menyiram tanaman, merawat pertumbuhan, lalu memanen hasilnya. Setiap aktivitas membantumu memperoleh hadiah.',target:'.farm-card'},{icon:'🧠',title:'Menu Quiz Challenge',description:'Uji pengetahuan tentang pertanian dan penyuluhan melalui lima soal acak. Jawaban benar memberikan XP dan koin. Selamat bermain dan belajar!',target:'.quiz-card'}];let tutorialIndex=0;function renderTutorial(){
+ const step=tutorialSteps[tutorialIndex],overlay=$('tutorialOverlay'),card=overlay.querySelector('.tutorial-card');
+ $('tutorialStepLabel').textContent='PANDUAN '+(tutorialIndex+1)+' DARI '+tutorialSteps.length;
+ $('tutorialIcon').textContent=step.icon;$('tutorialTitle').textContent=step.title;$('tutorialDescription').textContent=step.description;
+ document.querySelectorAll('.tutorial-dots i').forEach((dot,i)=>dot.classList.toggle('active',i===tutorialIndex));
+ $('tutorialBack').disabled=tutorialIndex===0;$('tutorialNext').textContent=tutorialIndex===tutorialSteps.length-1?'Mulai bermain ✓':'Lanjutkan →';
+ overlay.classList.remove('hidden');
+ requestAnimationFrame(()=>{
+   const target=document.querySelector(step.target);
+   const rect=target?target.getBoundingClientRect():{left:innerWidth/2,top:innerHeight/2,width:0,height:0,bottom:innerHeight/2};
+   const cx=Math.max(45,Math.min(innerWidth-45,rect.left+rect.width/2));
+   const cy=Math.max(55,Math.min(innerHeight-55,rect.top+rect.height/2));
+   overlay.style.setProperty('--spot-x',cx+'px');overlay.style.setProperty('--spot-y',cy+'px');
+   const cardRect=card.getBoundingClientRect(),margin=14;
+   const left=Math.max(margin,Math.min(innerWidth-cardRect.width-margin,cx-cardRect.width/2));
+   let top;
+   if(rect.bottom+cardRect.height+24<innerHeight)top=rect.bottom+16;
+   else if(rect.top-cardRect.height-16>0)top=rect.top-cardRect.height-16;
+   else top=Math.max(margin,Math.min(innerHeight-cardRect.height-margin,cy+85));
+   top=Math.max(margin,Math.min(innerHeight-cardRect.height-margin,top));
+   card.style.left=left+'px';card.style.top=top+'px';
+ });
+}
+function finishTutorial(){
+ $('tutorialOverlay').classList.add('hidden');localStorage.setItem(TUTORIAL_KEY,'completed');
+}
+function startTutorial(){tutorialIndex=0;renderTutorial();}$('tutorialNext').addEventListener('click',()=>{if(tutorialIndex<tutorialSteps.length-1){tutorialIndex++;renderTutorial();}else finishTutorial();});$('tutorialBack').addEventListener('click',()=>{if(tutorialIndex>0){tutorialIndex--;renderTutorial();}});$('tutorialSkip').addEventListener('click',finishTutorial);
+window.addEventListener('resize',()=>{if(!$('tutorialOverlay').classList.contains('hidden'))renderTutorial();});
 load();updateStats();checkAchievements();$('playerName').value=state.name==='Penyuluh Muda'?'':state.name;
 $('startButton').addEventListener('click',()=>{startBgm();const n=$('playerName').value.trim();if(n)state.name=n;$('welcomeName').textContent=state.name+'!';showScreen('menuScreen');updateProfile();save();if(localStorage.getItem(TUTORIAL_KEY)!=='completed')startTutorial();});
 
