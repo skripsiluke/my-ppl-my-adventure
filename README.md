@@ -270,7 +270,7 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Input gerak, joystick, dan interaksi tetap diproses pada frame berikutnya.
 - Mekanisme penalti kelabang tetap: -10 XP dan kelabang menghilang sementara.
 
-## v0.20.11 — Notifikasi Kemenangan dan Peti Hadiah Boss
+## v0.20.12 — Notifikasi Kemenangan dan Peti Hadiah Boss
 - Setelah Boss Kelabang dikalahkan, tampil notifikasi selamat dengan rincian hadiah +100 XP dan +50 koin.
 - Peti harta karun kini benar-benar muncul di lokasi Boss dikalahkan.
 - Pemain dapat mendekati peti dan menekan E/Spasi atau tombol INTERAKSI untuk membuka peti.
