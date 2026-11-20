@@ -116,3 +116,12 @@ Workflow pada `.github/workflows/deploy.yml` juga disediakan untuk deployment ot
 - Lahan demonstrasi, rumah warga, balai kelompok tani, dan kios pertanian mendapat detail visual tambahan.
 - Pepohonan, vegetasi, penanda NPC, dan karakter pemain diberi bayangan serta detail agar dunia terasa lebih hidup.
 - Mempertahankan koordinat dunia, NPC, rintangan, sistem interaksi, misi, XP, dan penyimpanan progres.
+
+
+## Pembaruan v0.13.1 — Karakter dan Interaksi Adventure
+- Karakter pemain dan NPC kini digambar sebagai petani utuh dengan kepala, badan, tangan, kaki, pakaian, topi, dan bayangan yang solid.
+- Kaki karakter pemain bergerak bergantian saat pemain berjalan.
+- Label nama warga dan petunjuk interaksi diberi latar kontras, ukuran adaptif, dan batas posisi agar lebih mudah dibaca.
+- Petunjuk desktop menggunakan tombol E/Spasi; pada layar HP berubah menjadi instruksi tap tombol INTERAKSI.
+- Petunjuk kontrol, HUD, dan panel misi disesuaikan agar teks tidak mudah bertumpuk pada layar kecil.
+- Data progres, koordinat NPC, misi, dan sistem permainan tetap dipertahankan.

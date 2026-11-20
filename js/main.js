@@ -455,6 +455,24 @@ function drawHouse(b){
  ctx.fillStyle='#b8a17b';ctx.fillRect(b.x+b.w/2-20,b.y+b.h,40,7);
  ctx.fillStyle='#fff8df';ctx.font='bold 13px Nunito';ctx.textAlign='center';ctx.fillText(b.name,b.x+b.w/2,b.y+b.h+25);
 }
+function drawFarmer(x,y,palette,phase=0,moving=false,isPlayer=false){
+ const bob=moving?Math.abs(Math.sin(phase*.12))*2:0,step=moving?Math.sin(phase*.12)*7:0;
+ ctx.save();ctx.globalAlpha=1;ctx.lineCap='round';ctx.lineJoin='round';
+ // Ground shadow
+ ctx.fillStyle='rgba(30,55,30,.30)';ctx.beginPath();ctx.ellipse(x,y+17,17,6,0,0,Math.PI*2);ctx.fill();
+ // Legs and shoes, alternating while walking
+ ctx.strokeStyle=palette.pants;ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(x-5,y+3-bob);ctx.lineTo(x-6-step*.55,y+16);ctx.moveTo(x+5,y+3-bob);ctx.lineTo(x+6+step*.55,y+16);ctx.stroke();
+ ctx.strokeStyle='#49382c';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x-6-step*.55,y+16);ctx.lineTo(x-10-step*.55,y+17);ctx.moveTo(x+6+step*.55,y+16);ctx.lineTo(x+10+step*.55,y+17);ctx.stroke();
+ // Torso and arms
+ roundedRect(ctx,x-10,y-18-bob,20,24,6,palette.shirt);ctx.strokeStyle='#e7b58b';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x-9,y-13-bob);ctx.lineTo(x-14+step*.2,y-2-bob);ctx.moveTo(x+9,y-13-bob);ctx.lineTo(x+14-step*.2,y-2-bob);ctx.stroke();
+ // Neck and face
+ roundedRect(ctx,x-3,y-23-bob,6,7,2,'#d99a70');ctx.fillStyle='#f0bd91';ctx.beginPath();ctx.arc(x,y-29-bob,10,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#33251e';ctx.beginPath();ctx.arc(x-3.5,y-30-bob,1.2,0,Math.PI*2);ctx.arc(x+3.5,y-30-bob,1.2,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#9c5e49';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(x,y-27-bob,3,0.15,Math.PI-.15);ctx.stroke();
+ // Farmer hat
+ ctx.fillStyle=palette.hat;ctx.beginPath();ctx.ellipse(x,y-39-bob,15,4,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#e9c66b';ctx.beginPath();ctx.ellipse(x,y-42-bob,9,5,0,Math.PI,Math.PI*2);ctx.fill();
+ if(isPlayer){ctx.strokeStyle='rgba(255,255,255,.75)';ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(x,y-29-bob,11,Math.PI*1.05,Math.PI*1.95);ctx.stroke();}
+ ctx.restore();
+}
 function drawWorld(t=0){
  const camX=Math.max(0,Math.min(WORLD.w-canvas.width,state.player.x-canvas.width/2));
  const camY=Math.max(0,Math.min(WORLD.h-canvas.height,state.player.y-canvas.height/2));
@@ -498,13 +516,15 @@ function drawWorld(t=0){
  // area labels with subtle backing
  ctx.textAlign='left';ctx.font='900 20px Nunito';ctx.fillStyle='rgba(255,255,235,.72)';ctx.fillText('DESA SUKAMAJU',43,54);ctx.fillStyle='#315c37';ctx.fillText('DESA SUKAMAJU',40,51);
  ctx.font='bold 16px Nunito';ctx.fillStyle='#315c37';ctx.fillText('AREA PERSAWAHAN',1190,690);ctx.fillText('JALAN DESA',420,530);
- // NPCs with shadows and quest markers
- npcs.forEach(n=>{const done=missionDone(n.id);ctx.fillStyle='rgba(38,70,37,.18)';ctx.beginPath();ctx.ellipse(n.x,n.y+7,19,7,0,0,Math.PI*2);ctx.fill();ctx.font='40px serif';ctx.textAlign='center';ctx.fillText(n.emoji,n.x,n.y+5);roundedRect(ctx,n.x-43,n.y+12,86,21,9,'rgba(255,255,244,.88)');ctx.font='bold 12px Nunito';ctx.fillStyle='#23452c';ctx.fillText(n.name,n.x,n.y+27);if(n.kind==='mission'){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(n.x,n.y-34,15,0,Math.PI*2);ctx.fill();ctx.fillStyle=done?'#23834b':'#d88b1f';ctx.font='bold 17px Nunito';ctx.fillText(done?'✓':'!',n.x,n.y-28);}});
- // player shadow and character
- ctx.fillStyle='rgba(35,69,42,.28)';ctx.beginPath();ctx.ellipse(state.player.x,state.player.y+12,19,8,0,0,Math.PI*2);ctx.fill();ctx.font='40px serif';ctx.textAlign='center';ctx.fillText('🧑‍🌾',state.player.x,state.player.y+5);
- const near=nearestNpc();if(near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<82){roundedRect(ctx,state.player.x-75,state.player.y-63,150,25,10,'rgba(255,255,245,.94)');ctx.fillStyle='#174d32';ctx.font='bold 13px Nunito';ctx.fillText('Tekan E untuk bicara',state.player.x,state.player.y-46);}
+ // Karakter NPC digambar solid dengan badan, tangan, kaki, dan pakaian.
+ npcs.forEach((n,i)=>{const done=missionDone(n.id);ctx.font='bold 12px Nunito';drawFarmer(n.x,n.y,{shirt:['#3979b9','#bd6686','#3f8a57','#c58a38'][i%4],pants:'#394d43',hat:['#d6a34d','#d8b86d','#6b8e57'][i%3]},i*.8,false);const labelW=Math.max(76,Math.min(132,ctx.measureText(n.name).width+22));roundedRect(ctx,n.x-labelW/2,n.y+28,labelW,23,10,'rgba(255,255,245,.98)');ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillStyle='#23452c';ctx.fillText(n.name,n.x,n.y+44);if(n.kind==='mission'){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(n.x,n.y-43,14,0,Math.PI*2);ctx.fill();ctx.strokeStyle=done?'#23834b':'#d88b1f';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=done?'#23834b':'#d88b1f';ctx.font='bold 17px Nunito';ctx.fillText(done?'✓':'!',n.x,n.y-37);}});
+ // Pemain: badan penuh, dua kaki dan animasi langkah saat bergerak.
+ const moving=!!(state.keys.ArrowRight||state.keys.ArrowLeft||state.keys.ArrowUp||state.keys.ArrowDown||state.keys.w||state.keys.a||state.keys.s||state.keys.d);
+ drawFarmer(state.player.x,state.player.y,{shirt:'#287b49',pants:'#344b3a',hat:'#d8ad4e'},t/105,moving,true);
+ const near=nearestNpc();if(near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<88){const mobile=window.matchMedia('(max-width: 760px)').matches;const hint=mobile?'Tap tombol INTERAKSI':'Tekan E untuk bicara';ctx.font='bold 12px Nunito';const bw=Math.max(138,ctx.measureText(hint).width+24),bx=Math.max(8,Math.min(WORLD.w-bw-8,state.player.x-bw/2)),by=state.player.y-91;roundedRect(ctx,bx,by,bw,28,12,'rgba(255,255,245,.98)');ctx.strokeStyle='#d8e6ce';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='#174d32';ctx.textAlign='center';ctx.fillText(hint,bx+bw/2,by+18);}
  ctx.restore();
  $('worldLocation').textContent=near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<100?'📍 '+near.name:'📍 Desa Sukamaju';
+ const hintEl=$('canvasHint');if(hintEl)hintEl.textContent=window.matchMedia('(max-width: 760px)').matches?'Gunakan tombol arah untuk bergerak • Dekati warga lalu tap INTERAKSI':'Gunakan WASD / tombol panah untuk bergerak • Dekati warga lalu tekan E atau Spasi untuk bicara';
  const next=nextMission();$('worldObjective').textContent=next?'🎯 '+next.text:'⭐ Semua misi desa selesai';
 }
 function nearestNpc(){let best=null,dist=Infinity;for(const n of npcs){const d=Math.hypot(n.x-state.player.x,n.y-state.player.y);if(d<dist){dist=d;best=n;}}return best;}

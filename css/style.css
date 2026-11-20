@@ -164,3 +164,7 @@
   .avatar-profile-panel .avatar-chooser{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
   .avatar-profile-panel .avatar-choice{border-radius:13px}
 }
+
+/* Adventure gameplay readability and character controls */
+.canvas-hint{font-size:12px;line-height:1.55;padding:11px 14px;font-weight:700;white-space:normal;overflow-wrap:anywhere}.world-hud span{min-width:0;line-height:1.45}.world-hud span:last-child{text-align:right;max-width:62%;overflow-wrap:anywhere}.game-info{min-width:0}.game-info>div{min-width:0}.game-info p{line-height:1.55;overflow-wrap:anywhere}.mobile-controls{padding:4px 2px}.interact-button{min-height:48px;white-space:normal;line-height:1.25}
+@media(max-width:760px){.world-hud{align-items:flex-start;flex-direction:column;gap:5px}.world-hud span:last-child{text-align:left;max-width:100%}.canvas-hint{font-size:11px;padding:10px 9px}.game-info{gap:8px}.game-info p{font-size:11px}.mobile-controls{gap:10px}.interact-button{min-width:112px;max-width:44%;padding:12px 10px;font-size:11px}}
