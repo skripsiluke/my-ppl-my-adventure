@@ -373,10 +373,19 @@ function showLevelUp(level,bonus){
  $('levelUpOverlay').classList.remove('hidden');playSound('level');
 }
 function showMineBossVictory(){
- $('levelUpTitle').textContent='🏆 VICTORY! BOSS KELABANG KALAH! 🏆';
- $('levelUpRank').textContent='🎉 LUAR BIASA! Kamu berhasil menaklukkan Boss Kelabang!';
- $('levelUpBonus').textContent='⭐ +100 XP     🪙 +50 KOIN  •  Peti harta karun menantimu!';
- $('levelUpOverlay').classList.remove('hidden');
+ let overlay=document.getElementById('mineBossVictoryOverlay');
+ if(!overlay){
+  overlay=document.createElement('div');
+  overlay.id='mineBossVictoryOverlay';
+  overlay.setAttribute('role','dialog');
+  overlay.setAttribute('aria-modal','true');
+  overlay.style.cssText='position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(8,18,12,.78);backdrop-filter:blur(5px);';
+  overlay.innerHTML='<div style="position:relative;overflow:hidden;width:min(520px,96vw);padding:28px 22px 24px;border:4px solid #ffe18a;border-radius:26px;background:linear-gradient(145deg,#245b36,#10291d);box-shadow:0 0 0 5px rgba(255,213,91,.22),0 20px 70px rgba(0,0,0,.65);color:#fff;text-align:center;font-family:Nunito,Arial,sans-serif;animation:mineVictoryPop .55s cubic-bezier(.2,1.5,.4,1) both"><div style="font-size:42px;line-height:1.2">🏆 ✨ 🏆</div><div style="color:#ffe18a;font-weight:900;letter-spacing:2px;font-size:14px;margin:8px 0">SELAMAT!</div><h2 style="font-size:clamp(23px,5vw,34px);line-height:1.12;margin:8px 0 12px;color:#fff;text-shadow:0 3px 0 #8c4e16">BOSS KELABANG KALAH!</h2><p style="font-size:16px;margin:0 0 18px">Kamu berhasil menaklukkan penjaga tambang emas!</p><div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:18px 0"><div style="background:#17472b;border:2px solid #9de3a8;border-radius:15px;padding:13px 20px;min-width:125px"><div style="font-size:29px;font-weight:900;color:#ffe18a">+100</div><b>⭐ XP</b></div><div style="background:#17472b;border:2px solid #f4cf72;border-radius:15px;padding:13px 20px;min-width:125px"><div style="font-size:29px;font-weight:900;color:#ffe18a">+50</div><b>🪙 KOIN</b></div></div><p style="font-size:14px;color:#ffedbd;margin:0 0 18px">Peti harta karun menantimu di dalam tambang!</p><button id="mineBossVictoryContinue" type="button" style="border:0;border-radius:999px;padding:13px 30px;background:linear-gradient(#ffe88a,#e9a92d);color:#3b2608;font-size:16px;font-weight:900;cursor:pointer;box-shadow:0 4px 0 #9a6417">LANJUTKAN PETUALANGAN</button></div>';
+  document.body.appendChild(overlay);
+  const style=document.createElement('style');style.textContent='@keyframes mineVictoryPop{0%{transform:scale(.55) translateY(30px);opacity:0}100%{transform:scale(1) translateY(0);opacity:1}}';document.head.appendChild(style);
+  overlay.querySelector('#mineBossVictoryContinue').addEventListener('click',()=>{overlay.style.display='none';});
+ }
+ overlay.style.display='flex';
  playSound('level');
 }
 function reward(xp,coins){
@@ -919,7 +928,7 @@ function mineInteract(){
    save();return;
  }
  let idx=-1,best=Infinity;state.mineNodes.forEach((pt,i)=>{if(!pt)return;const d=Math.hypot(state.player.x-pt[0],state.player.y-pt[1]);if(d<best){best=d;idx=i;}});
- if(idx>=0&&best<75){state.mineNodes[idx]=null;mineRespawnQueue=mineRespawnQueue.filter(item=>item.index!==idx);mineRespawnQueue.push({index:idx,at:performance.now()+12000});state.mineGold++;state.xp+=12;updateStats();checkAchievements();save();$('worldLocation').textContent='⛏️ Emas terkumpul: '+state.mineGold+' • +12 XP langsung';const hud=document.querySelector('.game-heading .game-coin');if(hud)hud.textContent='⭐ '+state.xp+' XP';}
+ if(idx>=0&&best<75){state.mineNodes[idx]=null;mineRespawnQueue=mineRespawnQueue.filter(item=>item.index!==idx);mineRespawnQueue.push({index:idx,at:performance.now()+12000});state.mineGold++;state.xp+=3;updateStats();checkAchievements();save();$('worldLocation').textContent='⛏️ Emas terkumpul: '+state.mineGold+' • +3 XP langsung';const hud=document.querySelector('.game-heading .game-coin');if(hud)hud.textContent='⭐ '+state.xp+' XP';}
 }
 function enterMine(){state.returnPosition={x:state.player.x,y:state.player.y};state.scene='mine';mineMonster=null;mineBoss=null;mineTreasureChest=null;mineBossWarningAt=0;mineCommonSpawnCount=0;minePickaxeOwned=false;minePickaxeHitAt=0;mineLastFrame=0;mineNextMonsterAt=performance.now()+6500;mineHitCooldown=0;mineRespawnQueue=[];state.player={x:canvas.width*.5,y:canvas.height-180};if(!state.mineNodes.length)state.mineNodes=[[canvas.width*.28,canvas.height*.38],[canvas.width*.72,canvas.height*.34],[canvas.width*.5,canvas.height*.68],[canvas.width*.82,canvas.height*.7],[canvas.width*.18,canvas.height*.72]];else state.mineNodes=state.mineNodes.map((pt,i)=>pt||[[canvas.width*.28,canvas.height*.38],[canvas.width*.72,canvas.height*.34],[canvas.width*.5,canvas.height*.68],[canvas.width*.82,canvas.height*.7],[canvas.width*.18,canvas.height*.72]][i%5]);save();const md=$('missionDescription');if(md)md.textContent='⛏️ PERLENGKAPAN TAMBANG: Dekati Kapak Tambang di dekat jalur masuk lalu tekan E / INTERAKSI untuk mengambilnya sebelum melawan Boss Kelabang!';}
 function nearestNpc(){let best=null,dist=Infinity;for(const n of npcs){const d=Math.hypot(n.x-state.player.x,n.y-state.player.y);if(d<dist){dist=d;best=n;}}return best;}
