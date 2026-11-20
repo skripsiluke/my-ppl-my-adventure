@@ -523,7 +523,7 @@ const npcs=[
 {id:'pak',name:'Pak Tani',x:1160,y:510,emoji:'👨‍🌾',role:'Petani padi',kind:'mission'},
 {id:'bu',name:'Bu Rina',x:390,y:365,emoji:'👩‍🌾',role:'Anggota kelompok tani',kind:'mission'},
 {id:'ketua',name:'Pak Ketua',x:760,y:690,emoji:'🧑‍🌾',role:'Ketua kelompok tani',kind:'mission'},
-{id:'peternak',name:'Pak Asep',x:1195,y:430,emoji:'👨‍🌾',role:'Peternak Desa',kind:'mission'},
+{id:'peternak',name:'Pak Asep',x:1385,y:485,emoji:'👨‍🌾',role:'Peternak Desa',kind:'mission'},
 ...extraMissions.map(m=>({...m,kind:'mission'})),
 {id:'catcaretaker',name:'Penjaga Anak Kucing',x:930,y:600,emoji:'🐱',role:'Misi spesial • Adopsi kucing',kind:'special'}
 ];
@@ -534,7 +534,7 @@ const buildings=[
 {x:180,y:235,w:150,h:110,name:'Rumah Bu Rina',roof:'#a65f3e',wall:'#f1dfb7',door:'#6b986b'},
 {x:830,y:170,w:170,h:125,name:'Balai Kelompok Tani',roof:'#9b5638',wall:'#f4e5bd',door:'#5d8c63'},
 {x:1420,y:180,w:150,h:110,name:'Kios Pertanian',roof:'#b36c3e',wall:'#f5e6c7',door:'#638e68'},
-{x:1120,y:390,w:210,h:120,name:'Koperasi Desa Merah Putih Sukamaju',type:'kopdes',roof:'#b9c4c8',wall:'#f0f1ed',door:'#a8322c'}
+{x:1450,y:420,w:190,h:105,name:'Koperasi Desa Merah Putih Sukamaju',type:'kopdes',roof:'#b9c4c8',wall:'#f0f1ed',door:'#a8322c'}
 ];
 const obstacles=[...buildings.map(b=>({x:b.x-5,y:b.y-15,w:b.w+10,h:b.h+20})),{x:990,y:720,w:600,h:280},
  // Pagar kandang, kandang ternak, kebun berpagar, dan pepohonan besar
