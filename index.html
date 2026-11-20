@@ -108,6 +108,16 @@
     <div class="settings-tools">
       <button id="settingsToggle" class="settings-toggle" type="button" aria-expanded="false"><span>⚙️ Pengaturan Game</span><span>▼</span></button>
       <section id="settingsPanel" class="settings-panel hidden">
+        <h3>Pengaturan Kontrol HP</h3>
+        <p class="settings-description">Pilih cara menggerakkan karakter saat bermain di HP Android.</p>
+        <div class="setting-row" style="display:block">
+          <div class="setting-label"><b>🎮 Kontrol gerakan</b><small>Pilihan ini hanya berlaku untuk layar HP.</small></div>
+          <select id="mobileControlSelect" class="volume-control" aria-label="Pilih kontrol gerakan HP">
+            <option value="analog">Analog (Joystick)</option>
+            <option value="arrows">Arah Panah</option>
+          </select>
+          <p id="mobileControlStatus" class="settings-status" aria-live="polite">Kontrol: Arah Panah</p>
+        </div>
         <h3>Pengaturan Audio</h3>
         <p class="settings-description">Atur musik latar permainan. Musik akan diputar berulang selama game berjalan dan pengaturanmu disimpan di perangkat ini.</p>
         <div class="setting-row">
@@ -134,7 +144,11 @@
       <div class="world-hud"><span id="worldLocation">📍 Gerbang Desa</span><span id="worldObjective">🎯 Tujuan: temui warga desa</span></div>
       <div class="canvas-wrap"><canvas id="worldCanvas" width="960" height="600" aria-label="Peta top-down Desa Sukamaju"></canvas><div class="canvas-hint" id="canvasHint">Gunakan WASD / tombol panah untuk bergerak • Dekati warga lalu tekan E atau Spasi untuk bicara</div></div>
       <div class="game-info"><div><b>🎯 Misi Adventure: Jelajahi Desa Sukamaju</b><p id="missionDescription">Jelajahi Desa Sukamaju, temui warga, dan selesaikan 11 misi penyuluhan.</p></div><span id="missionStatus" class="status-pill">Belum selesai</span></div>
-      <div class="mobile-controls"><div class="dpad"><button data-key="ArrowUp" aria-label="Atas">▲</button><button data-key="ArrowLeft" aria-label="Kiri">◀</button><button data-key="ArrowDown" aria-label="Bawah">▼</button><button data-key="ArrowRight" aria-label="Kanan">▶</button></div><button id="interactButton" class="interact-button">INTERAKSI</button></div>
+      <div class="mobile-controls" id="mobileControls">
+        <div class="dpad" id="arrowControls"><button data-key="ArrowUp" aria-label="Atas">▲</button><button data-key="ArrowLeft" aria-label="Kiri">◀</button><button data-key="ArrowDown" aria-label="Bawah">▼</button><button data-key="ArrowRight" aria-label="Kanan">▶</button></div>
+        <div class="joystick" id="joystickControl" aria-label="Joystick virtual"><div class="joystick-ring"><div class="joystick-knob" id="joystickKnob"></div></div><small>GERAK</small></div>
+        <button id="interactButton" class="interact-button">INTERAKSI</button>
+      </div>
     </div>
     <div id="farmPanel" class="game-panel hidden"><div class="farm-scene"><div class="farm-sky">☀️ &nbsp; Kebun Belajar</div><div class="farm-plot" id="farmPlot"><span id="cropEmoji">🟫</span></div><p id="farmStatus">Lahan masih kosong. Mulai dengan menanam benih.</p></div><div class="action-row"><button id="plantButton" class="button button-primary">🌱 Tanam benih</button><button id="waterButton" class="button button-secondary" disabled>💧 Siram</button><button id="harvestButton" class="button button-secondary" disabled>🧺 Panen</button></div><p class="muted small">Simulasi sederhana: tanam → siram → panen.</p></div>
     <div id="quizPanel" class="game-panel hidden"><div class="quiz-top"><span class="status-pill">KUIS PERTANIAN</span><span id="questionCount">Soal 1 dari 5</span></div><h3 id="questionText">Apa tujuan utama penyuluhan pertanian?</h3><div id="answerList" class="answer-list"></div><p id="quizFeedback" class="quiz-feedback" aria-live="polite"></p><button id="nextQuestionButton" class="button button-primary hidden">Soal berikutnya →</button></div>

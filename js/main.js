@@ -6,7 +6,7 @@ const FIRST_LEVEL_XP=150, XP_PER_LEVEL=250;
 function xpThreshold(level){return level<=1?0:FIRST_LEVEL_XP+(level-2)*XP_PER_LEVEL;}
 function levelFromXP(xp){let level=1;while(xp>=xpThreshold(level+1))level++;return level;}
 function levelProgress(xp){const level=levelFromXP(xp);return {level,progress:xp-xpThreshold(level),needed:level===1?FIRST_LEVEL_XP:XP_PER_LEVEL};}
-const state = {name:'Penyuluh Muda',avatarIndex:0,xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},interact:false};
+const state = {name:'Penyuluh Muda',avatarIndex:0,xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},analog:{x:0,y:0},interact:false};
 const screens=['homeScreen','menuScreen','gameScreen'];
 function save(){
   localStorage.setItem(KEY, JSON.stringify({
@@ -345,7 +345,7 @@ function reward(xp,coins){
 /* Background music and persistent audio settings */
 const SETTINGS_KEY='myPplMyAdventure.settings.v1';
 const bgm=$('bgmAudio');
-const audioSettings={bgmEnabled:true,bgmVolume:0.7};
+const audioSettings={bgmEnabled:true,bgmVolume:0.7,mobileControl:'arrows'};
 let gameStarted=false;
 function saveAudioSettings(){
   try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(audioSettings));}catch(e){}
@@ -355,6 +355,16 @@ function updateAudioSettingsUI(){
   if($('bgmVolume'))$('bgmVolume').value=Math.round(audioSettings.bgmVolume*100);
   if($('bgmVolumeValue'))$('bgmVolumeValue').textContent=Math.round(audioSettings.bgmVolume*100)+'%';
   if($('bgmStatus'))$('bgmStatus').textContent=audioSettings.bgmEnabled?'🎵 BGM aktif':'🔇 BGM nonaktif';
+}
+function applyMobileControl(){
+  const analog=audioSettings.mobileControl==='analog';
+  const dpad=$('arrowControls'),stick=$('joystickControl'),status=$('mobileControlStatus'),select=$('mobileControlSelect');
+  if(dpad)dpad.classList.toggle('hidden',analog);
+  if(stick)stick.classList.toggle('hidden',!analog);
+  if(select)select.value=audioSettings.mobileControl;
+  if(status)status.textContent=analog?'Kontrol aktif: Analog (Joystick)':'Kontrol aktif: Arah Panah';
+  state.analog={x:0,y:0};
+  const knob=$('joystickKnob');if(knob)knob.style.transform='translate(0px, 0px)';
 }
 function applyBgmSettings(){
   if(!bgm)return;
@@ -374,6 +384,7 @@ function loadAudioSettings(){
     if(saved){
       if(typeof saved.bgmEnabled==='boolean')audioSettings.bgmEnabled=saved.bgmEnabled;
       if(Number.isFinite(Number(saved.bgmVolume)))audioSettings.bgmVolume=Math.max(0,Math.min(1,Number(saved.bgmVolume)));
+      if(saved.mobileControl==='analog'||saved.mobileControl==='arrows')audioSettings.mobileControl=saved.mobileControl;
     }
   }catch(e){}
   applyBgmSettings();
@@ -403,9 +414,13 @@ $('bgmVolume').addEventListener('input',e=>{
   saveAudioSettings();
   applyBgmSettings();
 });
+$('mobileControlSelect').addEventListener('change',e=>{
+  audioSettings.mobileControl=e.target.value==='analog'?'analog':'arrows';
+  saveAudioSettings();applyMobileControl();
+});
 $('resetButton').addEventListener('click',()=>{if(confirm('Yakin ingin menghapus seluruh progres permainan? XP, koin, misi, dan pencapaian akan direset.')){localStorage.removeItem(KEY);location.reload();}});
 
-loadAudioSettings();
+loadAudioSettings();applyMobileControl();
 load();updateStats();checkAchievements();$('playerName').value=state.name==='Penyuluh Muda'?'':state.name;
 $('startButton').addEventListener('click',()=>{startBgm();const n=$('playerName').value.trim();if(n)state.name=n;$('welcomeName').textContent=state.name+'!';showScreen('menuScreen');updateProfile();save();});
 
@@ -569,7 +584,7 @@ function drawWorld(t=0){
 function nearestNpc(){let best=null,dist=Infinity;for(const n of npcs){const d=Math.hypot(n.x-state.player.x,n.y-state.player.y);if(d<dist){dist=d;best=n;}}return best;}
 function blocked(x,y){return obstacles.some(o=>x>o.x-18&&x<o.x+o.w+18&&y>o.y-10&&y<o.y+o.h+10);}
 function movePlayer(dx,dy){if(!dx&&!dy)return;const len=Math.hypot(dx,dy)||1;dx/=len;dy/=len;const speed=3.4;const nx=Math.max(25,Math.min(WORLD.w-25,state.player.x+dx*speed));const ny=Math.max(55,Math.min(WORLD.h-30,state.player.y+dy*speed));if(!blocked(nx,state.player.y))state.player.x=nx;if(!blocked(state.player.x,ny))state.player.y=ny;}
-function loop(ts){const dt=Math.min((ts-last)/16||1,2);last=ts;let dx=(state.keys.ArrowRight||state.keys.d?1:0)-(state.keys.ArrowLeft||state.keys.a?1:0);let dy=(state.keys.ArrowDown||state.keys.s?1:0)-(state.keys.ArrowUp||state.keys.w?1:0);if(dx||dy)movePlayer(dx*dt,dy*dt);drawWorld(ts);raf=requestAnimationFrame(loop);}
+function loop(ts){const dt=Math.min((ts-last)/16||1,2);last=ts;let dx=(state.keys.ArrowRight||state.keys.d?1:0)-(state.keys.ArrowLeft||state.keys.a?1:0);let dy=(state.keys.ArrowDown||state.keys.s?1:0)-(state.keys.ArrowUp||state.keys.w?1:0);dx+=state.analog.x;dy+=state.analog.y;if(dx||dy)movePlayer(dx*dt,dy*dt);drawWorld(ts);raf=requestAnimationFrame(loop);}
 function startWorld(){stopWorld();last=0;drawWorld();raf=requestAnimationFrame(loop);}
 function stopWorld(){if(raf)cancelAnimationFrame(raf);raf=0;state.keys={};}
 function interact(){
@@ -630,6 +645,24 @@ $('closeDialog').addEventListener('click',()=>{$('dialog').classList.add('hidden
 window.addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();state.keys[e.key]=true;if(e.key==='e'||e.key==='E'||e.key===' '){if(!$('dialog').classList.contains('hidden'))return;interact();}});
 window.addEventListener('keyup',e=>state.keys[e.key]=false);window.addEventListener('blur',()=>state.keys={});
 document.querySelectorAll('[data-key]').forEach(b=>{const k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture?.(e.pointerId);state.keys[k]=true;});['pointerup','pointercancel','lostpointercapture'].forEach(ev=>b.addEventListener(ev,()=>state.keys[k]=false));});
+const joystick=$('joystickControl'),joystickKnob=$('joystickKnob');
+if(joystick&&joystickKnob){
+ let stickPointer=null;
+ const updateStick=e=>{
+  const r=joystick.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
+  const max=Math.max(20,r.width*.34),dx=e.clientX-cx,dy=e.clientY-cy,len=Math.hypot(dx,dy)||1,scale=Math.min(1,max/len);
+  const px=dx*scale,py=dy*scale;
+  state.analog={x:px/max,y:py/max};
+  joystickKnob.style.transform=`translate(${px}px, ${py}px)`;
+ };
+ const releaseStick=e=>{
+  if(stickPointer!==null&&(!e||e.pointerId===stickPointer)){stickPointer=null;state.analog={x:0,y:0};joystickKnob.style.transform='translate(0px, 0px)';}
+ };
+ joystick.addEventListener('pointerdown',e=>{e.preventDefault();stickPointer=e.pointerId;joystick.setPointerCapture?.(e.pointerId);updateStick(e);});
+ joystick.addEventListener('pointermove',e=>{if(e.pointerId===stickPointer){e.preventDefault();updateStick(e);}});
+ ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>joystick.addEventListener(ev,releaseStick));
+}
+
 $('interactButton').addEventListener('click',interact);
 /* Farm simulator */
 function updateFarm(){const stages=['🟫','🌱','🌿','🌾'];$('cropEmoji').textContent=stages[state.farmStage];$('plantButton').disabled=state.farmStage!==0;$('waterButton').disabled=state.farmStage!==1;$('harvestButton').disabled=state.farmStage!==2;$('farmStatus').textContent=['Lahan masih kosong. Mulai dengan menanam benih.','Benih sudah ditanam. Tanaman membutuhkan air.','Tanaman tumbuh subur. Saatnya panen!','Panen berhasil! Kamu memperoleh hasil dari kerja kerasmu.'][state.farmStage];}
