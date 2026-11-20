@@ -3,7 +3,7 @@
 const $ = id => document.getElementById(id);
 const KEY = 'myPplMyAdventure.save.v1';
 const TUTORIAL_KEY='myPplMyAdventure.tutorial.v1';
-let mineMonster=null,mineNextMonsterAt=0,mineLastFrame=0,mineHitCooldown=0,mineToastTimer=0;
+let mineMonster=null,mineNextMonsterAt=0,mineLastFrame=0,mineHitCooldown=0,mineToastTimer=0,mineRespawnQueue=[];
 
 const FIRST_LEVEL_XP=150, XP_PER_LEVEL=250;
 function xpThreshold(level){return level<=1?0:FIRST_LEVEL_XP+(level-2)*XP_PER_LEVEL;}
@@ -822,8 +822,11 @@ function drawMine(t=0){
  function chest(x,y,scale=1){ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.fillStyle='#70401f';ctx.fillRect(-28,-3,56,29);ctx.fillStyle='#a96a2d';ctx.beginPath();ctx.moveTo(-28,-3);ctx.lineTo(-23,-20);ctx.quadraticCurveTo(0,-37,23,-20);ctx.lineTo(28,-3);ctx.closePath();ctx.fill();ctx.strokeStyle='#e5b94f';ctx.lineWidth=5;ctx.stroke();ctx.fillStyle='#f6d45e';ctx.fillRect(-4,-12,8,19);ctx.fillStyle='#f6e39b';ctx.fillRect(-23,5,46,5);ctx.restore();}
  chest(w*.16,h*.39,.83);chest(w*.82,h*.52,.9);chest(w*.37,h*.22,.58);
  for(const [x,y] of [[w*.1,h*.65],[w*.88,h*.28],[w*.7,h*.19]]){ctx.fillStyle='#41d5ce';ctx.beginPath();ctx.moveTo(x,y-12);ctx.lineTo(x+9,y);ctx.lineTo(x,y+13);ctx.lineTo(x-9,y);ctx.closePath();ctx.fill();ctx.fillStyle='rgba(255,255,255,.5)';ctx.fillRect(x-2,y-8,3,9);}
+ // Titik emas yang habis ditambang akan terisi kembali otomatis setelah jeda singkat.
+ if(!state.mineNodes.length)state.mineNodes=[[w*.28,h*.38],[w*.72,h*.34],[w*.5,h*.68],[w*.82,h*.7],[w*.18,h*.72]];
+ for(let q=mineRespawnQueue.length-1;q>=0;q--){const item=mineRespawnQueue[q];if(t>=item.at){if(state.mineNodes[item.index]===null){let candidate=null;for(let attempt=0;attempt<30;attempt++){const x=75+Math.random()*(w-150),y=145+Math.random()*(h-285);const nearPlayer=Math.hypot(x-state.player.x,y-state.player.y)<115;const nearOther=state.mineNodes.some((pt,i)=>i!==item.index&&pt&&Math.hypot(x-pt[0],y-pt[1])<95);if(!nearPlayer&&!nearOther){candidate=[x,y];break;}}if(!candidate)candidate=[75+Math.random()*(w-150),145+Math.random()*(h-285)];state.mineNodes[item.index]=candidate;save();}mineRespawnQueue.splice(q,1);}}
  // Bongkahan emas yang dapat ditambang: emas batangan dan koin terlihat jelas.
- const spots=state.mineNodes.length?state.mineNodes:[[w*.28,h*.38],[w*.72,h*.34],[w*.5,h*.68],[w*.82,h*.7],[w*.18,h*.72]];
+ const spots=state.mineNodes;
  spots.forEach((pt,i)=>{if(pt===null)return;const [x,y]=pt;ctx.fillStyle='#47382e';ctx.beginPath();ctx.ellipse(x,y+8,35,23,0,0,Math.PI*2);ctx.fill();ctx.save();ctx.translate(x-8,y-4);ctx.rotate(-.12);ctx.fillStyle='#d99b20';ctx.beginPath();ctx.moveTo(-17,-7);ctx.lineTo(12,-7);ctx.lineTo(17,5);ctx.lineTo(-12,5);ctx.closePath();ctx.fill();ctx.strokeStyle='#ffe58a';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#f7c843';ctx.beginPath();ctx.ellipse(19,10,8,5,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#fff0a5';ctx.stroke();ctx.beginPath();ctx.ellipse(-22,12,7,4,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();ctx.fillStyle='#fff0a5';ctx.font='bold 11px Nunito';ctx.textAlign='center';ctx.fillText('EMAS',x,y+42);});
  // Monster kelabang merah muncul berkala dan memburu pemain.
  if(!mineMonster&&t>=mineNextMonsterAt){const edge=Math.floor(Math.random()*4);mineMonster={x:edge===0?28:edge===1?w-28:Math.random()*w,y:edge===2?95:edge===3?h-105:95+Math.random()*(h-210),phase:Math.random()*6.28};mineNextMonsterAt=t+10500+Math.random()*6500;}
@@ -852,9 +855,9 @@ function mineInteract(){
    save();return;
  }
  let idx=-1,best=Infinity;state.mineNodes.forEach((pt,i)=>{if(!pt)return;const d=Math.hypot(state.player.x-pt[0],state.player.y-pt[1]);if(d<best){best=d;idx=i;}});
- if(idx>=0&&best<75){state.mineNodes[idx]=null;state.mineGold++;save();$('worldLocation').textContent='⛏️ Emas terkumpul: '+state.mineGold;}
+ if(idx>=0&&best<75){state.mineNodes[idx]=null;mineRespawnQueue=mineRespawnQueue.filter(item=>item.index!==idx);mineRespawnQueue.push({index:idx,at:performance.now()+3500});state.mineGold++;save();$('worldLocation').textContent='⛏️ Emas terkumpul: '+state.mineGold+' • titik emas diperbarui dalam beberapa detik';}
 }
-function enterMine(){state.returnPosition={x:state.player.x,y:state.player.y};state.scene='mine';mineMonster=null;mineLastFrame=0;mineNextMonsterAt=performance.now()+6500;mineHitCooldown=0;state.player={x:canvas.width*.5,y:canvas.height-180};if(!state.mineNodes.length||state.mineNodes.every(x=>x===null))state.mineNodes=[[canvas.width*.28,canvas.height*.38],[canvas.width*.72,canvas.height*.34],[canvas.width*.5,canvas.height*.68],[canvas.width*.82,canvas.height*.7],[canvas.width*.18,canvas.height*.72]];save();}
+function enterMine(){state.returnPosition={x:state.player.x,y:state.player.y};state.scene='mine';mineMonster=null;mineLastFrame=0;mineNextMonsterAt=performance.now()+6500;mineHitCooldown=0;mineRespawnQueue=[];state.player={x:canvas.width*.5,y:canvas.height-180};if(!state.mineNodes.length)state.mineNodes=[[canvas.width*.28,canvas.height*.38],[canvas.width*.72,canvas.height*.34],[canvas.width*.5,canvas.height*.68],[canvas.width*.82,canvas.height*.7],[canvas.width*.18,canvas.height*.72]];else state.mineNodes=state.mineNodes.map((pt,i)=>pt||[[canvas.width*.28,canvas.height*.38],[canvas.width*.72,canvas.height*.34],[canvas.width*.5,canvas.height*.68],[canvas.width*.82,canvas.height*.7],[canvas.width*.18,canvas.height*.72]][i%5]);save();}
 function nearestNpc(){let best=null,dist=Infinity;for(const n of npcs){const d=Math.hypot(n.x-state.player.x,n.y-state.player.y);if(d<dist){dist=d;best=n;}}return best;}
 function blocked(x,y){if(state.scene==='mine'||state.scene==='palm')return false;if(obstacles.some(o=>x>o.x-18&&x<o.x+o.w+18&&y>o.y-10&&y<o.y+o.h+10))return true;const trunks=[[90,160],[450,130],[900,170],[1080,250],[1700,220],[850,850],[650,960],[1750,850],[920,1080],[1660,1120],[500,920],[1320,1110],[1770,390],[610,260],[880,760],[1720,500],[1320,80],[250,1120]];if(trunks.some(([tx,ty])=>Math.hypot(x-tx,y-(ty+18))<22))return true;return npcs.some(n=>Math.hypot(x-n.x,y-n.y)<22);}
 function movePlayer(dx,dy){

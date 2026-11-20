@@ -224,3 +224,11 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Kelabang merah bawah tanah muncul berkala dan mengejar pemain.
 - Jika tersentuh kelabang, XP berkurang 2 poin (tidak sampai negatif); monster menghilang sementara sebelum muncul kembali.
 - Sistem save lama tetap dipertahankan.
+
+
+## v0.20.1 — Regenerasi Emas Otomatis
+- Titik emas yang sudah ditambang muncul kembali otomatis setelah sekitar 3,5 detik.
+- Emas terus tersedia selama pemain berada di dalam tambang; tidak perlu keluar-masuk untuk mengisi ulang.
+- Titik kemunculan baru dipilih secara acak dan diupayakan tidak terlalu dekat dengan pemain atau titik emas lain.
+- Saat masuk kembali, titik emas yang sedang kosong dipulihkan agar tambang tetap siap digunakan.
+- Progres permainan dan sistem monster kelabang tetap dipertahankan.
