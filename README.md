@@ -104,8 +104,15 @@ Workflow pada `.github/workflows/deploy.yml` juga disediakan untuk deployment ot
 - Ukuran kartu, gambar, label, dan jarak disesuaikan agar dua kolom tetap muat di layar kecil.
 
 
-## Pembaruan v0.12.0
+## Pembaruan v0.12.1
 - Memperbaiki tata letak kartu level agar ilustrasi daun tidak menimpa teks pada layar ponsel.
 - Menambahkan indikator panah pada avatar profil.
 - Menambahkan 10 pilihan ilustrasi avatar petani pria dan wanita.
 - Avatar pilihan disimpan bersama progres lokal pemain; progres lama tetap dipertahankan.
+
+## Pembaruan v0.13.0 — Visual Desa Adventure
+- Memperbarui ilustrasi dunia Adventure dengan tekstur rumput, jalan desa berlapis, tepian sungai, dan detail pematang.
+- Area persawahan kini memiliki genangan air, barisan tanaman, serta pematang yang lebih jelas.
+- Lahan demonstrasi, rumah warga, balai kelompok tani, dan kios pertanian mendapat detail visual tambahan.
+- Pepohonan, vegetasi, penanda NPC, dan karakter pemain diberi bayangan serta detail agar dunia terasa lebih hidup.
+- Mempertahankan koordinat dunia, NPC, rintangan, sistem interaksi, misi, XP, dan penyimpanan progres.

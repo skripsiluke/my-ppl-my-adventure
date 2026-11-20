@@ -428,38 +428,81 @@ const buildings=[
 ];
 const obstacles=[...buildings.map(b=>({x:b.x-5,y:b.y-15,w:b.w+10,h:b.h+20})),{x:990,y:720,w:600,h:280}];
 function roundedRect(c,x,y,w,h,r,fill){c.fillStyle=fill;c.beginPath();c.roundRect(x,y,w,h,r);c.fill();}
-function drawTree(x,y){ctx.fillStyle='#76513b';ctx.fillRect(x-5,y+10,10,24);ctx.fillStyle='#3f8d4d';ctx.beginPath();ctx.arc(x,y,24,0,Math.PI*2);ctx.fill();ctx.fillStyle='#68ad5e';ctx.beginPath();ctx.arc(x-10,y-8,12,0,Math.PI*2);ctx.fill();}
-function drawHouse(b){roundedRect(ctx,b.x,b.y,b.w,b.h,8,b.wall);ctx.fillStyle=b.roof;ctx.beginPath();ctx.moveTo(b.x-12,b.y+8);ctx.lineTo(b.x+b.w/2,b.y-48);ctx.lineTo(b.x+b.w+12,b.y+8);ctx.closePath();ctx.fill();ctx.fillStyle=b.door;ctx.fillRect(b.x+b.w/2-13,b.y+b.h-48,26,48);ctx.fillStyle='#fff5d8';ctx.font='bold 15px Nunito';ctx.textAlign='center';ctx.fillText(b.name,b.x+b.w/2,b.y+b.h+22);}
+function drawTree(x,y){
+ // soft shadow, layered canopy and small highlights
+ ctx.fillStyle='rgba(40,75,35,.20)';ctx.beginPath();ctx.ellipse(x+5,y+28,25,9,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#76513b';ctx.fillRect(x-5,y+5,11,31);ctx.fillStyle='#5d3f2e';ctx.fillRect(x+1,y+8,4,26);
+ [[-11,-2,22,'#347d43'],[8,-9,21,'#438f4b'],[-2,-18,23,'#5aa653'],[-19,-14,15,'#68b45b'],[17,5,14,'#2f7540']].forEach(([ox,oy,r,c])=>{ctx.fillStyle=c;ctx.beginPath();ctx.arc(x+ox,y+oy,r,0,Math.PI*2);ctx.fill();});
+ ctx.fillStyle='rgba(220,244,150,.42)';ctx.beginPath();ctx.arc(x-9,y-20,6,0,Math.PI*2);ctx.fill();
+}
+function drawHouse(b){
+ // building shadow and foundation
+ ctx.fillStyle='rgba(48,69,42,.20)';ctx.beginPath();ctx.ellipse(b.x+b.w/2,b.y+b.h+9,b.w*.62,13,0,0,Math.PI*2);ctx.fill();
+ roundedRect(ctx,b.x-5,b.y-2,b.w+10,b.h+8,7,'#b9a27b');
+ roundedRect(ctx,b.x,b.y,b.w,b.h,5,b.wall);
+ // roof with layered tiles
+ ctx.fillStyle='#71452f';ctx.beginPath();ctx.moveTo(b.x-17,b.y+9);ctx.lineTo(b.x+b.w/2,b.y-53);ctx.lineTo(b.x+b.w+17,b.y+9);ctx.closePath();ctx.fill();
+ ctx.fillStyle=b.roof;ctx.beginPath();ctx.moveTo(b.x-13,b.y+6);ctx.lineTo(b.x+b.w/2,b.y-48);ctx.lineTo(b.x+b.w+13,b.y+6);ctx.closePath();ctx.fill();
+ ctx.save();ctx.beginPath();ctx.moveTo(b.x-13,b.y+6);ctx.lineTo(b.x+b.w/2,b.y-48);ctx.lineTo(b.x+b.w+13,b.y+6);ctx.closePath();ctx.clip();
+ ctx.strokeStyle='rgba(255,226,177,.28)';ctx.lineWidth=3;for(let yy=-28;yy<18;yy+=10){ctx.beginPath();ctx.moveTo(b.x-20,b.y+yy);ctx.lineTo(b.x+b.w+20,b.y+yy);ctx.stroke();}
+ ctx.restore();
+ // wall trim, windows, door and steps
+ ctx.fillStyle='rgba(126,91,57,.18)';ctx.fillRect(b.x+8,b.y+12,b.w-16,5);
+ ctx.fillStyle='#b8d8d0';ctx.fillRect(b.x+17,b.y+30,29,27);ctx.fillRect(b.x+b.w-46,b.y+30,29,27);
+ ctx.strokeStyle='#fff4d7';ctx.lineWidth=4;ctx.strokeRect(b.x+17,b.y+30,29,27);ctx.strokeRect(b.x+b.w-46,b.y+30,29,27);
+ ctx.strokeStyle='#8b795d';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(b.x+31,b.y+30);ctx.lineTo(b.x+31,b.y+57);ctx.moveTo(b.x+17,b.y+43);ctx.lineTo(b.x+46,b.y+43);ctx.moveTo(b.x+b.w-32,b.y+30);ctx.lineTo(b.x+b.w-32,b.y+57);ctx.stroke();
+ ctx.fillStyle=b.door;ctx.fillRect(b.x+b.w/2-14,b.y+b.h-49,28,49);ctx.fillStyle='#e6c878';ctx.beginPath();ctx.arc(b.x+b.w/2+7,b.y+b.h-25,2.5,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#b8a17b';ctx.fillRect(b.x+b.w/2-20,b.y+b.h,40,7);
+ ctx.fillStyle='#fff8df';ctx.font='bold 13px Nunito';ctx.textAlign='center';ctx.fillText(b.name,b.x+b.w/2,b.y+b.h+25);
+}
 function drawWorld(t=0){
  const camX=Math.max(0,Math.min(WORLD.w-canvas.width,state.player.x-canvas.width/2));
  const camY=Math.max(0,Math.min(WORLD.h-canvas.height,state.player.y-canvas.height/2));
  ctx.clearRect(0,0,canvas.width,canvas.height);ctx.save();ctx.translate(-camX,-camY);
- ctx.fillStyle='#b8d99c';ctx.fillRect(0,0,WORLD.w,WORLD.h);
- // grass patches
- ctx.fillStyle='#a6cf88';for(let i=0;i<12;i++){ctx.beginPath();ctx.ellipse(150+i*145,110+(i%3)*310,110,65,0,0,Math.PI*2);ctx.fill();}
- // main village roads
- ctx.strokeStyle='#d9b77b';ctx.lineWidth=78;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(0,570);ctx.lineTo(520,570);ctx.lineTo(850,570);ctx.lineTo(1100,570);ctx.lineTo(1650,570);ctx.stroke();
- ctx.beginPath();ctx.moveTo(700,80);ctx.lineTo(700,570);ctx.lineTo(700,1020);ctx.stroke();
- // rice fields
- roundedRect(ctx,970,700,650,350,14,'#78b64c');ctx.strokeStyle='#d8e99b';ctx.lineWidth=8;for(let y=735;y<1020;y+=43){ctx.beginPath();ctx.moveTo(995,y);ctx.lineTo(1595,y+6);ctx.stroke();}
- for(let x=1010;x<1580;x+=90){for(let y=760;y<1015;y+=90){ctx.font='27px serif';ctx.fillText('🌱',x,y);}}
- // demonstration plot
- roundedRect(ctx,120,800,430,230,12,'#9cba64');ctx.fillStyle='#e6d9a7';ctx.fillRect(140,820,390,190);ctx.font='bold 19px Nunito';ctx.fillStyle='#405d34';ctx.fillText('LAHAN DEMONSTRASI',160,850);for(let x=170;x<500;x+=65){ctx.font='30px serif';ctx.fillText('🥬',x,930);}
- // irrigation stream
- ctx.strokeStyle='#75c6d7';ctx.lineWidth=28;ctx.beginPath();ctx.moveTo(0,1080);ctx.quadraticCurveTo(420,990,780,1100);ctx.quadraticCurveTo(1150,1190,1800,1060);ctx.stroke();
+ // rich grass base with subtle organic texture
+ ctx.fillStyle='#a8ce83';ctx.fillRect(0,0,WORLD.w,WORLD.h);
+ for(let i=0;i<520;i++){const x=(i*197+43)%WORLD.w,y=(i*131+71)%WORLD.h;ctx.fillStyle=i%3===0?'rgba(235,247,190,.22)':'rgba(65,119,55,.10)';ctx.beginPath();ctx.ellipse(x,y,3+(i%4),1.5,((i%7)-3)*.15,0,Math.PI*2);ctx.fill();}
+ // landscaped grassy clearings
+ [[150,120,115,65],[470,380,145,85],[900,270,125,75],[1280,430,150,85],[760,900,140,90],[300,690,125,75],[1690,930,110,70]].forEach(([x,y,rx,ry],i)=>{ctx.fillStyle=i%2?'#b5d894':'#9fc879';ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx.fill();});
+ // village road: dark shoulder, compacted earth, pale wheel tracks
+ ctx.lineCap='round';ctx.lineJoin='round';
+ const road=()=>{ctx.beginPath();ctx.moveTo(0,570);ctx.lineTo(520,570);ctx.lineTo(850,570);ctx.lineTo(1100,570);ctx.lineTo(1800,570);ctx.moveTo(700,80);ctx.lineTo(700,570);ctx.lineTo(700,1200);};
+ ctx.strokeStyle='#b18b5d';ctx.lineWidth=94;road();ctx.stroke();ctx.strokeStyle='#d9bd8b';ctx.lineWidth=82;road();ctx.stroke();
+ ctx.strokeStyle='rgba(255,244,207,.35)';ctx.lineWidth=3;ctx.setLineDash([18,22]);road();ctx.stroke();ctx.setLineDash([]);
+ // roadside stones and grass tufts
+ for(let i=0;i<34;i++){let x=(i*83+35)%1770,y=(i%2?520:620);ctx.fillStyle=i%2?'#8b9b72':'#d1c39b';ctx.beginPath();ctx.ellipse(x,y,5,3,.2,0,Math.PI*2);ctx.fill();}
+ // irrigation stream with banks and glints
+ ctx.strokeStyle='#8baf68';ctx.lineWidth=56;ctx.beginPath();ctx.moveTo(0,1080);ctx.quadraticCurveTo(420,990,780,1100);ctx.quadraticCurveTo(1150,1190,1800,1060);ctx.stroke();
+ ctx.strokeStyle='#6bb7c8';ctx.lineWidth=42;ctx.beginPath();ctx.moveTo(0,1080);ctx.quadraticCurveTo(420,990,780,1100);ctx.quadraticCurveTo(1150,1190,1800,1060);ctx.stroke();
+ ctx.strokeStyle='rgba(222,250,244,.65)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(80,1070);ctx.quadraticCurveTo(430,1010,760,1092);ctx.quadraticCurveTo(1180,1170,1700,1067);ctx.stroke();
+ // paddy bunds, shallow water and rice rows
+ roundedRect(ctx,970,700,650,350,18,'#92764c');roundedRect(ctx,982,712,626,326,13,'#6fae68');
+ ctx.fillStyle='#83c9c4';roundedRect(ctx,994,724,602,302,9,'#83c9c4');
+ for(let y=744;y<1010;y+=38){ctx.strokeStyle='rgba(240,249,196,.62)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(1005,y);ctx.lineTo(1585,y+4);ctx.stroke();}
+ for(let row=0;row<6;row++){for(let col=0;col<15;col++){const x=1018+col*39+(row%2)*8,y=758+row*43;ctx.strokeStyle='#4c8a43';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,y+8);ctx.lineTo(x-5,y-3);ctx.moveTo(x,y+8);ctx.lineTo(x+5,y-4);ctx.moveTo(x,y+8);ctx.lineTo(x,y-8);ctx.stroke();ctx.fillStyle='#b5d86c';ctx.beginPath();ctx.arc(x-5,y-3,2,0,Math.PI*2);ctx.arc(x+5,y-4,2,0,Math.PI*2);ctx.fill();}}
+ // demonstration plot with beds and vegetable seedlings
+ roundedRect(ctx,112,790,446,252,16,'#806344');roundedRect(ctx,123,801,424,230,11,'#c6a36a');
+ ctx.fillStyle='#547c3f';ctx.font='bold 18px Nunito';ctx.textAlign='left';ctx.fillText('LAHAN DEMONSTRASI',145,831);
+ for(let row=0;row<3;row++){ctx.strokeStyle='#8b6945';ctx.lineWidth=17;ctx.beginPath();ctx.moveTo(150,875+row*48);ctx.lineTo(520,875+row*48);ctx.stroke();for(let x=170;x<510;x+=43){ctx.strokeStyle='#4d8d42';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,880+row*48);ctx.lineTo(x-5,866+row*48);ctx.moveTo(x,880+row*48);ctx.lineTo(x+6,866+row*48);ctx.stroke();ctx.fillStyle='#8fc65a';ctx.beginPath();ctx.arc(x,866+row*48,5,0,Math.PI*2);ctx.fill();}}
+ // small fences around plots and houses
+ ctx.strokeStyle='#e7d4a9';ctx.lineWidth=6;for(let x=105;x<565;x+=42){ctx.beginPath();ctx.moveTo(x,775);ctx.lineTo(x,789);ctx.stroke();}ctx.beginPath();ctx.moveTo(105,782);ctx.lineTo(565,782);ctx.stroke();
+ // stepping stones near village paths
+ for(let i=0;i<8;i++){ctx.fillStyle='#c9c2a6';ctx.beginPath();ctx.ellipse(800+i*28,615+(i%2)*5,10,6,.15,0,Math.PI*2);ctx.fill();}
  buildings.forEach(drawHouse);
- // kios sign and balai sign
- ctx.font='bold 14px Nunito';ctx.textAlign='center';ctx.fillStyle='#174d32';ctx.fillText('BALAI KELOMPOK TANI',685,125);ctx.fillText('TOKO TANI',1495,155);
- // trees
- [[90,160],[450,130],[900,170],[1080,250],[1700,220],[850,850],[650,960],[1750,850],[300,650],[920,1080],[1660,1120]].forEach(p=>drawTree(...p));
- // labels
- ctx.textAlign='left';ctx.font='bold 20px Nunito';ctx.fillStyle='#315c37';ctx.fillText('DESA SUKAMAJU',45,55);ctx.font='bold 16px Nunito';ctx.fillText('AREA PERSAWAHAN',1190,690);ctx.fillText('JALAN DESA',420,530);
- // NPCs
- npcs.forEach(n=>{const done=missionDone(n.id);ctx.font='38px serif';ctx.textAlign='center';ctx.fillText(n.emoji,n.x,n.y+8);ctx.font='bold 14px Nunito';ctx.fillStyle='#23452c';ctx.fillText(n.name,n.x,n.y+27);if(n.kind==='mission'){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(n.x,n.y-32,15,0,Math.PI*2);ctx.fill();ctx.fillStyle=done?'#23834b':'#d88b1f';ctx.font='bold 17px Nunito';ctx.fillText(done?'✓':'!',n.x,n.y-26);}});
+ // signboards and lamp posts
+ ctx.fillStyle='#68482e';ctx.fillRect(678,98,5,34);roundedRect(ctx,625,88,112,25,5,'#f2dfad');ctx.fillStyle='#315b39';ctx.font='bold 11px Nunito';ctx.textAlign='center';ctx.fillText('BALAI KELOMPOK TANI',681,105);
+ ctx.fillStyle='#68482e';ctx.fillRect(1590,495,5,60);ctx.fillStyle='#f7e4a8';ctx.beginPath();ctx.arc(1592,490,10,0,Math.PI*2);ctx.fill();
+ // decorative shrubs, flower beds and trees
+ [[90,160],[450,130],[900,170],[1080,250],[1700,220],[850,850],[650,960],[1750,850],[300,650],[920,1080],[1660,1120],[500,920],[1320,1110],[1770,390]].forEach(p=>drawTree(...p));
+ for(let i=0;i<42;i++){const x=(i*149+60)%1760,y=(i*97+95)%1160;if((x>960&&x<1630&&y>690&&y<1060)||(x>110&&x<570&&y>780&&y<1050))continue;ctx.fillStyle=i%2?'#e9d778':'#f0e9bd';ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);ctx.fill();}
+ // area labels with subtle backing
+ ctx.textAlign='left';ctx.font='900 20px Nunito';ctx.fillStyle='rgba(255,255,235,.72)';ctx.fillText('DESA SUKAMAJU',43,54);ctx.fillStyle='#315c37';ctx.fillText('DESA SUKAMAJU',40,51);
+ ctx.font='bold 16px Nunito';ctx.fillStyle='#315c37';ctx.fillText('AREA PERSAWAHAN',1190,690);ctx.fillText('JALAN DESA',420,530);
+ // NPCs with shadows and quest markers
+ npcs.forEach(n=>{const done=missionDone(n.id);ctx.fillStyle='rgba(38,70,37,.18)';ctx.beginPath();ctx.ellipse(n.x,n.y+7,19,7,0,0,Math.PI*2);ctx.fill();ctx.font='40px serif';ctx.textAlign='center';ctx.fillText(n.emoji,n.x,n.y+5);roundedRect(ctx,n.x-43,n.y+12,86,21,9,'rgba(255,255,244,.88)');ctx.font='bold 12px Nunito';ctx.fillStyle='#23452c';ctx.fillText(n.name,n.x,n.y+27);if(n.kind==='mission'){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(n.x,n.y-34,15,0,Math.PI*2);ctx.fill();ctx.fillStyle=done?'#23834b':'#d88b1f';ctx.font='bold 17px Nunito';ctx.fillText(done?'✓':'!',n.x,n.y-28);}});
  // player shadow and character
- ctx.fillStyle='#31552c55';ctx.beginPath();ctx.ellipse(state.player.x,state.player.y+8,16,7,0,0,Math.PI*2);ctx.fill();ctx.font='38px serif';ctx.textAlign='center';ctx.fillText('🧑‍🌾',state.player.x,state.player.y+5);
- // proximity indicator
- const near=nearestNpc();if(near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<82){ctx.fillStyle='#174d32';ctx.font='bold 15px Nunito';ctx.fillText('Tekan E untuk bicara',state.player.x,state.player.y-34);}
+ ctx.fillStyle='rgba(35,69,42,.28)';ctx.beginPath();ctx.ellipse(state.player.x,state.player.y+12,19,8,0,0,Math.PI*2);ctx.fill();ctx.font='40px serif';ctx.textAlign='center';ctx.fillText('🧑‍🌾',state.player.x,state.player.y+5);
+ const near=nearestNpc();if(near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<82){roundedRect(ctx,state.player.x-75,state.player.y-63,150,25,10,'rgba(255,255,245,.94)');ctx.fillStyle='#174d32';ctx.font='bold 13px Nunito';ctx.fillText('Tekan E untuk bicara',state.player.x,state.player.y-46);}
  ctx.restore();
  $('worldLocation').textContent=near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<100?'📍 '+near.name:'📍 Desa Sukamaju';
  const next=nextMission();$('worldObjective').textContent=next?'🎯 '+next.text:'⭐ Semua misi desa selesai';
