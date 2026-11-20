@@ -3,6 +3,7 @@
 const $ = id => document.getElementById(id);
 const KEY = 'myPplMyAdventure.save.v1';
 const TUTORIAL_KEY='myPplMyAdventure.tutorial.v1';
+let mineMonster=null,mineNextMonsterAt=0,mineLastFrame=0,mineHitCooldown=0,mineToastTimer=0;
 
 const FIRST_LEVEL_XP=150, XP_PER_LEVEL=250;
 function xpThreshold(level){return level<=1?0:FIRST_LEVEL_XP+(level-2)*XP_PER_LEVEL;}
@@ -804,27 +805,44 @@ function drawPalm(t=0){
  const hint=$('canvasHint');if(hint)hint.textContent=window.matchMedia('(max-width: 760px)').matches?'Gerakkan karakter, kejar hantu, lalu tap INTERAKSI saat dekat untuk +2 koin.':'Gerakkan karakter, kejar hantu, lalu tekan E / Spasi saat dekat untuk +2 koin.';
 }
 function drawMine(t=0){
- ctx.clearRect(0,0,canvas.width,canvas.height);ctx.save();
- const g=ctx.createLinearGradient(0,0,0,canvas.height);g.addColorStop(0,'#302a29');g.addColorStop(1,'#17191b');ctx.fillStyle=g;ctx.fillRect(0,0,canvas.width,canvas.height);
- // Terowongan batu dan rel tambang.
- ctx.fillStyle='#51443b';ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(canvas.width,0);ctx.lineTo(canvas.width,115);ctx.quadraticCurveTo(canvas.width/2,35,0,115);ctx.closePath();ctx.fill();
- for(let i=0;i<75;i++){const x=(i*137+29)%canvas.width,y=(i*83+37)%(canvas.height-100);ctx.fillStyle=i%2?'rgba(194,169,132,.15)':'rgba(0,0,0,.18)';ctx.beginPath();ctx.arc(x,y,2+(i%5),0,Math.PI*2);ctx.fill();}
- ctx.strokeStyle='#8d765f';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(0,canvas.height-75);ctx.lineTo(canvas.width,canvas.height-75);ctx.moveTo(0,canvas.height-52);ctx.lineTo(canvas.width,canvas.height-52);ctx.stroke();
- for(let x=25;x<canvas.width;x+=55){ctx.strokeStyle='#6c5948';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x,canvas.height-88);ctx.lineTo(x+18,canvas.height-40);ctx.stroke();}
- // Vena emas di dinding.
- [[100,180],[canvas.width-120,170],[canvas.width/2,125],[canvas.width-210,canvas.height-155],[180,canvas.height-180]].forEach(([x,y],i)=>{ctx.fillStyle='#7c6344';ctx.beginPath();ctx.moveTo(x-34,y+18);ctx.lineTo(x-20,y-20);ctx.lineTo(x+18,y-27);ctx.lineTo(x+38,y+12);ctx.closePath();ctx.fill();ctx.fillStyle='#f2c94c';ctx.beginPath();ctx.moveTo(x-17,y+8);ctx.lineTo(x-6,y-14);ctx.lineTo(x+5,y-4);ctx.lineTo(x+17,y-17);ctx.lineTo(x+23,y+10);ctx.closePath();ctx.fill();});
- const spots=state.mineNodes.length?state.mineNodes:[[canvas.width*.28,canvas.height*.38],[canvas.width*.72,canvas.height*.34],[canvas.width*.5,canvas.height*.68],[canvas.width*.82,canvas.height*.7],[canvas.width*.18,canvas.height*.72]];
- spots.forEach((pt,i)=>{if(pt===null)return;const [x,y]=pt;ctx.fillStyle='#4b3b2e';ctx.beginPath();ctx.arc(x,y,24,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f4c542';ctx.beginPath();ctx.arc(x-7,y-5,7,0,Math.PI*2);ctx.arc(x+8,y+4,6,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff0a5';ctx.font='bold 11px Nunito';ctx.textAlign='center';ctx.fillText('EMAS',x,y+39);});
+ const w=canvas.width,h=canvas.height, mobile=window.matchMedia('(max-width: 760px)').matches;
+ const dt=mineLastFrame?Math.min((t-mineLastFrame)/16,2):1;mineLastFrame=t;
+ ctx.clearRect(0,0,w,h);ctx.save();
+ const bg=ctx.createLinearGradient(0,0,0,h);bg.addColorStop(0,'#42342e');bg.addColorStop(.48,'#292526');bg.addColorStop(1,'#15191c');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+ // Lapisan batu, stalaktit, dan cahaya obor.
+ ctx.fillStyle='#594438';ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(w,0);ctx.lineTo(w,112);ctx.quadraticCurveTo(w*.5,30,0,112);ctx.closePath();ctx.fill();
+ for(let i=0;i<85;i++){const x=(i*137+29)%w,y=(i*83+37)%(h-95);ctx.fillStyle=i%2?'rgba(210,174,128,.13)':'rgba(0,0,0,.2)';ctx.beginPath();ctx.arc(x,y,2+(i%5),0,Math.PI*2);ctx.fill();}
+ for(const x of [42,w-42]){ctx.fillStyle='#6d4b32';ctx.fillRect(x-5,92,10,46);ctx.fillStyle='#f6a53a';ctx.beginPath();ctx.moveTo(x,83);ctx.quadraticCurveTo(x+18,102,x,119);ctx.quadraticCurveTo(x-15,103,x,83);ctx.fill();ctx.fillStyle='rgba(255,170,52,.12)';ctx.beginPath();ctx.arc(x,105,48,0,Math.PI*2);ctx.fill();}
+ // Rel dan bantalan kayu.
+ ctx.strokeStyle='#9b7957';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(0,h-75);ctx.lineTo(w,h-75);ctx.moveTo(0,h-52);ctx.lineTo(w,h-52);ctx.stroke();
+ for(let x=18;x<w;x+=48){ctx.strokeStyle='#76583f';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(x,h-87);ctx.lineTo(x+18,h-39);ctx.stroke();}
+ // Urat emas di dinding.
+ [[100,180],[w-120,170],[w/2,125],[w-210,h-155],[180,h-180]].forEach(([x,y])=>{ctx.fillStyle='#71543c';ctx.beginPath();ctx.moveTo(x-38,y+18);ctx.lineTo(x-20,y-22);ctx.lineTo(x+18,y-29);ctx.lineTo(x+40,y+12);ctx.closePath();ctx.fill();ctx.fillStyle='#f4c542';ctx.beginPath();ctx.moveTo(x-17,y+8);ctx.lineTo(x-6,y-14);ctx.lineTo(x+5,y-4);ctx.lineTo(x+17,y-17);ctx.lineTo(x+23,y+10);ctx.closePath();ctx.fill();});
+ // Hiasan peti harta, permata, dan tumpukan koin.
+ function chest(x,y,scale=1){ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.fillStyle='#70401f';ctx.fillRect(-28,-3,56,29);ctx.fillStyle='#a96a2d';ctx.beginPath();ctx.moveTo(-28,-3);ctx.lineTo(-23,-20);ctx.quadraticCurveTo(0,-37,23,-20);ctx.lineTo(28,-3);ctx.closePath();ctx.fill();ctx.strokeStyle='#e5b94f';ctx.lineWidth=5;ctx.stroke();ctx.fillStyle='#f6d45e';ctx.fillRect(-4,-12,8,19);ctx.fillStyle='#f6e39b';ctx.fillRect(-23,5,46,5);ctx.restore();}
+ chest(w*.16,h*.39,.83);chest(w*.82,h*.52,.9);chest(w*.37,h*.22,.58);
+ for(const [x,y] of [[w*.1,h*.65],[w*.88,h*.28],[w*.7,h*.19]]){ctx.fillStyle='#41d5ce';ctx.beginPath();ctx.moveTo(x,y-12);ctx.lineTo(x+9,y);ctx.lineTo(x,y+13);ctx.lineTo(x-9,y);ctx.closePath();ctx.fill();ctx.fillStyle='rgba(255,255,255,.5)';ctx.fillRect(x-2,y-8,3,9);}
+ // Bongkahan emas yang dapat ditambang: emas batangan dan koin terlihat jelas.
+ const spots=state.mineNodes.length?state.mineNodes:[[w*.28,h*.38],[w*.72,h*.34],[w*.5,h*.68],[w*.82,h*.7],[w*.18,h*.72]];
+ spots.forEach((pt,i)=>{if(pt===null)return;const [x,y]=pt;ctx.fillStyle='#47382e';ctx.beginPath();ctx.ellipse(x,y+8,35,23,0,0,Math.PI*2);ctx.fill();ctx.save();ctx.translate(x-8,y-4);ctx.rotate(-.12);ctx.fillStyle='#d99b20';ctx.beginPath();ctx.moveTo(-17,-7);ctx.lineTo(12,-7);ctx.lineTo(17,5);ctx.lineTo(-12,5);ctx.closePath();ctx.fill();ctx.strokeStyle='#ffe58a';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#f7c843';ctx.beginPath();ctx.ellipse(19,10,8,5,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#fff0a5';ctx.stroke();ctx.beginPath();ctx.ellipse(-22,12,7,4,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();ctx.fillStyle='#fff0a5';ctx.font='bold 11px Nunito';ctx.textAlign='center';ctx.fillText('EMAS',x,y+42);});
+ // Monster kelabang merah muncul berkala dan memburu pemain.
+ if(!mineMonster&&t>=mineNextMonsterAt){const edge=Math.floor(Math.random()*4);mineMonster={x:edge===0?28:edge===1?w-28:Math.random()*w,y:edge===2?95:edge===3?h-105:95+Math.random()*(h-210),phase:Math.random()*6.28};mineNextMonsterAt=t+10500+Math.random()*6500;}
+ const px=state.player.x,py=state.player.y;
+ if(mineMonster){const dx=px-mineMonster.x,dy=py-mineMonster.y,dist=Math.hypot(dx,dy)||1;mineMonster.x+=dx/dist*1.18*dt;mineMonster.y+=dy/dist*1.18*dt;mineMonster.x=Math.max(25,Math.min(w-25,mineMonster.x));mineMonster.y=Math.max(90,Math.min(h-100,mineMonster.y));
+   ctx.save();ctx.translate(mineMonster.x,mineMonster.y);ctx.rotate(Math.atan2(dy,dx));
+   for(let i=8;i>=0;i--){const x=-i*10;ctx.fillStyle=i%2?'#a91420':'#d92731';ctx.beginPath();ctx.ellipse(x,Math.sin(t/100+i*.8)*3,8,12-i*.35,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#ff6b62';ctx.lineWidth=1.5;ctx.stroke();ctx.strokeStyle='#f3a39a';ctx.lineWidth=2;for(const side of [-1,1]){ctx.beginPath();ctx.moveTo(x,side*5);ctx.lineTo(x-5,side*14);ctx.stroke();}}
+   ctx.fillStyle='#f04438';ctx.beginPath();ctx.arc(5,0,10,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ffe7b0';ctx.beginPath();ctx.arc(8,-4,2.3,0,Math.PI*2);ctx.arc(8,4,2.3,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#ff8b78';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(9,-7);ctx.lineTo(17,-13);ctx.moveTo(9,7);ctx.lineTo(17,13);ctx.stroke();ctx.restore();
+   if(dist<27&&t>=mineHitCooldown){state.xp=Math.max(0,state.xp-2);updateStats();save();mineHitCooldown=t+1800;mineMonster=null;mineNextMonsterAt=t+7000;const md=$('missionDescription');if(md)md.textContent='⚠️ Kamu terkena kelabang merah! XP berkurang 2.';}
+ }
  // Gerobak dan pintu keluar.
- ctx.fillStyle='#b98a54';ctx.beginPath();ctx.ellipse(canvas.width*.5,canvas.height-70,58,27,0,Math.PI,Math.PI*2);ctx.fill();ctx.fillStyle='#17191b';ctx.beginPath();ctx.ellipse(canvas.width*.5,canvas.height-69,43,19,0,Math.PI,Math.PI*2);ctx.fill();ctx.fillStyle='#fff0c2';ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillText('KELUAR • INTERAKSI',canvas.width*.5,canvas.height-24);
+ ctx.fillStyle='#b98a54';ctx.beginPath();ctx.ellipse(w*.5,h-70,58,27,0,Math.PI,Math.PI*2);ctx.fill();ctx.fillStyle='#17191b';ctx.beginPath();ctx.ellipse(w*.5,h-69,43,19,0,Math.PI,Math.PI*2);ctx.fill();ctx.fillStyle='#fff0c2';ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillText('KELUAR • INTERAKSI',w*.5,h-24);
  ctx.fillStyle='#986a3f';ctx.fillRect(18,20,75,46);ctx.fillStyle='#d8b879';ctx.fillRect(25,26,61,30);ctx.fillStyle='#2d2520';ctx.beginPath();ctx.arc(33,70,8,0,Math.PI*2);ctx.arc(78,70,8,0,Math.PI*2);ctx.fill();
- ctx.fillStyle='#fff0c2';ctx.font='bold 15px Nunito';ctx.textAlign='left';ctx.fillText('TAMBANG EMAS BAWAH TANAH',110,43);ctx.font='bold 12px Nunito';ctx.fillText(window.matchMedia('(max-width: 760px)').matches?'Dekati emas lalu tap tombol INTERAKSI':'Dekati emas lalu tekan E / Spasi untuk menambang',110,64);
- const px=state.player.x,py=state.player.y;drawFarmer(px,py,{shirt:'#287b49',pants:'#344b3a'},t/105,false,true);
- if(state.catOwned)drawPetCat(px-28,py+20,t);
+ ctx.fillStyle='#fff0c2';ctx.font='bold 15px Nunito';ctx.textAlign='left';ctx.fillText('TAMBANG EMAS BAWAH TANAH',110,43);ctx.font='bold 12px Nunito';ctx.fillText(mobile?'Dekati emas lalu tap INTERAKSI':'Dekati emas lalu tekan E / Spasi untuk menambang',110,64);
+ drawFarmer(px,py,{shirt:'#287b49',pants:'#344b3a'},t/105,false,true);if(state.catOwned)drawPetCat(px-28,py+20,t);
  let nearestGold=null,nearestGoldDist=Infinity;spots.forEach(pt=>{if(!pt)return;const d=Math.hypot(px-pt[0],py-pt[1]);if(d<nearestGoldDist){nearestGoldDist=d;nearestGold=pt;}});
- if(nearestGold&&nearestGoldDist<90){const mobile=window.matchMedia('(max-width: 760px)').matches,label=mobile?'Tap tombol INTERAKSI untuk menambang':'Tekan E / Spasi untuk menambang';ctx.font='bold 12px Nunito';const bw=Math.max(190,ctx.measureText(label).width+24),bx=Math.max(8,Math.min(canvas.width-bw-8,px-bw/2)),by=py-90;roundedRect(ctx,bx,by,bw,28,12,'rgba(255,250,226,.96)');ctx.fillStyle='#4b3825';ctx.textAlign='center';ctx.fillText(label,bx+bw/2,by+18);}
- ctx.restore();$('worldLocation').textContent='⛏️ Tambang Emas • '+state.mineGold+' bongkah';$('worldObjective').textContent='🎯 Tambang emas lalu kembali ke permukaan untuk menukar menjadi XP';
- const h=$('canvasHint');if(h)h.textContent=window.matchMedia('(max-width: 760px)').matches?'Dekati bongkahan emas lalu tap tombol INTERAKSI. Dekati pintu keluar untuk kembali ke desa.':'Dekati bongkahan emas lalu tekan E / Spasi. Dekati pintu keluar untuk kembali ke desa.';
+ if(nearestGold&&nearestGoldDist<90){const label=mobile?'Tap INTERAKSI untuk menambang':'Tekan E / Spasi untuk menambang';ctx.font='bold 12px Nunito';const bw=Math.max(190,ctx.measureText(label).width+24),bx=Math.max(8,Math.min(w-bw-8,px-bw/2)),by=py-90;roundedRect(ctx,bx,by,bw,28,12,'rgba(255,250,226,.96)');ctx.fillStyle='#4b3825';ctx.textAlign='center';ctx.fillText(label,bx+bw/2,by+18);}
+ ctx.restore();$('worldLocation').textContent='⛏️ Tambang Emas • '+state.mineGold+' bongkah';$('worldObjective').textContent='🎯 Tambang emas (batangan & koin), hindari kelabang merah! • Keluar untuk menukar emas';
+ const hint=$('canvasHint');if(hint)hint.textContent=mobile?'Tambang emas batangan dan koin. Hindari kelabang merah (XP -2 jika terkena). Tap INTERAKSI saat dekat emas atau pintu keluar.':'Tambang emas batangan dan koin. Hindari kelabang merah (XP -2 jika terkena). Tekan E / Spasi saat dekat emas atau pintu keluar.';
 }
 function mineInteract(){
  const exit={x:canvas.width*.5,y:canvas.height-105};
@@ -836,7 +854,7 @@ function mineInteract(){
  let idx=-1,best=Infinity;state.mineNodes.forEach((pt,i)=>{if(!pt)return;const d=Math.hypot(state.player.x-pt[0],state.player.y-pt[1]);if(d<best){best=d;idx=i;}});
  if(idx>=0&&best<75){state.mineNodes[idx]=null;state.mineGold++;save();$('worldLocation').textContent='⛏️ Emas terkumpul: '+state.mineGold;}
 }
-function enterMine(){state.returnPosition={x:state.player.x,y:state.player.y};state.scene='mine';state.player={x:canvas.width*.5,y:canvas.height-180};if(!state.mineNodes.length||state.mineNodes.every(x=>x===null))state.mineNodes=[[canvas.width*.28,canvas.height*.38],[canvas.width*.72,canvas.height*.34],[canvas.width*.5,canvas.height*.68],[canvas.width*.82,canvas.height*.7],[canvas.width*.18,canvas.height*.72]];save();}
+function enterMine(){state.returnPosition={x:state.player.x,y:state.player.y};state.scene='mine';mineMonster=null;mineLastFrame=0;mineNextMonsterAt=performance.now()+6500;mineHitCooldown=0;state.player={x:canvas.width*.5,y:canvas.height-180};if(!state.mineNodes.length||state.mineNodes.every(x=>x===null))state.mineNodes=[[canvas.width*.28,canvas.height*.38],[canvas.width*.72,canvas.height*.34],[canvas.width*.5,canvas.height*.68],[canvas.width*.82,canvas.height*.7],[canvas.width*.18,canvas.height*.72]];save();}
 function nearestNpc(){let best=null,dist=Infinity;for(const n of npcs){const d=Math.hypot(n.x-state.player.x,n.y-state.player.y);if(d<dist){dist=d;best=n;}}return best;}
 function blocked(x,y){if(state.scene==='mine'||state.scene==='palm')return false;if(obstacles.some(o=>x>o.x-18&&x<o.x+o.w+18&&y>o.y-10&&y<o.y+o.h+10))return true;const trunks=[[90,160],[450,130],[900,170],[1080,250],[1700,220],[850,850],[650,960],[1750,850],[920,1080],[1660,1120],[500,920],[1320,1110],[1770,390],[610,260],[880,760],[1720,500],[1320,80],[250,1120]];if(trunks.some(([tx,ty])=>Math.hypot(x-tx,y-(ty+18))<22))return true;return npcs.some(n=>Math.hypot(x-n.x,y-n.y)<22);}
 function movePlayer(dx,dy){

@@ -213,7 +213,14 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Pemilihan benih disimpan pada progres kebun.
 
 
-## Versi 0.19.2
+## v0.19.2 — Penguncian Kebun Sawit
 - Kebun Sawit terkunci sampai pemain mencapai Level 5 — Penyuluh Pertanian Ahli Pertama.
 - Pemain di bawah Level 5 menerima notifikasi saat mencoba masuk; gerbang menampilkan status terkunci.
 - Progres permainan dan penyimpanan lama tetap dipertahankan.
+
+## v0.20.0 — Penyempurnaan Tambang Emas
+- Area tambang dipercantik dengan detail gua, obor, peti harta karun, dan permata sebagai dekorasi.
+- Objek emas yang dapat ditambang divisualisasikan sebagai emas batangan dan koin.
+- Kelabang merah bawah tanah muncul berkala dan mengejar pemain.
+- Jika tersentuh kelabang, XP berkurang 2 poin (tidak sampai negatif); monster menghilang sementara sebelum muncul kembali.
+- Sistem save lama tetap dipertahankan.
