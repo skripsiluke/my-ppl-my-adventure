@@ -62,17 +62,17 @@
   </section>
 
   <section id="menuScreen" class="screen hidden">
-    <div class="welcome-row"><div><p class="eyebrow">SELAMAT DATANG,</p><h2 id="welcomeName">Penyuluh Muda!</h2><p class="muted">Desa menantimu. Misi petualangan sudah tersedia.</p></div><div class="avatar-bubble">🧑‍🌾</div></div>
-    <div class="level-card"><div><span class="eyebrow light" id="levelLabel">LEVEL 1</span><h3 id="levelTitle">Penyuluh Pemula</h3><p><span id="levelXp">0</span> / 250 XP menuju level berikutnya</p></div><div class="level-icon">🌱</div><div class="progress-track"><span id="levelProgress"></span></div></div>
+    <div class="welcome-row"><div><p class="eyebrow">SELAMAT DATANG,</p><h2 id="welcomeName">Penyuluh Muda!</h2><p class="muted">Desa menantimu. Misi petualangan sudah tersedia.</p></div><div class="avatar-wrap"><button id="avatarProfileButton" class="avatar-bubble" type="button" aria-label="Buka profil penyuluh" aria-expanded="false">🧑‍🌾</button><section id="profilePanel" class="profile-panel avatar-profile-panel hidden"><div class="profile-avatar">🧑‍🌾</div><div class="profile-details"><h3 id="profileName">Penyuluh Muda</h3><p id="profileRank">Penyuluh Pertanian Pemula</p><div class="profile-stats"><span>⭐ <b id="profileXp">0</b> XP</span><span>🪙 <b id="profileCoins">0</b></span><span>🏆 <b id="profileBadges">0/6</b></span></div></div></section></div></div>
+    <div class="level-card"><div><span class="eyebrow light" id="levelLabel">LEVEL 1</span><h3 id="levelTitle">Penyuluh Pemula</h3><p><span id="levelXp">0</span> / <span id="levelXpNeeded">150</span> XP menuju level berikutnya</p></div><div class="level-icon">🌱</div><div class="progress-track"><span id="levelProgress"></span></div></div>
     <h3 class="section-heading">Pilih petualangan</h3>
     <div class="mode-grid">
       <button class="mode-card adventure-card" data-mode="adventure"><span class="mode-icon">🗺️</span><b>Adventure</b><small>Jelajahi Desa Sukamaju dan temui warga.</small><span class="mode-link">Mainkan →</span></button>
       <button class="mode-card farm-card" data-mode="farm"><span class="mode-icon">🌾</span><b>Farm Simulator</b><small>Tanam, rawat, dan panen tanaman.</small><span class="mode-link">Mainkan →</span></button>
       <button class="mode-card quiz-card" data-mode="quiz"><span class="mode-icon">🧠</span><b>Quiz Challenge</b><small>Uji pengetahuan budidaya dan penyuluhan.</small><span class="mode-link">Mainkan →</span></button>
     </div>
-    <section class="pmaas-event-card">
+    <section id="pmaasEventCard" class="pmaas-event-card">
       <div class="pmaas-event-head"><span class="pmaas-event-icon">🌾</span><div><p class="eyebrow">EVENT KHUSUS KEMENTERIAN PERTANIAN</p><h3>Gerakan Adopsi PM-AAS</h3></div><span class="pmaas-live">EVENT</span></div>
-      <p class="pmaas-event-copy">Ajak petani dan kelompok tani mengenal, mencoba, lalu menerapkan Pertanian Modern – Advanced Agricultural System (PM-AAS). Semakin banyak yang menerapkan, semakin besar XP yang kamu kumpulkan!</p>
+      <p id="pmaasLockNotice" class="pmaas-lock-notice hidden">🔒 Event PM-AAS terkunci. Capai Level 2 (150 XP) untuk membuka seluruh misi calon adopter.</p><p class="pmaas-event-copy">Ajak petani dan kelompok tani mengenal, mencoba, lalu menerapkan Pertanian Modern – Advanced Agricultural System (PM-AAS). Semakin banyak yang menerapkan, semakin besar XP yang kamu kumpulkan!</p>
       <div class="pmaas-progress-line"><div><b id="pmaasCount">0</b> adopsi berhasil</div><div><b id="pmaasXp">0</b> XP event</div></div>
       <div class="pmaas-progress-track"><span id="pmaasProgress"></span></div>
       <button id="pmaasOpen" class="button button-primary pmaas-open">Buka Event PM-AAS →</button>
@@ -105,12 +105,6 @@
       </section>
     </div>
 
-    <div class="profile-tools">
-      <button id="profileToggle" class="profile-toggle" type="button"><span>👤 Profil Penyuluh</span><span>▼</span></button>
-      <section id="profilePanel" class="profile-panel hidden">
-        <div class="profile-avatar">🧑‍🌾</div><div class="profile-details"><h3 id="profileName">Penyuluh Muda</h3><p id="profileRank">Penyuluh Pertanian Pemula</p><div class="profile-stats"><span>⭐ <b id="profileXp">0</b> XP</span><span>🪙 <b id="profileCoins">0</b></span><span>🏆 <b id="profileBadges">0/4</b></span></div></div>
-      </section>
-    </div>
     <div class="settings-tools">
       <button id="settingsToggle" class="settings-toggle" type="button" aria-expanded="false"><span>⚙️ Pengaturan Game</span><span>▼</span></button>
       <section id="settingsPanel" class="settings-panel hidden">
@@ -129,9 +123,9 @@
           <div class="volume-meta"><span>0%</span><b id="bgmVolumeValue">70%</b><span>100%</span></div>
         </div>
         <p id="bgmStatus" class="settings-status" aria-live="polite">BGM aktif</p>
+        <div class="settings-danger-zone"><h3>Data Permainan</h3><p>Hapus XP, koin, progres misi, dan pencapaian pada perangkat ini.</p><button id="resetButton" class="text-button">Reset progres permainan</button></div>
       </section>
     </div>
-    <button id="resetButton" class="text-button">Reset progres permainan</button>
   </section>
 
   <section id="gameScreen" class="screen hidden">

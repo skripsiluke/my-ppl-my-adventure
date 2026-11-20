@@ -89,3 +89,11 @@ Workflow pada `.github/workflows/deploy.yml` juga disediakan untuk deployment ot
 - Adopsi kelompok tani tetap memperoleh bonus lebih besar daripada petani perorangan.
 - Data adopsi yang telah selesai pada versi sebelumnya tetap dikenali; progres lama yang belum selesai perlu mengikuti rangkaian lima tahap yang baru.
 - Herbisida hanya disebut sebagai pilihan bila diperlukan dan harus mengikuti label/petunjuk; rincian teknis mengikuti materi yang diberikan pengguna.
+
+## Versi 0.11.0 — Penyempurnaan Profil, Level, Event, dan Kuis
+- Profil penyuluh dipindahkan ke avatar kanan atas dan dibuka melalui klik/tap avatar.
+- Tombol reset progres dipindahkan ke dalam Pengaturan Game.
+- Event PM-AAS terkunci untuk pemain Level 1 dan terbuka mulai Level 2 (150 XP).
+- Level 1 membutuhkan 150 XP; level berikutnya masing-masing membutuhkan 250 XP.
+- Kuis tetap berisi 5 soal per sesi, tetapi diambil secara acak dari bank 20 pertanyaan, termasuk topik PM-AAS, Tabela, drum seeder, AWD, pemupukan, pengendalian OPT, dan panen.
+- Pengaturan musik, progres misi, event, serta penyimpanan lokal tetap dipertahankan.
