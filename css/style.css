@@ -79,3 +79,34 @@
 .settings-danger-zone h3{font-size:14px;color:#9b4032}
 .settings-danger-zone p{font-size:11px;color:#718071;line-height:1.5}
 .settings-danger-zone .text-button{color:#a23d32;border:1px solid #e8c7c0;border-radius:10px;padding:10px 13px;background:#fff8f6;font-weight:800;cursor:pointer}
+
+/* v0.11.1 — keep drum seeder parts and assembly slots side-by-side on phones */
+@media(max-width:560px){
+  .drum-game-grid{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+    gap:7px;
+    align-items:start;
+  }
+  .drum-game-grid>div{min-width:0}
+  .drum-game-grid h5{font-size:10px;line-height:1.3;min-height:26px;margin-bottom:6px}
+  .drum-parts,.drum-slots{gap:6px;min-width:0}
+  .drum-part{
+    min-width:0;
+    min-height:91px;
+    padding:5px 3px;
+    gap:3px;
+  }
+  .drum-part img{height:48px}
+  .drum-part b{font-size:8px;line-height:1.25;min-height:20px}
+  .drum-part small{font-size:7px;line-height:1.2}
+  .drum-slot{
+    min-width:0;
+    min-height:91px;
+    padding:5px 3px;
+    gap:3px;
+  }
+  .drum-slot img{height:46px;max-width:100%}
+  .drum-slot b{font-size:8px;line-height:1.25}
+  .drum-slot small{font-size:7px;line-height:1.2}
+  .slot-number{left:3px;top:3px;width:15px;height:15px;font-size:8px}
+}
