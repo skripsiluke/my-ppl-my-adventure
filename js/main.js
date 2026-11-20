@@ -456,23 +456,62 @@ function drawHouse(b){
  ctx.fillStyle='#fff8df';ctx.font='bold 13px Nunito';ctx.textAlign='center';ctx.fillText(b.name,b.x+b.w/2,b.y+b.h+25);
 }
 function drawFarmer(x,y,palette,phase=0,moving=false,isPlayer=false){
- const bob=moving?Math.abs(Math.sin(phase*.12))*2:0,step=moving?Math.sin(phase*.12)*7:0;
+ const gait=phase*.126;
+ const bob=moving?Math.abs(Math.sin(gait))*2.4:0;
+ const step=moving?Math.sin(gait)*7:0;
  ctx.save();ctx.globalAlpha=1;ctx.lineCap='round';ctx.lineJoin='round';
  // Ground shadow
- ctx.fillStyle='rgba(30,55,30,.30)';ctx.beginPath();ctx.ellipse(x,y+17,17,6,0,0,Math.PI*2);ctx.fill();
- // Legs and shoes, alternating while walking
- ctx.strokeStyle=palette.pants;ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(x-5,y+3-bob);ctx.lineTo(x-6-step*.55,y+16);ctx.moveTo(x+5,y+3-bob);ctx.lineTo(x+6+step*.55,y+16);ctx.stroke();
- ctx.strokeStyle='#49382c';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x-6-step*.55,y+16);ctx.lineTo(x-10-step*.55,y+17);ctx.moveTo(x+6+step*.55,y+16);ctx.lineTo(x+10+step*.55,y+17);ctx.stroke();
- // Torso and arms
- roundedRect(ctx,x-10,y-18-bob,20,24,6,palette.shirt);ctx.strokeStyle='#e7b58b';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x-9,y-13-bob);ctx.lineTo(x-14+step*.2,y-2-bob);ctx.moveTo(x+9,y-13-bob);ctx.lineTo(x+14-step*.2,y-2-bob);ctx.stroke();
- // Neck and face
- roundedRect(ctx,x-3,y-23-bob,6,7,2,'#d99a70');ctx.fillStyle='#f0bd91';ctx.beginPath();ctx.arc(x,y-29-bob,10,0,Math.PI*2);ctx.fill();
- ctx.fillStyle='#33251e';ctx.beginPath();ctx.arc(x-3.5,y-30-bob,1.2,0,Math.PI*2);ctx.arc(x+3.5,y-30-bob,1.2,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#9c5e49';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(x,y-27-bob,3,0.15,Math.PI-.15);ctx.stroke();
- // Farmer hat
- ctx.fillStyle=palette.hat;ctx.beginPath();ctx.ellipse(x,y-39-bob,15,4,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#e9c66b';ctx.beginPath();ctx.ellipse(x,y-42-bob,9,5,0,Math.PI,Math.PI*2);ctx.fill();
- if(isPlayer){ctx.strokeStyle='rgba(255,255,255,.75)';ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(x,y-29-bob,11,Math.PI*1.05,Math.PI*1.95);ctx.stroke();}
+ ctx.fillStyle='rgba(30,55,30,.30)';ctx.beginPath();ctx.ellipse(x,y+18,18,6,0,0,Math.PI*2);ctx.fill();
+ if(isPlayer){
+   // Dark green uniform trousers with alternating leg stride
+   ctx.fillStyle='#142719';
+   ctx.beginPath();
+   ctx.moveTo(x-9,y-1-bob);ctx.lineTo(x-2,y-1-bob);ctx.lineTo(x-3-step*.62,y+18);ctx.lineTo(x-5-step*.62,y+20);ctx.lineTo(x-10-step*.62,y+20);ctx.closePath();ctx.fill();
+   ctx.beginPath();
+   ctx.moveTo(x+2,y-1-bob);ctx.lineTo(x+9,y-1-bob);ctx.lineTo(x+10+step*.62,y+20);ctx.lineTo(x+5+step*.62,y+20);ctx.lineTo(x+3+step*.62,y+18);ctx.closePath();ctx.fill();
+   // Black polished shoes
+   ctx.fillStyle='#171817';
+   ctx.beginPath();ctx.ellipse(x-8-step*.62,y+20,6,3,0,0,Math.PI*2);ctx.fill();
+   ctx.beginPath();ctx.ellipse(x+8+step*.62,y+20,6,3,0,0,Math.PI*2);ctx.fill();
+   // Arms in short-sleeved olive uniform; swing with gait
+   ctx.strokeStyle='#bd795b';ctx.lineWidth=5.5;
+   ctx.beginPath();ctx.moveTo(x-9,y-15-bob);ctx.lineTo(x-13-step*.28,y-3);ctx.lineTo(x-12-step*.35,y+1);ctx.moveTo(x+9,y-15-bob);ctx.lineTo(x+13+step*.28,y-3);ctx.lineTo(x+12+step*.35,y+1);ctx.stroke();
+   // Shirt body
+   roundedRect(ctx,x-10,y-22-bob,20,23,3,'#66715d');
+   // Shirt front placket and buttons
+   ctx.strokeStyle='#4e5a48';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x,y-21-bob);ctx.lineTo(x,y-1);ctx.stroke();
+   ctx.fillStyle='#d2c7a2';for(let yy=-16;yy<=-4;yy+=5){ctx.beginPath();ctx.arc(x+1.8,y+yy-bob,0.65,0,Math.PI*2);ctx.fill();}
+   // Two chest pockets and flaps
+   ctx.fillStyle='#596653';ctx.fillRect(x-7,y-14-bob,5,6);ctx.fillRect(x+2,y-14-bob,5,6);
+   ctx.strokeStyle='#414c3e';ctx.lineWidth=.8;ctx.strokeRect(x-7,y-14-bob,5,6);ctx.strokeRect(x+2,y-14-bob,5,6);
+   ctx.beginPath();ctx.moveTo(x-7,y-13-bob);ctx.lineTo(x-2,y-13-bob);ctx.moveTo(x+2,y-13-bob);ctx.lineTo(x+7,y-13-bob);ctx.stroke();
+   // Shoulder epaulettes
+   ctx.strokeStyle='#b6a66b';ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(x-9,y-20-bob);ctx.lineTo(x-5,y-22-bob);ctx.moveTo(x+9,y-20-bob);ctx.lineTo(x+5,y-22-bob);ctx.stroke();
+   ctx.fillStyle='#d7c47a';ctx.beginPath();ctx.arc(x-6,y-21-bob,1,0,Math.PI*2);ctx.arc(x+6,y-21-bob,1,0,Math.PI*2);ctx.fill();
+   // Sleeve insignia patches
+   ctx.fillStyle='#d5c34e';ctx.beginPath();ctx.arc(x-10,y-15-bob,2.1,0,Math.PI*2);ctx.arc(x+10,y-15-bob,2.1,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle='#356c43';ctx.beginPath();ctx.arc(x-10,y-15-bob,1,0,Math.PI*2);ctx.arc(x+10,y-15-bob,1,0,Math.PI*2);ctx.fill();
+   // Black belt with gold buckle
+   ctx.fillStyle='#171b16';ctx.fillRect(x-10,y-2-bob,20,3);
+   ctx.fillStyle='#c7ad55';ctx.fillRect(x-2,y-2-bob,4,3);
+   // Neck, head and short dark hair (no farmer hat)
+   roundedRect(ctx,x-3,y-27-bob,6,6,2,'#b9785b');
+   ctx.fillStyle='#d99a78';ctx.beginPath();ctx.arc(x,y-34-bob,9,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle='#292522';ctx.beginPath();ctx.arc(x,y-38-bob,9,Math.PI,Math.PI*2);ctx.lineTo(x+8,y-34-bob);ctx.quadraticCurveTo(x,y-39-bob,x-8,y-34-bob);ctx.closePath();ctx.fill();
+   ctx.fillStyle='#292522';ctx.beginPath();ctx.arc(x-3,y-34-bob,1,0,Math.PI*2);ctx.arc(x+3,y-34-bob,1,0,Math.PI*2);ctx.fill();
+   ctx.strokeStyle='#8d5546';ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y-31-bob,2.5,.15,Math.PI-.15);ctx.stroke();
+ }else{
+   // NPC farmer clothes and animated feet
+   ctx.strokeStyle=palette.pants;ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(x-5,y+3-bob);ctx.lineTo(x-6-step*.55,y+16);ctx.moveTo(x+5,y+3-bob);ctx.lineTo(x+6+step*.55,y+16);ctx.stroke();
+   ctx.strokeStyle='#49382c';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x-6-step*.55,y+16);ctx.lineTo(x-10-step*.55,y+17);ctx.moveTo(x+6+step*.55,y+16);ctx.lineTo(x+10+step*.55,y+17);ctx.stroke();
+   roundedRect(ctx,x-10,y-18-bob,20,24,6,palette.shirt);ctx.strokeStyle='#e7b58b';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x-9,y-13-bob);ctx.lineTo(x-14+step*.2,y-2-bob);ctx.moveTo(x+9,y-13-bob);ctx.lineTo(x+14-step*.2,y-2-bob);ctx.stroke();
+   roundedRect(ctx,x-3,y-23-bob,6,7,2,'#d99a70');ctx.fillStyle='#f0bd91';ctx.beginPath();ctx.arc(x,y-29-bob,10,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle='#33251e';ctx.beginPath();ctx.arc(x-3.5,y-30-bob,1.2,0,Math.PI*2);ctx.arc(x+3.5,y-30-bob,1.2,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#9c5e49';ctx.lineWidth=1.2;ctx.beginPath();ctx.arc(x,y-27-bob,3,.15,Math.PI-.15);ctx.stroke();
+   ctx.fillStyle=palette.hat;ctx.beginPath();ctx.ellipse(x,y-39-bob,15,4,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#e9c66b';ctx.beginPath();ctx.ellipse(x,y-42-bob,9,5,0,Math.PI,Math.PI*2);ctx.fill();
+ }
  ctx.restore();
 }
+
 function drawWorld(t=0){
  const camX=Math.max(0,Math.min(WORLD.w-canvas.width,state.player.x-canvas.width/2));
  const camY=Math.max(0,Math.min(WORLD.h-canvas.height,state.player.y-canvas.height/2));

@@ -118,10 +118,16 @@ Workflow pada `.github/workflows/deploy.yml` juga disediakan untuk deployment ot
 - Mempertahankan koordinat dunia, NPC, rintangan, sistem interaksi, misi, XP, dan penyimpanan progres.
 
 
-## Pembaruan v0.13.1 — Karakter dan Interaksi Adventure
+## Pembaruan v0.13.3 — Karakter dan Interaksi Adventure
 - Karakter pemain dan NPC kini digambar sebagai petani utuh dengan kepala, badan, tangan, kaki, pakaian, topi, dan bayangan yang solid.
 - Kaki karakter pemain bergerak bergantian saat pemain berjalan.
 - Label nama warga dan petunjuk interaksi diberi latar kontras, ukuran adaptif, dan batas posisi agar lebih mudah dibaca.
 - Petunjuk desktop menggunakan tombol E/Spasi; pada layar HP berubah menjadi instruksi tap tombol INTERAKSI.
 - Petunjuk kontrol, HUD, dan panel misi disesuaikan agar teks tidak mudah bertumpuk pada layar kecil.
 - Data progres, koordinat NPC, misi, dan sistem permainan tetap dipertahankan.
+
+
+Pembaruan v0.13.3: tempo animasi langkah kaki karakter pemain dipercepat dan ayunan langkah diperjelas.
+
+
+Pembaruan v0.13.3: karakter pemain memakai seragam dinas lapangan lengkap terinspirasi referensi pengguna: kemeja olive dengan tanda bahu dan saku, sabuk hitam, celana panjang hijau gelap, dan sepatu hitam. Animasi langkah dipertahankan.
