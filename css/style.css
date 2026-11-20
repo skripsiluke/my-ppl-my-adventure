@@ -132,3 +132,35 @@
  .level-icon{right:12px;top:20px;font-size:48px}
  .avatar-chooser{gap:7px}
 }
+
+/* v0.12.1: make avatar choices large and place the picker below profile details */
+.avatar-profile-panel{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:14px;
+  width:min(440px,calc(100vw - 30px));
+  padding:18px;
+}
+.avatar-profile-panel .profile-avatar{flex:0 0 72px;width:72px;height:72px}
+.avatar-profile-panel .profile-details{flex:1 1 220px;min-width:0}
+.avatar-profile-panel .avatar-chooser{
+  flex:1 0 100%;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:12px;
+  padding-top:16px;
+}
+.avatar-profile-panel .avatar-choice{
+  width:100%;
+  min-width:0;
+  aspect-ratio:1;
+  border-width:3px;
+  border-radius:16px;
+  box-shadow:0 2px 7px #173d2414;
+}
+.avatar-profile-panel .avatar-choice:focus-visible{outline:3px solid #8ebc75;outline-offset:2px}
+@media(max-width:520px){
+  .avatar-profile-panel{width:min(390px,calc(100vw - 24px));padding:14px;gap:10px}
+  .avatar-profile-panel .avatar-chooser{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+  .avatar-profile-panel .avatar-choice{border-radius:13px}
+}
