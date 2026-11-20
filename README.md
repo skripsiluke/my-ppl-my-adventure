@@ -58,3 +58,12 @@ Workflow pada `.github/workflows/deploy.yml` juga disediakan untuk deployment ot
 - Indikator XP menampilkan progres terhadap target 250 XP.
 - Ditambahkan milestone Penjelajah Desa (6 misi) dan Pahlawan Sukamaju (seluruh 11 misi).
 - Syarat Penyuluh Berprestasi disesuaikan menjadi Level 5 (1.000 XP).
+
+
+## Versi 0.9.0 — Mini-game Merakit Drum Seeder
+- Menambahkan mini-game PM-AAS untuk menyusun lima komponen drum seeder: pegangan, rangka utama, poros, tabung penjatah benih, dan roda.
+- Pemain dapat memilih komponen lalu memilih tempat pemasangan; pada desktop komponen juga dapat diseret (drag-and-drop).
+- Menambahkan pemeriksaan hasil rakitan, umpan balik untuk jawaban yang belum tepat, dan bonus XP untuk rakitan tanpa kesalahan.
+- Status penyelesaian misi disimpan bersama progres PM-AAS yang sudah ada.
+- Progres versi sebelumnya, pengaturan musik, dan penyimpanan LocalStorage tetap menggunakan kunci yang sama.
+- Ilustrasi rakitan merupakan penyederhanaan edukatif berdasarkan contoh drum seeder, bukan panduan servis untuk semua tipe alat.
