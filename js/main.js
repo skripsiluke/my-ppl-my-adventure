@@ -595,7 +595,7 @@ function drawPetCat(x,y,t=0){
 }
 
 function drawWorld(t=0){
- if(state.scene==='mine'){drawMine(t);return;}
+ if(state.scene==='mine'){drawMine(t);return;}if(state.scene==='palm'){drawPalm(t);return;}
  const camX=Math.max(0,Math.min(WORLD.w-canvas.width,state.player.x-canvas.width/2));
  const camY=Math.max(0,Math.min(WORLD.h-canvas.height,state.player.y-canvas.height/2));
  ctx.clearRect(0,0,canvas.width,canvas.height);ctx.save();ctx.translate(-camX,-camY);
@@ -661,6 +661,10 @@ function drawWorld(t=0){
  [[430,470],[875,630],[1650,420],[1750,980],[70,700]].forEach(([x,y])=>{ctx.fillStyle='#9b7045';ctx.fillRect(x-10,y-10,20,20);ctx.strokeStyle='#e0bd83';ctx.lineWidth=2;ctx.strokeRect(x-10,y-10,20,20);ctx.beginPath();ctx.moveTo(x-8,y-8);ctx.lineTo(x+8,y+8);ctx.moveTo(x+8,y-8);ctx.lineTo(x-8,y+8);ctx.stroke();});
  for(let i=0;i<90;i++){const x=(i*173+95)%1760,y=(i*211+140)%1140;if((x>960&&x<1630&&y>690&&y<1060)||(x>110&&x<570&&y>780&&y<1050))continue;ctx.fillStyle=['#e7d16d','#e9a5a0','#f3e6ba','#d7b5e2'][i%4];ctx.beginPath();ctx.arc(x,y,3.2,0,Math.PI*2);ctx.fill();ctx.fillStyle='#4b8b43';ctx.fillRect(x-1,y+3,2,5);}
 
+ // Gerbang menuju Kebun Sawit di pojok tenggara desa
+ ctx.fillStyle='#4d3828';ctx.fillRect(1615,1030,92,12);ctx.fillRect(1625,995,10,52);ctx.fillRect(1687,995,10,52);
+ ctx.fillStyle='#315a34';ctx.beginPath();ctx.moveTo(1605,1002);ctx.lineTo(1660,962);ctx.lineTo(1715,1002);ctx.closePath();ctx.fill();
+ roundedRect(ctx,1632,1008,58,38,5,'#253c2b');ctx.fillStyle='#f0d7a1';ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillText('KEBUN SAWIT',1660,1022);ctx.font='bold 10px Nunito';ctx.fillText('MASUK',1660,1038);
  // area labels with subtle backing
  ctx.textAlign='left';ctx.font='900 20px Nunito';ctx.fillStyle='rgba(255,255,235,.72)';ctx.fillText('DESA SUKAMAJU',43,54);ctx.fillStyle='#315c37';ctx.fillText('DESA SUKAMAJU',40,51);
  ctx.font='bold 16px Nunito';ctx.fillStyle='#315c37';ctx.fillText('AREA PERSAWAHAN',1190,690);ctx.textAlign='center';ctx.font='900 17px Nunito';ctx.lineWidth=4;ctx.strokeStyle='rgba(95,70,43,.48)';ctx.strokeText('JALAN DESA',900,575);ctx.fillStyle='#fff4d8';ctx.fillText('JALAN DESA',900,575);
@@ -670,11 +674,62 @@ function drawWorld(t=0){
  // Pemain: badan penuh, dua kaki dan animasi langkah saat bergerak.
  const moving=!!(state.keys.ArrowRight||state.keys.ArrowLeft||state.keys.ArrowUp||state.keys.ArrowDown||state.keys.w||state.keys.a||state.keys.s||state.keys.d||Math.hypot(state.analog.x,state.analog.y)>.12);
  drawFarmer(state.player.x,state.player.y,{shirt:'#287b49',pants:'#344b3a',hat:'#d8ad4e'},t/105,moving,true);
- const near=nearestNpc();if(Math.hypot(300-state.player.x,640-state.player.y)<90){ctx.font='bold 12px Nunito';roundedRect(ctx,state.player.x-75,state.player.y-91,150,28,12,'rgba(255,255,245,.98)');ctx.fillStyle='#174d32';ctx.textAlign='center';ctx.fillText('Tekan E: Masuk Tambang',state.player.x,state.player.y-73);}else if(near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<88){const mobile=window.matchMedia('(max-width: 760px)').matches;const hint=mobile?'Tap tombol INTERAKSI':'Tekan E untuk bicara';ctx.font='bold 12px Nunito';const bw=Math.max(138,ctx.measureText(hint).width+24),bx=Math.max(8,Math.min(WORLD.w-bw-8,state.player.x-bw/2)),by=state.player.y-91;roundedRect(ctx,bx,by,bw,28,12,'rgba(255,255,245,.98)');ctx.strokeStyle='#d8e6ce';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='#174d32';ctx.textAlign='center';ctx.fillText(hint,bx+bw/2,by+18);}
+ const near=nearestNpc();if(Math.hypot(300-state.player.x,640-state.player.y)<90){const mob=window.matchMedia('(max-width: 760px)').matches;const label=mob?'Tap INTERAKSI: Tambang':'Tekan E: Masuk Tambang';ctx.font='bold 12px Nunito';roundedRect(ctx,state.player.x-90,state.player.y-91,180,28,12,'rgba(255,255,245,.98)');ctx.fillStyle='#174d32';ctx.textAlign='center';ctx.fillText(label,state.player.x,state.player.y-73);}else if(Math.hypot(1660-state.player.x,1080-state.player.y)<105){const mob=window.matchMedia('(max-width: 760px)').matches;const label=mob?'Tap INTERAKSI: Kebun Sawit':'Tekan E: Kebun Sawit';ctx.font='bold 12px Nunito';roundedRect(ctx,state.player.x-94,state.player.y-91,188,28,12,'rgba(255,255,245,.98)');ctx.fillStyle='#174d32';ctx.textAlign='center';ctx.fillText(label,state.player.x,state.player.y-73);}else if(near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<88){const mobile=window.matchMedia('(max-width: 760px)').matches;const hint=mobile?'Tap tombol INTERAKSI':'Tekan E untuk bicara';ctx.font='bold 12px Nunito';const bw=Math.max(138,ctx.measureText(hint).width+24),bx=Math.max(8,Math.min(WORLD.w-bw-8,state.player.x-bw/2)),by=state.player.y-91;roundedRect(ctx,bx,by,bw,28,12,'rgba(255,255,245,.98)');ctx.strokeStyle='#d8e6ce';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='#174d32';ctx.textAlign='center';ctx.fillText(hint,bx+bw/2,by+18);}
  ctx.restore();
  $('worldLocation').textContent=(near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<100?'📍 '+near.name:'📍 Desa Sukamaju')+(state.catOwned?' • 🐈 Kucing menemani':'');
  const hintEl=$('canvasHint');if(hintEl)hintEl.textContent=window.matchMedia('(max-width: 760px)').matches?'Gunakan tombol arah untuk bergerak • Dekati warga lalu tap INTERAKSI':'Gunakan WASD / tombol panah untuk bergerak • Dekati warga lalu tekan E atau Spasi untuk bicara';
  const next=nextMission();$('worldObjective').textContent=next?'🎯 '+next.text:'⭐ Semua misi desa selesai';
+}
+function enterPalm(){
+ state.returnPosition={x:state.player.x,y:state.player.y};state.scene='palm';
+ state.player={x:canvas.width*.5,y:canvas.height-135};save();
+}
+function palmInteract(){
+ const exit={x:canvas.width*.5,y:canvas.height-90};
+ if(Math.hypot(state.player.x-exit.x,state.player.y-exit.y)<92){
+  state.scene='village';state.player={...state.returnPosition};save();return;
+ }
+ $('missionDescription').textContent='Hutan sawit terasa sunyi. Cari jalan kembali ke gerbang.';
+}
+function drawPalm(t=0){
+ const w=canvas.width,h=canvas.height;
+ ctx.clearRect(0,0,w,h);ctx.save();
+ const bg=ctx.createLinearGradient(0,0,0,h);bg.addColorStop(0,'#101b17');bg.addColorStop(.55,'#1d3023');bg.addColorStop(1,'#263526');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+ // lantai hutan, kabut dan jalur sempit
+ ctx.fillStyle='#263528';ctx.beginPath();ctx.moveTo(w*.39,0);ctx.lineTo(w*.62,0);ctx.lineTo(w*.78,h);ctx.lineTo(w*.2,h);ctx.closePath();ctx.fill();
+ for(let i=0;i<22;i++){const x=(i*137+35)%w,y=(i*91+50)%h;ctx.fillStyle='rgba(170,190,160,.035)';ctx.beginPath();ctx.ellipse(x,y,45+(i%5)*12,8+(i%4)*4,0,0,Math.PI*2);ctx.fill();}
+ // densely packed oil palms, layered trunks and fronds
+ for(let row=0;row<5;row++)for(let col=0;col<8;col++){
+  const x=col*(w/7)-22+(row%2)*23,y=row*112-22;
+  const scale=.72+row*.12;
+  ctx.fillStyle='rgba(0,0,0,.38)';ctx.beginPath();ctx.ellipse(x+8,y+95*scale,35*scale,10*scale,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#493c2b';ctx.fillRect(x-7*scale,y+24*scale,14*scale,78*scale);
+  ctx.strokeStyle=row%2?'#244b2d':'#1b4028';ctx.lineWidth=7*scale;ctx.lineCap='round';
+  for(let k=0;k<9;k++){const a=(-Math.PI*.95)+(k/8)*Math.PI*.9;ctx.beginPath();ctx.moveTo(x,y+28*scale);ctx.quadraticCurveTo(x+Math.cos(a)*35*scale,y-2*scale,x+Math.cos(a)*76*scale,y+Math.sin(a)*44*scale);ctx.stroke();}
+  ctx.fillStyle='#273d27';ctx.beginPath();ctx.arc(x,y+20*scale,18*scale,0,Math.PI*2);ctx.fill();
+  if((row+col)%3===0){ctx.fillStyle='#6d3d25';for(let q=0;q<5;q++){ctx.beginPath();ctx.arc(x+(q-2)*5*scale,y+44*scale,4*scale,0,Math.PI*2);ctx.fill();}}
+ }
+ // dark vignette
+ const vg=ctx.createRadialGradient(w/2,h/2,80,w/2,h/2,w*.72);vg.addColorStop(.35,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.62)');ctx.fillStyle=vg;ctx.fillRect(0,0,w,h);
+ // ghost appears periodically, translucent and drifting
+ const cycle=(t%12000),visible=cycle>1800&&cycle<6200;
+ if(visible){
+  const phase=(cycle-1800)/4400, gx=w*(.25+phase*.5), gy=h*(.34+Math.sin(phase*Math.PI*2)*.055);
+  ctx.save();ctx.globalAlpha=.25+.13*Math.sin(t/210);
+  ctx.shadowColor='#d9f4ef';ctx.shadowBlur=26;ctx.fillStyle='#dceeea';
+  ctx.beginPath();ctx.ellipse(gx,gy,24,34,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.moveTo(gx-22,gy+17);ctx.quadraticCurveTo(gx-38,gy+49,gx-15,gy+56);ctx.quadraticCurveTo(gx,gy+43,gx+12,gy+58);ctx.quadraticCurveTo(gx+36,gy+38,gx+21,gy+14);ctx.closePath();ctx.fill();
+  ctx.globalAlpha=.42;ctx.fillStyle='#526b68';ctx.beginPath();ctx.arc(gx-8,gy-4,3,0,Math.PI*2);ctx.arc(gx+8,gy-4,3,0,Math.PI*2);ctx.fill();ctx.restore();
+ }
+ // entrance glow and exit sign
+ ctx.fillStyle='rgba(225,210,145,.14)';ctx.beginPath();ctx.ellipse(w/2,h-82,80,45,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#e6d4a4';ctx.font='bold 13px Nunito';ctx.textAlign='center';ctx.fillText('GERBANG KELUAR',w/2,h-28);
+ drawFarmer(state.player.x,state.player.y,{shirt:'#287b49',pants:'#344b3a'},t/105,false,true);
+ if(state.catOwned)drawPetCat(state.player.x-28,state.player.y+20,t);
+ ctx.restore();
+ $('worldLocation').textContent='🌴 Kebun Sawit • Hutan Sunyi';
+ $('worldObjective').textContent='🌫️ Jelajahi kebun sawit dan temukan jalan kembali ke gerbang';
+ const hint=$('canvasHint');if(hint)hint.textContent=window.matchMedia('(max-width: 760px)').matches?'Gunakan tombol arah untuk bergerak • Dekati gerbang lalu tap INTERAKSI':'Gunakan WASD / tombol panah • Dekati gerbang lalu tekan E / Spasi';
 }
 function drawMine(t=0){
  ctx.clearRect(0,0,canvas.width,canvas.height);ctx.save();
@@ -691,11 +746,13 @@ function drawMine(t=0){
  // Gerobak dan pintu keluar.
  ctx.fillStyle='#b98a54';ctx.beginPath();ctx.ellipse(canvas.width*.5,canvas.height-70,58,27,0,Math.PI,Math.PI*2);ctx.fill();ctx.fillStyle='#17191b';ctx.beginPath();ctx.ellipse(canvas.width*.5,canvas.height-69,43,19,0,Math.PI,Math.PI*2);ctx.fill();ctx.fillStyle='#fff0c2';ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillText('KELUAR • INTERAKSI',canvas.width*.5,canvas.height-24);
  ctx.fillStyle='#986a3f';ctx.fillRect(18,20,75,46);ctx.fillStyle='#d8b879';ctx.fillRect(25,26,61,30);ctx.fillStyle='#2d2520';ctx.beginPath();ctx.arc(33,70,8,0,Math.PI*2);ctx.arc(78,70,8,0,Math.PI*2);ctx.fill();
- ctx.fillStyle='#fff0c2';ctx.font='bold 15px Nunito';ctx.textAlign='left';ctx.fillText('TAMBANG EMAS BAWAH TANAH',110,43);ctx.font='bold 12px Nunito';ctx.fillText('Dekati bongkahan emas lalu tekan E / INTERAKSI untuk menambang',110,64);
+ ctx.fillStyle='#fff0c2';ctx.font='bold 15px Nunito';ctx.textAlign='left';ctx.fillText('TAMBANG EMAS BAWAH TANAH',110,43);ctx.font='bold 12px Nunito';ctx.fillText(window.matchMedia('(max-width: 760px)').matches?'Dekati emas lalu tap tombol INTERAKSI':'Dekati emas lalu tekan E / Spasi untuk menambang',110,64);
  const px=state.player.x,py=state.player.y;drawFarmer(px,py,{shirt:'#287b49',pants:'#344b3a'},t/105,false,true);
  if(state.catOwned)drawPetCat(px-28,py+20,t);
+ let nearestGold=null,nearestGoldDist=Infinity;spots.forEach(pt=>{if(!pt)return;const d=Math.hypot(px-pt[0],py-pt[1]);if(d<nearestGoldDist){nearestGoldDist=d;nearestGold=pt;}});
+ if(nearestGold&&nearestGoldDist<90){const mobile=window.matchMedia('(max-width: 760px)').matches,label=mobile?'Tap tombol INTERAKSI untuk menambang':'Tekan E / Spasi untuk menambang';ctx.font='bold 12px Nunito';const bw=Math.max(190,ctx.measureText(label).width+24),bx=Math.max(8,Math.min(canvas.width-bw-8,px-bw/2)),by=py-90;roundedRect(ctx,bx,by,bw,28,12,'rgba(255,250,226,.96)');ctx.fillStyle='#4b3825';ctx.textAlign='center';ctx.fillText(label,bx+bw/2,by+18);}
  ctx.restore();$('worldLocation').textContent='⛏️ Tambang Emas • '+state.mineGold+' bongkah';$('worldObjective').textContent='🎯 Tambang emas lalu kembali ke permukaan untuk menukar menjadi XP';
- const h=$('canvasHint');if(h)h.textContent='Dekati bongkahan emas dan tekan E / INTERAKSI. Dekati pintu keluar untuk kembali ke desa.';
+ const h=$('canvasHint');if(h)h.textContent=window.matchMedia('(max-width: 760px)').matches?'Dekati bongkahan emas lalu tap tombol INTERAKSI. Dekati pintu keluar untuk kembali ke desa.':'Dekati bongkahan emas lalu tekan E / Spasi. Dekati pintu keluar untuk kembali ke desa.';
 }
 function mineInteract(){
  const exit={x:canvas.width*.5,y:canvas.height-105};
@@ -709,13 +766,13 @@ function mineInteract(){
 }
 function enterMine(){state.returnPosition={x:state.player.x,y:state.player.y};state.scene='mine';state.player={x:canvas.width*.5,y:canvas.height-180};if(!state.mineNodes.length||state.mineNodes.every(x=>x===null))state.mineNodes=[[canvas.width*.28,canvas.height*.38],[canvas.width*.72,canvas.height*.34],[canvas.width*.5,canvas.height*.68],[canvas.width*.82,canvas.height*.7],[canvas.width*.18,canvas.height*.72]];save();}
 function nearestNpc(){let best=null,dist=Infinity;for(const n of npcs){const d=Math.hypot(n.x-state.player.x,n.y-state.player.y);if(d<dist){dist=d;best=n;}}return best;}
-function blocked(x,y){if(state.scene==='mine')return false;if(obstacles.some(o=>x>o.x-18&&x<o.x+o.w+18&&y>o.y-10&&y<o.y+o.h+10))return true;const trunks=[[90,160],[450,130],[900,170],[1080,250],[1700,220],[850,850],[650,960],[1750,850],[920,1080],[1660,1120],[500,920],[1320,1110],[1770,390],[610,260],[880,760],[1720,500],[1320,80],[250,1120]];if(trunks.some(([tx,ty])=>Math.hypot(x-tx,y-(ty+18))<22))return true;return npcs.some(n=>Math.hypot(x-n.x,y-n.y)<22);}
+function blocked(x,y){if(state.scene==='mine'||state.scene==='palm')return false;if(obstacles.some(o=>x>o.x-18&&x<o.x+o.w+18&&y>o.y-10&&y<o.y+o.h+10))return true;const trunks=[[90,160],[450,130],[900,170],[1080,250],[1700,220],[850,850],[650,960],[1750,850],[920,1080],[1660,1120],[500,920],[1320,1110],[1770,390],[610,260],[880,760],[1720,500],[1320,80],[250,1120]];if(trunks.some(([tx,ty])=>Math.hypot(x-tx,y-(ty+18))<22))return true;return npcs.some(n=>Math.hypot(x-n.x,y-n.y)<22);}
 function movePlayer(dx,dy){
  if(!dx&&!dy)return;
  const len=Math.hypot(dx,dy)||1;dx/=len;dy/=len;
  const speed=3.4;
- const maxX=state.scene==='mine'?canvas.width-35:WORLD.w-25;
- const maxY=state.scene==='mine'?canvas.height-90:WORLD.h-30;
+ const maxX=(state.scene==='mine'||state.scene==='palm')?canvas.width-35:WORLD.w-25;
+ const maxY=(state.scene==='mine'||state.scene==='palm')?canvas.height-90:WORLD.h-30;
  const startX=state.player.x,startY=state.player.y;
  const startBlocked=blocked(startX,startY);
  const nx=Math.max(25,Math.min(maxX,startX+dx*speed));
