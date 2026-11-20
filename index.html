@@ -86,8 +86,8 @@
       <section class="drum-mission">
         <div class="drum-mission-head"><span class="drum-mission-icon">🛠️</span><div><p class="eyebrow">MINI-GAME LAPANGAN</p><h4>Misi Khusus: Rakit Drum Seeder</h4></div><span class="drum-mission-tag">TABELA</span></div>
         <p class="drum-mission-copy">Bantu petani menyiapkan alat tanam benih langsung. Lihat gambar setiap bagian alat, lalu seret ke urutan pemasangan yang benar. Di HP, ketuk gambar komponen lalu ketuk tempat pemasangannya.</p>
-        <div class="drum-machine-preview" aria-label="Ilustrasi susunan drum seeder"><div class="machine-handle"></div><div class="machine-frame"></div><div class="machine-axle"><i></i><i></i><i></i></div><div class="machine-wheel left"></div><div class="machine-wheel right"></div></div>
-        <div class="drum-game-grid"><div><h5>Pilih gambar komponen</h5><div id="drumSeederParts" class="drum-parts"></div></div><div><h5>Urutan perakitan</h5><div id="drumSeederSlots" class="drum-slots"></div></div></div>
+        <div id="drumMachinePreview" class="drum-machine-preview" aria-label="Ilustrasi drum seeder yang berubah sesuai komponen terpasang"><div class="machine-handle"></div><div class="machine-frame"></div><div class="machine-axle"></div><div class="machine-drums"><i></i><i></i><i></i></div><div class="machine-wheel left"></div><div class="machine-wheel right"></div></div>
+        <div class="drum-game-grid"><div><h5>Pilih gambar komponen</h5><div id="drumSeederParts" class="drum-parts"></div></div><div><h5>Tempat pemasangan (acak)</h5><div id="drumSeederSlots" class="drum-slots"></div></div></div>
         <p id="drumSeederFeedback" class="drum-feedback" aria-live="polite">Ayo mulai! Seret gambar roda, drum, poros, rangka, dan pegangan ke urutan yang tepat.</p>
         <p id="drumSeederStatus" class="drum-status">Komponen benar: 0/5.</p>
         <button id="drumSeederCheck" class="button button-primary drum-check" disabled>Periksa hasil rakitan</button>

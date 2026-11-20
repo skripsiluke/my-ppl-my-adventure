@@ -74,3 +74,9 @@ Workflow pada `.github/workflows/deploy.yml` juga disediakan untuk deployment ot
 - Setiap slot perakitan menampilkan gambar komponen setelah berhasil dipasang.
 - Drag-and-drop di komputer dan metode ketuk-komponen/ketuk-slot di ponsel tetap didukung.
 - Memperjelas urutan perakitan dan mempertahankan hadiah serta status penyelesaian misi.
+
+
+## Versi 0.9.2 — Perakitan Drum Seeder Interaktif
+- Posisi tempat pemasangan diacak/tidak mengikuti urutan kartu komponen.
+- Ilustrasi mesin di bagian atas memperlihatkan komponen secara bertahap hanya setelah dipasang.
+- Roda, drum benih, poros, rangka, dan pegangan memiliki lapisan visual terpisah.
