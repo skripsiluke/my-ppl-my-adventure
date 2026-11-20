@@ -141,17 +141,20 @@ const drumParts=[
  {id:'handle',name:'Pegangan (handle)',image:'handle.png',hint:'Pegangan digunakan operator untuk mengarahkan dan mendorong alat.'}
 ];
 const drumSlots=[
- {id:'wheels',label:'1. Pasang roda',desc:'Sepasang roda pada kedua ujung poros'},
- {id:'drums',label:'2. Pasang drum benih',desc:'Tabung penjatah benih pada poros'},
- {id:'axle',label:'3. Pasang poros',desc:'Sumbu melintang alat'},
- {id:'frame',label:'4. Pasang rangka utama',desc:'Struktur penyangga komponen'},
- {id:'handle',label:'5. Pasang pegangan',desc:'Bagian kendali operator'}
+ {id:'frame',label:'Pasang rangka utama',desc:'Struktur penyangga alat'},
+ {id:'drums',label:'Pasang drum benih',desc:'Tabung penjatah benih pada poros'},
+ {id:'handle',label:'Pasang pegangan',desc:'Bagian kendali operator'},
+ {id:'wheels',label:'Pasang roda',desc:'Sepasang roda pada kedua ujung poros'},
+ {id:'axle',label:'Pasang poros',desc:'Sumbu melintang alat'}
 ];
 let drumSelected=null,drumPlaced={},drumAttempts=0;
 function renderDrumSeeder(){
  const done=!!state.pmaas.drumSeederCompleted;
  if(done&&Object.keys(drumPlaced).length===0)drumSlots.forEach(slot=>drumPlaced[slot.id]=slot.id);
  $('drumSeederStatus').textContent=done?'Misi selesai! Drum seeder berhasil dirakit dan diperiksa.':`Pilih komponen, lalu pilih tempat pemasangannya. Komponen benar: ${Object.keys(drumPlaced).length}/5.`;
+ const preview=$('drumMachinePreview');
+ if(preview){preview.classList.toggle('has-handle',!!drumPlaced.handle);preview.classList.toggle('has-frame',!!drumPlaced.frame);preview.classList.toggle('has-axle',!!drumPlaced.axle);preview.classList.toggle('has-drums',!!drumPlaced.drums);preview.classList.toggle('has-wheels',!!drumPlaced.wheels);}
+
  $('drumSeederParts').innerHTML=drumParts.map(p=>{
   const used=Object.values(drumPlaced).includes(p.id);
   return `<button type="button" class="drum-part ${used?'used':''} ${drumSelected===p.id?'selected':''}" data-drum-part="${p.id}" draggable="${!used&&!done}" ${used||done?'disabled':''}><img src="assets/images/drum-seeder/${p.image}" alt="${p.name}"><b>${p.name}</b><small>${used?'Sudah dipasang':'Pilih atau seret gambar'}</small></button>`;
