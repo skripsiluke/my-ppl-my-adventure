@@ -264,7 +264,7 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Sistem kapak, Boss Kelabang, tambang emas, dan kompatibilitas save tetap dipertahankan.
 
 
-## v0.20.9 — Ketahanan Game Loop Setelah Tabrakan
+## v0.20.10 — Ketahanan Game Loop Setelah Tabrakan
 - Memperbaiki loop animasi utama agar frame berikutnya tetap dijadwalkan sebelum proses gambar dan simulasi dijalankan.
 - Error pada satu frame tidak lagi menghentikan seluruh loop kontrol secara permanen.
 - Input gerak, joystick, dan interaksi tetap diproses pada frame berikutnya.

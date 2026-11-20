@@ -12,6 +12,26 @@ function levelFromXP(xp){let level=1;while(xp>=xpThreshold(level+1))level++;retu
 function levelProgress(xp){const level=levelFromXP(xp);return {level,progress:xp-xpThreshold(level),needed:level===1?FIRST_LEVEL_XP:XP_PER_LEVEL};}
 const state = {name:'Penyuluh Muda',avatarIndex:0,xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},analog:{x:0,y:0},interact:false,catOwned:false,catQuestNpcId:null,catFollower:{x:120,y:410},scene:'village',mineGold:0,mineNodes:[],returnPosition:{x:145,y:390},ranchMissionDone:false,palmGhostCaught:0,farmPlots:[],farmSeeds:{padi:3,jagung:2,cabai:1},farmProduce:{},farmSelectedPlot:0,farmSelectedCrop:'padi',farmPlayer:{x:450,y:430},farmTarget:null,farmDay:1,farmLastWeather:'Cerah',farmUnlockedPlots:1,farmPesticides:0,farmPesticideStarterGranted:false};
 const screens=['homeScreen','menuScreen','gameScreen'];
+function applyMineXpPenalty(amount){
+  // XP utama adalah state.xp. Jika runtime tiba-tiba membaca 0 padahal
+  // save terakhir masih memiliki XP positif, pulihkan baseline save dahulu.
+  const current=Number(state.xp);
+  if(!Number.isFinite(current)||current<0)state.xp=0;
+  if(Number(state.xp)===0){
+    try{
+      const persisted=JSON.parse(localStorage.getItem(KEY)||'null');
+      const savedXp=Number(persisted&&persisted.xp);
+      if(Number.isFinite(savedXp)&&savedXp>0)state.xp=savedXp;
+    }catch(e){}
+  }
+  state.xp=Math.max(0,Number(state.xp||0)-amount);
+  // Simpan nilai XP yang sudah dikurangi sebelum memperbarui elemen UI.
+  save();
+  updateStats();
+  const hud=document.querySelector('.game-heading .game-coin');
+  if(hud)hud.textContent='⭐ '+state.xp+' XP';
+  return state.xp;
+}
 function save(){
   localStorage.setItem(KEY, JSON.stringify({
     name:state.name,
@@ -844,15 +864,15 @@ function drawMine(t=0){
      // Penalti tabrakan tidak boleh mengubah atau mengganti objek input global.
      // Mengosongkan state.keys/analog di dalam loop dapat memutus pointer/joystick
      // yang masih aktif pada perangkat sentuh dan membuat kontrol terasa macet.
-     state.xp=Math.max(0,state.xp-10);updateStats();save();mineHitCooldown=t+1800;
+     mineMonster=null;mineNextMonsterAt=t+7000;mineHitCooldown=t+1800;
+     applyMineXpPenalty(10);
      const push=48;state.player.x=Math.max(35,Math.min(w-35,state.player.x+(dx/dist)*push));state.player.y=Math.max(100,Math.min(h-105,state.player.y+(dy/dist)*push));
-     mineMonster=null;mineNextMonsterAt=t+7000;
      const md=$('missionDescription');if(md)md.textContent='⚠️ Kamu terkena kelabang merah! XP berkurang 10. Kelabang menghilang sementara—kontrol tetap aktif, lanjutkan bergerak!';
    }
  }
  // Boss kelabang merah raksasa dan bar HP.
  if(mineBoss){if(!minePickaxeOwned&&Math.floor(t/3000)!==Math.floor((t-16)/3000)){const md=$('missionDescription');if(md)md.textContent='🚨 Boss Kelabang muncul! Ambil Kapak Tambang di dekat jalur masuk sebelum menyerang.';}const dx=px-mineBoss.x,dy=py-mineBoss.y,dist=Math.hypot(dx,dy)||1;mineBoss.x+=dx/dist*.72*dt;mineBoss.y+=dy/dist*.72*dt;mineBoss.x=Math.max(65,Math.min(w-65,mineBoss.x));mineBoss.y=Math.max(115,Math.min(h-150,mineBoss.y));ctx.save();ctx.translate(mineBoss.x,mineBoss.y);ctx.rotate(Math.atan2(dy,dx));for(let i=9;i>=0;i--){const x=-i*13;ctx.fillStyle=i%2?'#870d1b':'#e32632';ctx.beginPath();ctx.ellipse(x,Math.sin(t/130+i*.6)*4,13,19,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#ff8174';ctx.lineWidth=2;ctx.stroke();for(const side of [-1,1]){ctx.strokeStyle='#c91d2b';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x,side*8);ctx.lineTo(x-8,side*25);ctx.stroke();}}ctx.fillStyle='#f04438';ctx.beginPath();ctx.arc(12,0,17,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff2a6';ctx.beginPath();ctx.arc(17,-7,4,0,Math.PI*2);ctx.arc(17,7,4,0,Math.PI*2);ctx.fill();ctx.restore();ctx.fillStyle='rgba(30,10,10,.85)';roundedRect(ctx,w/2-125,78,250,22,8,'rgba(35,12,12,.9)');ctx.fillStyle='#e22c35';roundedRect(ctx,w/2-121,82,242*(mineBoss.hp/mineBoss.maxHp),14,6,'#e22c35');ctx.fillStyle='#fff';ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillText('BOSS KELABANG • '+mineBoss.hp+'/100 HP',w/2,70);if(dist<115){ctx.fillStyle='#fff5cf';ctx.font='bold 12px Nunito';ctx.fillText(mobile?'Dekati lalu tap INTERAKSI untuk memukul':'Dekati lalu tekan E / Spasi untuk memukul',w/2,h-112);}}
- if(mineBoss&&Math.hypot(px-mineBoss.x,py-mineBoss.y)<34&&t>=mineHitCooldown){state.xp=Math.max(0,state.xp-20);updateStats();save();mineHitCooldown=t+2000;const md=$('missionDescription');if(md)md.textContent='💥 Boss Kelabang menyentuhmu! XP berkurang 20. Segera menjauh!';}
+ if(mineBoss&&Math.hypot(px-mineBoss.x,py-mineBoss.y)<34&&t>=mineHitCooldown){mineHitCooldown=t+2000;applyMineXpPenalty(20);const md=$('missionDescription');if(md)md.textContent='💥 Boss Kelabang menyentuhmu! XP berkurang 20. Segera menjauh!';}
  // Kapak menjadi objek di dalam gua, dekat jalur awal pemain dan dapat dijangkau.
  const axeX=w*.28,axeY=h-185;
  if(!minePickaxeOwned){
