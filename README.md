@@ -241,7 +241,7 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Penyimpanan progres dan kunci save tetap kompatibel dengan versi sebelumnya.
 
 
-## v0.20.5 — Boss Kelabang Tambang Emas
+## v0.20.6 — Boss Kelabang Tambang Emas
 - Kapak tambang tersedia melalui tombol khusus di pojok kanan atas area tambang, terpisah dari pintu keluar. Pemain perlu mengetuk/mengklik tombol untuk mengambil kapak.
 - Saat memasuki tambang, pemain menerima notifikasi untuk mengambil kapak sebagai persiapan menghadapi boss.
 - Setelah lima kelabang biasa muncul, pemain mendapat peringatan sebelum Boss Kelabang keluar. Boss menunggu kelabang biasa yang sedang aktif selesai terlebih dahulu.
