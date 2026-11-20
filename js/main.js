@@ -134,30 +134,31 @@ function advancePMAASTarget(id){
 
 /* Mini-game PM-AAS: merakit drum seeder */
 const drumParts=[
- {id:'handle',name:'Pegangan / rangka atas',icon:'🟠',hint:'Bagian yang dipegang operator untuk mendorong alat.'},
- {id:'frame',name:'Rangka utama',icon:'🟧',hint:'Rangka penghubung seluruh komponen alat.'},
- {id:'axle',name:'Poros roda',icon:'➖',hint:'Batang melintang yang menjadi sumbu roda dan drum.'},
- {id:'drums',name:'Tabung penjatah benih',icon:'🔵',hint:'Tabung berlubang untuk menyalurkan benih secara teratur.'},
- {id:'wheels',name:'Roda kiri dan kanan',icon:'⚫',hint:'Roda membantu alat bergerak di permukaan lahan.'}
+ {id:'wheels',name:'Roda (2 buah)',image:'wheels.png',hint:'Roda dipasang pada kedua ujung poros agar alat dapat bergerak stabil.'},
+ {id:'drums',name:'Drum penjatah benih (3 buah)',image:'drums.png',hint:'Drum penjatah benih menyalurkan benih ke alur tanam secara teratur.'},
+ {id:'axle',name:'Poros',image:'axle.png',hint:'Poros menjadi sumbu tempat roda dan drum terpasang.'},
+ {id:'frame',name:'Rangka utama',image:'frame.png',hint:'Rangka utama menopang dan menyatukan bagian-bagian alat.'},
+ {id:'handle',name:'Pegangan (handle)',image:'handle.png',hint:'Pegangan digunakan operator untuk mengarahkan dan mendorong alat.'}
 ];
 const drumSlots=[
- {id:'handle',label:'1. Pegangan',desc:'Bagian atas untuk kendali operator'},
- {id:'frame',label:'2. Rangka utama',desc:'Struktur penyangga alat'},
- {id:'axle',label:'3. Poros melintang',desc:'Sumbu penghubung komponen'},
- {id:'drums',label:'4. Tabung benih',desc:'Unit penjatah benih'},
- {id:'wheels',label:'5. Roda',desc:'Sepasang roda di kedua sisi'}
+ {id:'wheels',label:'1. Pasang roda',desc:'Sepasang roda pada kedua ujung poros'},
+ {id:'drums',label:'2. Pasang drum benih',desc:'Tabung penjatah benih pada poros'},
+ {id:'axle',label:'3. Pasang poros',desc:'Sumbu melintang alat'},
+ {id:'frame',label:'4. Pasang rangka utama',desc:'Struktur penyangga komponen'},
+ {id:'handle',label:'5. Pasang pegangan',desc:'Bagian kendali operator'}
 ];
 let drumSelected=null,drumPlaced={},drumAttempts=0;
 function renderDrumSeeder(){
  const done=!!state.pmaas.drumSeederCompleted;
+ if(done&&Object.keys(drumPlaced).length===0)drumSlots.forEach(slot=>drumPlaced[slot.id]=slot.id);
  $('drumSeederStatus').textContent=done?'Misi selesai! Drum seeder berhasil dirakit dan diperiksa.':`Pilih komponen, lalu pilih tempat pemasangannya. Komponen benar: ${Object.keys(drumPlaced).length}/5.`;
  $('drumSeederParts').innerHTML=drumParts.map(p=>{
   const used=Object.values(drumPlaced).includes(p.id);
-  return `<button type="button" class="drum-part ${used?'used':''} ${drumSelected===p.id?'selected':''}" data-drum-part="${p.id}" draggable="${!used&&!done}" ${used||done?'disabled':''}><span>${p.icon}</span><b>${p.name}</b><small>${used?'Sudah dipasang':'Pilih / seret komponen'}</small></button>`;
+  return `<button type="button" class="drum-part ${used?'used':''} ${drumSelected===p.id?'selected':''}" data-drum-part="${p.id}" draggable="${!used&&!done}" ${used||done?'disabled':''}><img src="assets/images/drum-seeder/${p.image}" alt="${p.name}"><b>${p.name}</b><small>${used?'Sudah dipasang':'Pilih atau seret gambar'}</small></button>`;
  }).join('');
  $('drumSeederSlots').innerHTML=drumSlots.map((s,i)=>{
   const partId=drumPlaced[s.id];const part=drumParts.find(p=>p.id===partId);
-  return `<button type="button" class="drum-slot ${part?'filled':''}" data-drum-slot="${s.id}" ${done?'disabled':''}><span class="slot-number">${i+1}</span><b>${part?part.icon+' '+part.name:s.label}</b><small>${part?'Terpasang ✓':s.desc}</small></button>`;
+  return `<button type="button" class="drum-slot ${part?'filled':''}" data-drum-slot="${s.id}" ${done?'disabled':''}><span class="slot-number">${i+1}</span>${part?`<img src="assets/images/drum-seeder/${part.image}" alt="${part.name}">`:''}<b>${part?part.name:s.label}</b><small>${part?'Terpasang ✓':s.desc}</small></button>`;
  }).join('');
  $('drumSeederCheck').disabled=done||Object.keys(drumPlaced).length!==5;
  $('drumSeederCheck').textContent=done?'✓ Misi selesai':'Periksa hasil rakitan';
