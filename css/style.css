@@ -65,3 +65,17 @@
 .adopter-current p{margin:0 0 10px;color:var(--muted);font-size:11px;line-height:1.6}
 .adopter-current button{width:100%;padding:9px 12px;border:0;border-radius:9px;background:#4f8a42;color:white;font-weight:800;font-size:11px;cursor:pointer}
 .pmaas-target{min-width:0}
+
+/* v0.11.0: avatar profile, gated event, reset placement, level progression */
+.avatar-wrap{position:relative;flex-shrink:0}
+.avatar-bubble{border:0;cursor:pointer;display:grid;place-items:center}
+.avatar-bubble:focus-visible{outline:3px solid #8ebc75;outline-offset:3px}
+.avatar-profile-panel{position:absolute;right:0;top:calc(100% + 10px);z-index:60;width:min(320px,calc(100vw - 48px));box-shadow:0 12px 35px #173d2426}
+.pmaas-event-card.pmaas-locked{filter:saturate(.72)}
+.pmaas-event-card.pmaas-locked .pmaas-event-copy{opacity:.6}
+.pmaas-lock-notice{margin:10px 0;padding:10px 12px;border:1px solid #f1d78c;border-radius:10px;background:#fff5d8;color:#704d08;font-size:12px;font-weight:800;line-height:1.5}
+.pmaas-open:disabled{opacity:.8;cursor:not-allowed}
+.settings-danger-zone{margin-top:18px;padding-top:14px;border-top:1px solid #f0dfd9}
+.settings-danger-zone h3{font-size:14px;color:#9b4032}
+.settings-danger-zone p{font-size:11px;color:#718071;line-height:1.5}
+.settings-danger-zone .text-button{color:#a23d32;border:1px solid #e8c7c0;border-radius:10px;padding:10px 13px;background:#fff8f6;font-weight:800;cursor:pointer}
