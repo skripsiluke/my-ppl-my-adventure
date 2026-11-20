@@ -105,9 +105,9 @@
   
 /* Farm Simulator v0.17.0 - compact integrated game UI */
 .farm-hud{margin-bottom:8px;padding:8px 12px}.farm-hud strong{font-size:15px}.farm-world-wrap{border-width:3px;border-radius:18px;box-shadow:0 8px 24px #315b3520}
-#farmCanvas{image-rendering:auto;cursor:pointer}
+#farmCanvas{image-rendering:auto;cursor:pointer;aspect-ratio:900/650}
 .farm-world-tip{display:none!important}
-#farmSeedStocks,.farm-player-hud,.farm-action-bar,.farm-management-grid,.farm-panel>.muted.small{display:none!important}
+.farm-seed-stocks,.farm-player-hud,.farm-action-bar,.farm-management-grid{display:none!important}
 @media(max-width:600px){.farm-hud{padding:7px 10px}.farm-hud strong{font-size:14px}.farm-wallet{font-size:12px}}
 
   </style>
@@ -223,7 +223,7 @@
     </div>
     <div id="farmPanel" class="game-panel hidden">
       <div class="farm-hud"><div><span class="farm-kicker">FARM SIMULATOR</span><strong>🌤️ Kebun Belajar</strong><small id="farmWeather">Cuaca cerah • Hari 1</small></div><div class="farm-wallet"><span>🪙 <b id="farmCoins">0</b></span><span>🌱 <b>Stok benih</b></span></div></div>
-      <div class="farm-world-wrap"><canvas id="farmCanvas" width="1800" height="1020" aria-label="Area kebun. Ketuk petak untuk memilih, ketuk area untuk berjalan."></canvas><div class="farm-world-tip">Ketuk petak untuk memilih • Ketuk area untuk berjalan</div></div>
+      <div class="farm-world-wrap"><canvas id="farmCanvas" width="1800" height="1300" aria-label="Area kebun. Ketuk petak untuk memilih, ketuk area untuk berjalan."></canvas><div class="farm-world-tip">Ketuk petak untuk memilih • Ketuk area untuk berjalan</div></div>
       <div class="farm-seed-stocks" id="farmSeedStocks"></div><div class="farm-player-hud"><span id="farmPlayerStatus">Pilih petak untuk mulai bertani.</span><span id="farmSelectedLabel">Belum ada petak dipilih</span></div>
       <div class="farm-action-bar"><button id="farmPlant" class="button button-primary">🌱 Tanam</button><button id="farmWater" class="button button-secondary">💧 Siram</button><button id="farmFertilize" class="button button-secondary">🧪 Pupuk</button><button id="farmHarvest" class="button button-secondary">🧺 Panen</button><button id="farmUnlock" class="button button-secondary">🔓 Buka Lahan</button></div>
       <div class="farm-management-grid"><button id="farmShop" class="farm-manage-card">🏪 <b>Toko Benih</b><small>Beli benih tanaman</small></button><button id="farmInventory" class="farm-manage-card">🎒 <b>Inventaris</b><small>Lihat benih & hasil panen</small></button><button id="farmMarket" class="farm-manage-card">🧺 <b>Pasar</b><small>Jual hasil panen</small></button></div>
