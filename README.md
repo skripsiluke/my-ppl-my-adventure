@@ -276,3 +276,9 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Pemain dapat mendekati peti dan menekan E/Spasi atau tombol INTERAKSI untuk membuka peti.
 - Membuka peti menampilkan konfirmasi bahwa hadiah kemenangan sudah diterima; hadiah tidak diberikan dua kali.
 - Progres dan penyimpanan permainan sebelumnya tetap dipertahankan.
+
+## v0.20.13 — Notifikasi Boss Meriah dan Siklus Gelombang Tambang
+- Kemenangan Boss Kelabang kini menampilkan overlay SELAMAT bergaya notifikasi naik level, berisi hadiah +100 XP dan +50 koin.
+- Setelah Boss kalah, gelombang kelabang berhenti sementara selama 45 detik.
+- Setelah jeda, lima kelabang biasa muncul kembali, disusul peringatan dan Boss Kelabang berikutnya.
+- Sistem gelombang berulang menjaga tantangan tambang tetap aktif sehingga penambangan tidak berlangsung tanpa risiko.

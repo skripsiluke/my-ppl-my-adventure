@@ -372,6 +372,13 @@ function showLevelUp(level,bonus){
  $('levelUpTitle').textContent='LEVEL '+level+'!';$('levelUpRank').textContent=levelName(level);$('levelUpBonus').textContent='Bonus kenaikan level: +'+bonus+' koin';
  $('levelUpOverlay').classList.remove('hidden');playSound('level');
 }
+function showMineBossVictory(){
+ $('levelUpTitle').textContent='BOSS KELABANG KALAH!';
+ $('levelUpRank').textContent='🎉 Selamat! Kamu berhasil mengalahkan Boss Kelabang.';
+ $('levelUpBonus').textContent='Hadiah kemenangan: +100 XP dan +50 koin';
+ $('levelUpOverlay').classList.remove('hidden');
+ playSound('level');
+}
 function reward(xp,coins){
  const oldLevel=levelFromXP(state.xp);
  state.xp+=xp;state.coins+=coins;
@@ -855,6 +862,8 @@ function drawMine(t=0){
  // Monster kelabang merah muncul berkala dan memburu pemain.
  if(!mineMonster&&!mineBoss&&mineCommonSpawnCount<5&&t>=mineNextMonsterAt){const edge=Math.floor(Math.random()*4);mineMonster={x:edge===0?28:edge===1?w-28:Math.random()*w,y:edge===2?95:edge===3?h-105:95+Math.random()*(h-210),phase:Math.random()*6.28};mineCommonSpawnCount++;mineNextMonsterAt=t+10500+Math.random()*6500;if(mineCommonSpawnCount===5){mineBossWarningAt=t+4500;const md=$('missionDescription');if(md)md.textContent='⚠️ AWAS! Ada sesuatu bergerak di lorong tambang... Boss Kelabang akan keluar!';}}
  if(!mineBoss&&!mineMonster&&mineCommonSpawnCount>=5&&mineBossWarningAt&&t>=mineBossWarningAt){mineBoss={x:w*.5,y:105,hp:100,maxHp:100,phase:0};mineBossWarningAt=0;const md=$('missionDescription');if(md)md.textContent='🚨 BOSS KELABANG MUNCUL! Cari dan ambil Kapak Tambang di dekat jalur masuk, lalu serang 20 kali!';}
+ // Setelah jeda 45 detik, mulai gelombang baru: 5 kelabang biasa lalu boss berikutnya.
+ if(!mineBoss&&!mineMonster&&mineCommonSpawnCount>=5&&!mineBossWarningAt&&mineBossNextAt&&t>=mineBossNextAt){mineCommonSpawnCount=0;mineBossNextAt=0;mineNextMonsterAt=t+1200;const md=$('missionDescription');if(md)md.textContent='⚠️ Gelombang baru dimulai! Lima kelabang biasa akan muncul sebelum Boss Kelabang berikutnya.';}
  const px=state.player.x,py=state.player.y;
  if(mineMonster){const dx=px-mineMonster.x,dy=py-mineMonster.y,dist=Math.hypot(dx,dy)||1;mineMonster.x+=dx/dist*1.18*dt;mineMonster.y+=dy/dist*1.18*dt;mineMonster.x=Math.max(25,Math.min(w-25,mineMonster.x));mineMonster.y=Math.max(90,Math.min(h-100,mineMonster.y));
    ctx.save();ctx.translate(mineMonster.x,mineMonster.y);ctx.rotate(Math.atan2(dy,dx));
@@ -902,7 +911,7 @@ function mineInteract(){
  if(mineTreasureChest&&!mineTreasureChest.opened&&Math.hypot(state.player.x-mineTreasureChest.x,state.player.y-mineTreasureChest.y)<155){mineTreasureChest.opened=true;const md=$('missionDescription');if(md)md.textContent='🎉 SELAMAT! Peti Harta Karun berhasil dibuka. Kamu telah mengalahkan Boss Kelabang dan hadiah +100 XP serta +50 koin sudah masuk. Terima kasih, penambang pemberani!';save();return;}
  const axe={x:canvas.width*.28,y:canvas.height-185};
  if(!minePickaxeOwned&&Math.hypot(state.player.x-axe.x,state.player.y-axe.y)<82){minePickaxeOwned=true;const md=$('missionDescription');if(md)md.textContent='✅ Kapak Tambang berhasil diambil! Simpan untuk melawan Boss Kelabang.';save();return;}
- if(mineBoss&&minePickaxeOwned&&Math.hypot(state.player.x-mineBoss.x,state.player.y-mineBoss.y)<118){if(now-minePickaxeHitAt<500){const md=$('missionDescription');if(md)md.textContent='⏳ Ayunkan kapak kembali setelah jeda singkat!';return;}minePickaxeHitAt=now;mineBoss.hp=Math.max(0,mineBoss.hp-5);const md=$('missionDescription');if(md)md.textContent='⛏️ Pukulan mengenai Boss Kelabang! Sisa HP: '+mineBoss.hp+'/100 ('+((100-mineBoss.hp)/5)+'/20 pukulan).';if(mineBoss.hp<=0){const chestX=mineBoss.x,chestY=mineBoss.y;mineBoss=null;mineTreasureChest={x:Math.max(110,Math.min(canvas.width-110,state.player.x+70)),y:Math.max(170,Math.min(canvas.height-190,state.player.y-75)),opened:false};mineBossNextAt=now+45000;state.xp+=100;state.coins+=50;updateStats();checkAchievements();save();if(md)md.textContent='🎉 SELAMAT! Kamu berhasil mengalahkan Boss Kelabang! Kamu mendapatkan tambahan +100 XP dan +50 koin. Peti harta karun muncul di lokasi boss—dekati lalu tekan E / INTERAKSI untuk membukanya!';}return;}
+ if(mineBoss&&minePickaxeOwned&&Math.hypot(state.player.x-mineBoss.x,state.player.y-mineBoss.y)<118){if(now-minePickaxeHitAt<500){const md=$('missionDescription');if(md)md.textContent='⏳ Ayunkan kapak kembali setelah jeda singkat!';return;}minePickaxeHitAt=now;mineBoss.hp=Math.max(0,mineBoss.hp-5);const md=$('missionDescription');if(md)md.textContent='⛏️ Pukulan mengenai Boss Kelabang! Sisa HP: '+mineBoss.hp+'/100 ('+((100-mineBoss.hp)/5)+'/20 pukulan).';if(mineBoss.hp<=0){mineBoss=null;mineTreasureChest={x:Math.max(110,Math.min(canvas.width-110,state.player.x+70)),y:Math.max(170,Math.min(canvas.height-190,state.player.y-75)),opened:false};mineBossNextAt=now+45000;mineBossWarningAt=0;state.xp+=100;state.coins+=50;updateStats();checkAchievements();save();if(md)md.textContent='🎉 Boss Kelabang berhasil dikalahkan! +100 XP dan +50 koin. Gelombang berikutnya dimulai setelah 45 detik.';showMineBossVictory();}return;}
  const exit={x:canvas.width*.5,y:canvas.height-105};
  if(Math.hypot(state.player.x-exit.x,state.player.y-exit.y)<75){
    state.scene='village';state.player={...state.returnPosition};const mineHud=document.querySelector('.game-heading .game-coin');if(mineHud)mineHud.textContent='🪙 '+state.coins;
