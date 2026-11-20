@@ -239,3 +239,12 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Regenerasi titik emas diperlambat menjadi sekitar 12 detik setelah ditambang.
 - Sentuhan kelabang merah mengurangi 10 XP (tidak sampai nilai XP negatif).
 - Penyimpanan progres dan kunci save tetap kompatibel dengan versi sebelumnya.
+
+
+## v0.20.5 — Boss Kelabang Tambang Emas
+- Kapak tambang tersedia melalui tombol khusus di pojok kanan atas area tambang, terpisah dari pintu keluar. Pemain perlu mengetuk/mengklik tombol untuk mengambil kapak.
+- Saat memasuki tambang, pemain menerima notifikasi untuk mengambil kapak sebagai persiapan menghadapi boss.
+- Setelah lima kelabang biasa muncul, pemain mendapat peringatan sebelum Boss Kelabang keluar. Boss menunggu kelabang biasa yang sedang aktif selesai terlebih dahulu.
+- Boss memiliki 100 HP dan membutuhkan 20 pukulan kapak; setiap pukulan mengurangi 5 HP dengan jeda 0,5 detik. Serangan dilakukan saat pemain dekat boss menggunakan E/Spasi atau tombol INTERAKSI.
+- Sentuhan Boss mengurangi 20 XP (tidak sampai negatif). Setelah boss dikalahkan, pemain mendapat 100 XP dan 50 koin.
+- Save game lama tetap kompatibel; status kapak dan pertarungan boss berlaku selama sesi berada di tambang.
