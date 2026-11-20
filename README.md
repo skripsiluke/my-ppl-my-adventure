@@ -1,3 +1,7 @@
+## Update v0.20.16
+- Farm Simulator: pembelian benih dan pestisida langsung menyegarkan seluruh indikator koin setelah transaksi tersimpan.
+- Sinkronisasi saldo juga diterapkan pada pembelian pupuk dan pembukaan lahan.
+
 ## Update v0.17.0
 - Farm Simulator redesigned into one compact interactive gameplay canvas.
 - Seed selection, farming actions, and shop / inventory / market buildings are clickable inside the game area.

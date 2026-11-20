@@ -1164,9 +1164,13 @@ function farmToast(title,message,icon='🎉'){
  const box=$('farmToast');$('farmToastTitle').textContent=title;$('farmToastText').textContent=message;$('farmToastIcon').textContent=icon;
  box.classList.remove('hidden');if(farmToastTimer)clearTimeout(farmToastTimer);farmToastTimer=setTimeout(()=>box.classList.add('hidden'),3200);
 }
+function refreshFarmWallet(){
+ const value=String(Number(state.coins)||0);
+ ['farmCoins','gameCoins','coinValue','profileCoins'].forEach(id=>{const el=$(id);if(el)el.textContent=value;});
+}
 function updateFarm(){
  if(!$('farmPanel'))return;
- $('farmCoins').textContent=state.coins;
+ refreshFarmWallet();
  const seedTotal=Object.values(state.farmSeeds||{}).reduce((sum,n)=>sum+(Number(n)||0),0);if($('farmSeedTotal'))$('farmSeedTotal').textContent=seedTotal;if($('farmPesticideTotal'))$('farmPesticideTotal').textContent=Number(state.farmPesticides)||0;
  $('farmSeedStocks').innerHTML='';
  $('farmSeedStocks').querySelectorAll('[data-select-farm-seed]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.selectFarmSeed;if(!(state.farmSeeds[id]>0))return;state.farmSelectedCrop=id;updateFarm();save();farmToast('Benih dipilih',farmCrops[id].name+' dipilih. Tekan tombol Tanam untuk menanam benih ini.','🌱');}));
@@ -1194,7 +1198,7 @@ function farmAct(action){
  }else if(action==='water'){
    if(!plot.crop||plot.watered)return;plot.watered=true;plot.plantedAt=Date.now();plot.stage=2;reward(3,0);farmNotify('Tanaman disiram. Tunggu hingga siap panen.');farmToast('Penyiraman berhasil','Tanaman mendapat air. +3 XP','💧');
  }else if(action==='fertilize'){
-   if(!plot.crop||plot.fertilized||state.coins<4)return;state.coins-=4;plot.fertilized=true;farmNotify('Pupuk diberikan. Pertumbuhan lebih cepat.');farmToast('Pemupukan berhasil','Biaya 4 koin. Pertumbuhan tanaman lebih cepat.','🧪');
+   if(!plot.crop||plot.fertilized||state.coins<4)return;state.coins-=4;plot.fertilized=true;refreshFarmWallet();farmNotify('Pupuk diberikan. Pertumbuhan lebih cepat.');farmToast('Pemupukan berhasil','Biaya 4 koin. Pertumbuhan tanaman lebih cepat.','🧪');
  }else if(action==='spray'){
    if(!plot.pest)return farmNotify('Tidak ada hama atau penyakit pada petak ini.');if((plot.pestSeverity||1)<=FARM_PEST_THRESHOLD)return farmNotify('Intensitas serangan '+(plot.pestSeverity||1)+'/5 belum melebihi ambang batas '+FARM_PEST_THRESHOLD+'/5. Pantau populasi/intensitas terlebih dahulu; penyemprotan belum dianjurkan.');if(!window.confirm('Pengingat PHT: pastikan populasi/intensitas serangan benar-benar MELEBIHI ambang batas (lebih dari '+FARM_PEST_THRESHOLD+'/5). Apakah hasil pengamatan sudah memenuhi ambang batas dan penyemprotan diperlukan?'))return;if(!(state.farmPesticides>0)){farmNotify('Stok pestisida habis. Beli pestisida di Toko Benih.');openFarmDialog('shop');return;}state.farmPesticides--;plot.pest=false;plot.pestType=null;plot.pestChecked=true;reward(4,0);farmToast('Penyemprotan berhasil','Serangan berhasil dikendalikan. Sisa pestisida: '+state.farmPesticides+'. +4 XP','🧴');
  }else if(action==='harvest'){
@@ -1208,7 +1212,7 @@ function unlockFarmPlot(){
  const i=state.farmUnlockedPlots,price=farmLandPrice(i);
  if(i>=farmPlotCenters.length)return farmToast('Semua lahan terbuka','Kamu sudah memiliki seluruh petak kebun.','🏡');
  if(state.coins<price)return farmToast('Koin belum cukup','Kamu membutuhkan '+price+' koin untuk membuka lahan berikutnya.','🪙');
- state.coins-=price;state.farmUnlockedPlots++;state.farmSelectedPlot=i;save();updateFarm();
+ state.coins-=price;state.farmUnlockedPlots++;state.farmSelectedPlot=i;save();refreshFarmWallet();updateFarm();
  farmToast('Selamat! Lahan baru terbuka','Petak '+(i+1)+' berhasil dibeli seharga '+price+' koin. Terus kembangkan kebunmu!','🎊');
 }
 function openFarmDialog(kind){
@@ -1222,8 +1226,8 @@ function openFarmDialog(kind){
   title.textContent='🧺 Pasar Hasil Panen';content='<p class="farm-dialog-note">Jual hasil panen untuk mendapatkan koin.</p><div class="farm-shop-list">'+Object.entries(farmCrops).map(([id,c])=>'<div class="farm-shop-item"><span>'+c.emoji+' <b>'+c.name+'</b><br>Stok: '+(state.farmProduce[id]||0)+' • '+c.sell+' koin/buah</span><button data-sell-crop="'+id+'" '+(!(state.farmProduce[id]>0)?'disabled':'')+'>Jual 1</button></div>').join('')+'</div>';
  }
  body.innerHTML=content;$('farmDialog').classList.remove('hidden');
- body.querySelectorAll('[data-buy-seed]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.buySeed,c=farmCrops[id];if(state.coins<c.seedPrice){farmNotify('Koin belum cukup untuk membeli benih.');return;}state.coins-=c.seedPrice;state.farmSeeds[id]=(state.farmSeeds[id]||0)+1;state.farmSelectedCrop=id;save();updateFarm();farmToast('Pembelian berhasil','1 benih '+c.name+' dibeli. -'+c.seedPrice+' koin. Sisa stok: '+state.farmSeeds[id]+'.','🛍️');openFarmDialog('shop');}));
- body.querySelector('[data-buy-pesticide]')?.addEventListener('click',()=>{if(state.coins<12){farmNotify('Koin belum cukup. Pestisida membutuhkan 12 koin.');return;}state.coins-=12;state.farmPesticides++;save();updateFarm();farmToast('Pestisida dibeli','1 botol pestisida masuk inventaris. -12 koin.','🧴');openFarmDialog('shop');});
+ body.querySelectorAll('[data-buy-seed]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.buySeed,c=farmCrops[id];if(state.coins<c.seedPrice){farmNotify('Koin belum cukup untuk membeli benih.');return;}state.coins-=c.seedPrice;state.farmSeeds[id]=(state.farmSeeds[id]||0)+1;state.farmSelectedCrop=id;save();refreshFarmWallet();updateFarm();farmToast('Pembelian berhasil','1 benih '+c.name+' dibeli. -'+c.seedPrice+' koin. Sisa stok: '+state.farmSeeds[id]+'.','🛍️');openFarmDialog('shop');}));
+ body.querySelector('[data-buy-pesticide]')?.addEventListener('click',()=>{if(state.coins<12){farmNotify('Koin belum cukup. Pestisida membutuhkan 12 koin.');return;}state.coins-=12;state.farmPesticides++;save();refreshFarmWallet();updateFarm();farmToast('Pestisida dibeli','1 botol pestisida masuk inventaris. -12 koin.','🧴');openFarmDialog('shop');});
  body.querySelectorAll('[data-sell-crop]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.sellCrop;if(!(state.farmProduce[id]>0))return;state.farmProduce[id]--;reward(0,farmCrops[id].sell);save();updateFarm();farmToast('Penjualan berhasil','1 '+farmCrops[id].name+' terjual. +'+farmCrops[id].sell+' koin.','💰');openFarmDialog('market');}));
 }
 $('farmCanvas').addEventListener('click',e=>{
