@@ -8,7 +8,7 @@ const FIRST_LEVEL_XP=150, XP_PER_LEVEL=250;
 function xpThreshold(level){return level<=1?0:FIRST_LEVEL_XP+(level-2)*XP_PER_LEVEL;}
 function levelFromXP(xp){let level=1;while(xp>=xpThreshold(level+1))level++;return level;}
 function levelProgress(xp){const level=levelFromXP(xp);return {level,progress:xp-xpThreshold(level),needed:level===1?FIRST_LEVEL_XP:XP_PER_LEVEL};}
-const state = {name:'Penyuluh Muda',avatarIndex:0,xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},analog:{x:0,y:0},interact:false,catOwned:false,catQuestNpcId:null,catFollower:{x:120,y:410},scene:'village',mineGold:0,mineNodes:[],returnPosition:{x:145,y:390},ranchMissionDone:false,farmPlots:[],farmSeeds:{padi:3,jagung:2,cabai:1},farmProduce:{},farmSelectedPlot:0,farmSelectedCrop:'padi',farmPlayer:{x:450,y:430},farmTarget:null,farmDay:1,farmLastWeather:'Cerah',farmUnlockedPlots:1,farmPesticides:0,farmPesticideStarterGranted:false};
+const state = {name:'Penyuluh Muda',avatarIndex:0,xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},analog:{x:0,y:0},interact:false,catOwned:false,catQuestNpcId:null,catFollower:{x:120,y:410},scene:'village',mineGold:0,mineNodes:[],returnPosition:{x:145,y:390},ranchMissionDone:false,palmGhostCaught:0,farmPlots:[],farmSeeds:{padi:3,jagung:2,cabai:1},farmProduce:{},farmSelectedPlot:0,farmSelectedCrop:'padi',farmPlayer:{x:450,y:430},farmTarget:null,farmDay:1,farmLastWeather:'Cerah',farmUnlockedPlots:1,farmPesticides:0,farmPesticideStarterGranted:false};
 const screens=['homeScreen','menuScreen','gameScreen'];
 function save(){
   localStorage.setItem(KEY, JSON.stringify({
@@ -34,7 +34,7 @@ function save(){
     catOwned:!!state.catOwned,
     catQuestNpcId:state.catQuestNpcId,
     catFollower:state.catFollower,
-    scene:state.scene||'village',mineGold:Number(state.mineGold)||0,mineNodes:Array.isArray(state.mineNodes)?state.mineNodes:[],returnPosition:state.returnPosition||{x:145,y:390},ranchMissionDone:!!state.ranchMissionDone,
+    scene:state.scene||'village',mineGold:Number(state.mineGold)||0,mineNodes:Array.isArray(state.mineNodes)?state.mineNodes:[],returnPosition:state.returnPosition||{x:145,y:390},ranchMissionDone:!!state.ranchMissionDone,palmGhostCaught:Number(state.palmGhostCaught)||0,
     farmPlots:state.farmPlots,farmSeeds:state.farmSeeds,farmProduce:state.farmProduce,farmSelectedPlot:state.farmSelectedPlot,farmSelectedCrop:state.farmSelectedCrop,farmPlayer:state.farmPlayer,farmDay:state.farmDay,farmLastWeather:state.farmLastWeather,farmUnlockedPlots:state.farmUnlockedPlots,farmPesticides:state.farmPesticides,farmPesticideStarterGranted:state.farmPesticideStarterGranted
   }));
 }
@@ -680,11 +680,66 @@ function drawWorld(t=0){
  const hintEl=$('canvasHint');if(hintEl)hintEl.textContent=window.matchMedia('(max-width: 760px)').matches?'Gunakan tombol arah untuk bergerak • Dekati warga lalu tap INTERAKSI':'Gunakan WASD / tombol panah untuk bergerak • Dekati warga lalu tekan E atau Spasi untuk bicara';
  const next=nextMission();$('worldObjective').textContent=next?'🎯 '+next.text:'⭐ Semua misi desa selesai';
 }
+let palmGhost=null,palmNextGhostAt=0,palmGhostToastTimer=0;
+const palmGhostTypes=['pocong','kuntilanak','tuyul','genderuwo'];
+function showPalmToast(message){
+ const el=$('achievementToast');if(!el)return;
+ el.textContent=message;el.classList.add('show');
+ if(palmGhostToastTimer)clearTimeout(palmGhostToastTimer);
+ palmGhostToastTimer=setTimeout(()=>el.classList.remove('show'),4200);
+}
+function spawnPalmGhost(now){
+ const type=palmGhostTypes[Math.floor(Math.random()*palmGhostTypes.length)];
+ const side=Math.random()<.5?-1:1;
+ palmGhost={type,x:canvas.width*(side<0?.18:.82),y:canvas.height*(.22+Math.random()*.42),phase:Math.random()*Math.PI*2,spawnAt:now};
+ showPalmToast('👻 Ada '+type.toUpperCase()+'! Kejar dan dekati hantunya, lalu tekan E / INTERAKSI untuk menangkap dan mendapat 2 koin!');
+}
+function drawPalmGhost(g,t){
+ const bob=Math.sin(t/260+g.phase)*8, sway=Math.sin(t/430+g.phase)*5;
+ const x=g.x+sway,y=g.y+bob;
+ ctx.save();ctx.translate(x,y);ctx.globalAlpha=.72;ctx.shadowColor='#dfffee';ctx.shadowBlur=22;
+ if(g.type==='pocong'){
+  ctx.fillStyle='#e7e8dc';ctx.beginPath();ctx.moveTo(-15,-25);ctx.quadraticCurveTo(-21,-7,-13,20);ctx.lineTo(-9,32);ctx.lineTo(0,25);ctx.lineTo(9,32);ctx.lineTo(14,18);ctx.quadraticCurveTo(21,-7,14,-25);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#c5c8bc';ctx.fillRect(-13,-28,26,7);ctx.fillRect(-11,-2,22,5);ctx.fillRect(-9,13,18,5);
+  ctx.fillStyle='#251d20';ctx.beginPath();ctx.ellipse(-5,-13,2.5,4,0,0,Math.PI*2);ctx.ellipse(5,-13,2.5,4,0,0,Math.PI*2);ctx.fill();
+ }else if(g.type==='kuntilanak'){
+  ctx.fillStyle='#e9e7df';ctx.beginPath();ctx.ellipse(0,-20,14,18,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.moveTo(-14,-6);ctx.quadraticCurveTo(-25,7,-18,35);ctx.quadraticCurveTo(-8,23,0,38);ctx.quadraticCurveTo(10,21,20,35);ctx.quadraticCurveTo(25,8,14,-6);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#292326';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-9,-5);ctx.lineTo(-4,-2);ctx.moveTo(9,-5);ctx.lineTo(4,-2);ctx.stroke();
+  ctx.fillStyle='#7d2732';ctx.beginPath();ctx.ellipse(0,1,4,7,0,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#d8d5ca';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-12,-12);ctx.quadraticCurveTo(-34,4,-24,28);ctx.moveTo(12,-12);ctx.quadraticCurveTo(34,4,24,28);ctx.stroke();
+ }else if(g.type==='tuyul'){
+  ctx.fillStyle='#9da98c';ctx.beginPath();ctx.ellipse(0,-13,14,18,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.moveTo(-12,-25);ctx.lineTo(-23,-35);ctx.lineTo(-19,-17);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(12,-25);ctx.lineTo(23,-35);ctx.lineTo(19,-17);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#211c1a';ctx.beginPath();ctx.ellipse(-5,-15,3,5,0,0,Math.PI*2);ctx.ellipse(5,-15,3,5,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#b7b99e';ctx.beginPath();ctx.ellipse(0,12,13,15,0,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#aeb99b';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(-8,22);ctx.lineTo(-14,34);ctx.moveTo(8,22);ctx.lineTo(14,34);ctx.stroke();
+ }else{
+  ctx.fillStyle='#343c35';ctx.beginPath();ctx.ellipse(0,-13,20,27,0,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.moveTo(-16,-29);ctx.lineTo(-26,-43);ctx.lineTo(-22,-16);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(16,-29);ctx.lineTo(26,-43);ctx.lineTo(22,-16);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#f1c66d';ctx.beginPath();ctx.ellipse(-7,-17,4,6,0,0,Math.PI*2);ctx.ellipse(7,-17,4,6,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#171a17';ctx.beginPath();ctx.ellipse(0,2,8,11,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#3b443b';ctx.beginPath();ctx.ellipse(0,17,22,18,0,0,Math.PI*2);ctx.fill();
+ }
+ ctx.restore();
+ ctx.save();ctx.font='bold 10px Nunito';ctx.textAlign='center';ctx.fillStyle='#f4f2db';ctx.shadowColor='#000';ctx.shadowBlur=5;ctx.fillText(g.type.toUpperCase(),x,y+48);ctx.restore();
+}
 function enterPalm(){
  state.returnPosition={x:state.player.x,y:state.player.y};state.scene='palm';
- state.player={x:canvas.width*.5,y:canvas.height-135};save();
+ state.player={x:canvas.width*.5,y:canvas.height-135};palmGhost=null;palmNextGhostAt=performance.now()+1800;save();showPalmToast('MISI KEBUN SAWIT: Kejar dan tangkap hantu yang muncul. Dekati hantu lalu tekan E / INTERAKSI untuk mendapat 2 koin!');
 }
 function palmInteract(){
+ if(palmGhost&&Math.hypot(state.player.x-palmGhost.x,state.player.y-palmGhost.y)<68){
+  const caught=palmGhost.type;palmGhost=null;state.palmGhostCaught=(Number(state.palmGhostCaught)||0)+1;reward(0,2);save();
+  showPalmToast('🎉 Berhasil menangkap '+caught+'! Kamu mendapat 2 koin. Total tertangkap: '+state.palmGhostCaught+'.');
+  return;
+ }
+ if(palmGhost&&Math.hypot(state.player.x-palmGhost.x,state.player.y-palmGhost.y)>=68){
+  showPalmToast('👻 Hantu masih jauh! Kejar dan dekati hantunya untuk menangkap, lalu tekan E / INTERAKSI.');
+  return;
+ }
  const exit={x:canvas.width*.5,y:canvas.height-90};
  if(Math.hypot(state.player.x-exit.x,state.player.y-exit.y)<92){
   state.scene='village';state.player={...state.returnPosition};save();return;
@@ -728,8 +783,8 @@ function drawPalm(t=0){
  if(state.catOwned)drawPetCat(state.player.x-28,state.player.y+20,t);
  ctx.restore();
  $('worldLocation').textContent='🌴 Kebun Sawit • Hutan Sunyi';
- $('worldObjective').textContent='🌫️ Jelajahi kebun sawit dan temukan jalan kembali ke gerbang';
- const hint=$('canvasHint');if(hint)hint.textContent=window.matchMedia('(max-width: 760px)').matches?'Gunakan tombol arah untuk bergerak • Dekati gerbang lalu tap INTERAKSI':'Gunakan WASD / tombol panah • Dekati gerbang lalu tekan E / Spasi';
+ $('worldObjective').textContent='👻 Misi: tangkap hantu untuk +2 koin • Tertangkap: '+(state.palmGhostCaught||0);
+ const hint=$('canvasHint');if(hint)hint.textContent=window.matchMedia('(max-width: 760px)').matches?'Gerakkan karakter, kejar hantu, lalu tap INTERAKSI saat dekat untuk +2 koin.':'Gerakkan karakter, kejar hantu, lalu tekan E / Spasi saat dekat untuk +2 koin.';
 }
 function drawMine(t=0){
  ctx.clearRect(0,0,canvas.width,canvas.height);ctx.save();
