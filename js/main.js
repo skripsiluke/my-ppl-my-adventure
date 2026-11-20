@@ -8,7 +8,7 @@ const FIRST_LEVEL_XP=150, XP_PER_LEVEL=250;
 function xpThreshold(level){return level<=1?0:FIRST_LEVEL_XP+(level-2)*XP_PER_LEVEL;}
 function levelFromXP(xp){let level=1;while(xp>=xpThreshold(level+1))level++;return level;}
 function levelProgress(xp){const level=levelFromXP(xp);return {level,progress:xp-xpThreshold(level),needed:level===1?FIRST_LEVEL_XP:XP_PER_LEVEL};}
-const state = {name:'Penyuluh Muda',avatarIndex:0,xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},analog:{x:0,y:0},interact:false,catOwned:false,catQuestNpcId:null,catFollower:{x:120,y:410},scene:'village',mineGold:0,mineNodes:[],returnPosition:{x:145,y:390},ranchMissionDone:false,farmPlots:[],farmSeeds:{padi:3,jagung:2,cabai:1},farmProduce:{},farmSelectedPlot:0,farmSelectedCrop:'padi',farmPlayer:{x:450,y:430},farmTarget:null,farmDay:1,farmLastWeather:'Cerah'};
+const state = {name:'Penyuluh Muda',avatarIndex:0,xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},analog:{x:0,y:0},interact:false,catOwned:false,catQuestNpcId:null,catFollower:{x:120,y:410},scene:'village',mineGold:0,mineNodes:[],returnPosition:{x:145,y:390},ranchMissionDone:false,farmPlots:[],farmSeeds:{padi:3,jagung:2,cabai:1},farmProduce:{},farmSelectedPlot:0,farmSelectedCrop:'padi',farmPlayer:{x:450,y:430},farmTarget:null,farmDay:1,farmLastWeather:'Cerah',farmUnlockedPlots:1};
 const screens=['homeScreen','menuScreen','gameScreen'];
 function save(){
   localStorage.setItem(KEY, JSON.stringify({
@@ -34,7 +34,8 @@ function save(){
     catOwned:!!state.catOwned,
     catQuestNpcId:state.catQuestNpcId,
     catFollower:state.catFollower,
-    scene:state.scene||'village',mineGold:Number(state.mineGold)||0,mineNodes:Array.isArray(state.mineNodes)?state.mineNodes:[],returnPosition:state.returnPosition||{x:145,y:390},ranchMissionDone:!!state.ranchMissionDone
+    scene:state.scene||'village',mineGold:Number(state.mineGold)||0,mineNodes:Array.isArray(state.mineNodes)?state.mineNodes:[],returnPosition:state.returnPosition||{x:145,y:390},ranchMissionDone:!!state.ranchMissionDone,
+    farmPlots:state.farmPlots,farmSeeds:state.farmSeeds,farmProduce:state.farmProduce,farmSelectedPlot:state.farmSelectedPlot,farmSelectedCrop:state.farmSelectedCrop,farmPlayer:state.farmPlayer,farmDay:state.farmDay,farmLastWeather:state.farmLastWeather,farmUnlockedPlots:state.farmUnlockedPlots
   }));
 }
 function load(){
@@ -70,6 +71,9 @@ function load(){
   state.farmProduce=state.farmProduce&&typeof state.farmProduce==='object'?state.farmProduce:{};
   state.farmPlayer=state.farmPlayer&&typeof state.farmPlayer==='object'?state.farmPlayer:{x:450,y:430};
   state.farmDay=Number(state.farmDay)||1;state.farmLastWeather=state.farmLastWeather||'Cerah';
+  state.farmUnlockedPlots=Math.max(1,Math.min(6,Number(state.farmUnlockedPlots)||1));
+  // Keep any previously planted legacy plot accessible.
+  state.farmPlots.forEach((p,i)=>{if(p&&p.crop)state.farmUnlockedPlots=Math.max(state.farmUnlockedPlots,i+1);});
   save();
 }
 function showScreen(id){screens.forEach(s=>$(s).classList.toggle('hidden',s!==id));}
@@ -844,18 +848,22 @@ function drawFarmWorld(){
  [[175,70],[735,70],[845,260],[75,275]].forEach(([x,y])=>{c.fillStyle='#795238';c.fillRect(x-5,y,10,24);c.fillStyle='#347d3c';c.beginPath();c.arc(x,y,22,0,Math.PI*2);c.fill();c.fillStyle='#69a94c';c.beginPath();c.arc(x-9,y-8,11,0,Math.PI*2);c.fill();});
  // field plots
  farmPlotCenters.forEach((p,i)=>{
-   const plot=state.farmPlots[i]||{crop:null,stage:0};
+   const plot=state.farmPlots[i]||{crop:null,stage:0},locked=i>=state.farmUnlockedPlots;
    c.fillStyle=state.farmSelectedPlot===i?'#f4d45b':'#8a5935';c.fillRect(p.x-86,p.y-48,172,96);
-   c.fillStyle='#9e7047';c.fillRect(p.x-80,p.y-42,160,84);
-   for(let r=0;r<3;r++){c.fillStyle='#805432';c.fillRect(p.x-70,p.y-27+r*27,140,5);}
-   if(plot.crop){
+   c.fillStyle=locked?'#6c6c55':'#9e7047';c.fillRect(p.x-80,p.y-42,160,84);
+   for(let r=0;r<3;r++){c.fillStyle=locked?'#62624e':'#805432';c.fillRect(p.x-70,p.y-27+r*27,140,5);}
+   c.textAlign='center';
+   if(locked){
+     c.fillStyle='#fff8df';c.font='25px serif';c.fillText('🔒',p.x,p.y-2);
+     c.font='bold 10px Nunito';c.fillText('BELI LAHAN',p.x,p.y+27);
+     c.font='9px Nunito';c.fillText(''+farmLandPrice(i)+' koin',p.x,p.y+40);
+   }else if(plot.crop){
      const crop=farmCrops[plot.crop],ready=farmPlotReady(plot);
-     c.font='27px serif';c.textAlign='center';
-     const icon=ready?crop.emoji:(plot.stage===1?'🌱':'🌿');
+     c.font='27px serif';const icon=ready?crop.emoji:(plot.stage===1?'🌱':'🌿');
      for(let j=0;j<5;j++)c.fillText(icon,p.x-48+j*24,p.y-4+(j%2)*17);
      if(!plot.watered){c.fillStyle='#fff4dc';c.fillRect(p.x-35,p.y-43,70,16);c.fillStyle='#68482d';c.font='bold 9px Nunito';c.fillText('BUTUH AIR',p.x,p.y-32);}
      else if(ready){c.fillStyle='#fff4dc';c.fillRect(p.x-29,p.y-43,58,16);c.fillStyle='#426c32';c.font='bold 9px Nunito';c.fillText('SIAP PANEN',p.x,p.y-32);}
-   }else{c.fillStyle='#f5e6c9';c.font='bold 11px Nunito';c.textAlign='center';c.fillText('PETAK '+(i+1),p.x,p.y+5);}
+   }else{c.fillStyle='#f5e6c9';c.font='bold 11px Nunito';c.fillText('PETAK '+(i+1),p.x,p.y+5);}
    if(state.farmSelectedPlot===i){c.strokeStyle='#fff6a5';c.lineWidth=4;c.strokeRect(p.x-89,p.y-51,178,102);}
  });
  // player
@@ -865,57 +873,75 @@ function drawFarmWorld(){
 function farmDrawLoop(t){if(t-farmLastFrame>25){farmLastFrame=t;drawFarmWorld();}if(t-farmUiLast>500){farmUiLast=t;updateFarm();}if(state.farmTarget){const p=state.farmPlayer,dx=state.farmTarget.x-p.x,dy=state.farmTarget.y-p.y,d=Math.hypot(dx,dy);if(d>2){const step=Math.min(2.7,d);p.x+=dx/d*step;p.y+=dy/d*step;}else state.farmTarget=null;}farmRaf=requestAnimationFrame(farmDrawLoop);}
 function startFarm(){if(farmRaf)cancelAnimationFrame(farmRaf);farmRaf=requestAnimationFrame(farmDrawLoop);updateFarm();}
 function stopFarm(){if(farmRaf)cancelAnimationFrame(farmRaf);farmRaf=0;state.farmTarget=null;}
+const farmLandPrices=[0,35,55,80,110,150];
+function farmLandPrice(i){return farmLandPrices[i]||150;}
+let farmToastTimer=0;
+function farmToast(title,message,icon='🎉'){
+ const box=$('farmToast');$('farmToastTitle').textContent=title;$('farmToastText').textContent=message;$('farmToastIcon').textContent=icon;
+ box.classList.remove('hidden');if(farmToastTimer)clearTimeout(farmToastTimer);farmToastTimer=setTimeout(()=>box.classList.add('hidden'),3200);
+}
 function updateFarm(){
  if(!$('farmPanel'))return;
- $('farmCoins').textContent=state.coins;$('farmSeedCount').textContent=Object.values(state.farmSeeds).reduce((a,b)=>a+(Number(b)||0),0);
+ $('farmCoins').textContent=state.coins;
+ $('farmSeedStocks').innerHTML=Object.entries(farmCrops).map(([id,c])=>'<div class="farm-seed-chip">'+c.emoji+' '+c.name+'<b>'+(state.farmSeeds[id]||0)+' benih</b></div>').join('');
  $('farmWeather').textContent='Cuaca '+state.farmLastWeather+' • Hari '+state.farmDay;
- const i=state.farmSelectedPlot||0,plot=state.farmPlots[i],crop=plot?.crop?farmCrops[plot.crop]:null,ready=plot&&farmPlotReady(plot);
- $('farmSelectedLabel').textContent='Petak '+(i+1)+(crop?' • '+crop.name:' • Kosong');
- $('farmPlayerStatus').textContent=!plot?.crop?'Lahan siap diolah. Pilih benih lalu tanam.':!plot.watered?'Tanaman membutuhkan air.':ready?'Tanaman siap dipanen!':'Tanaman sedang tumbuh. Kembali sebentar lagi.';
- $('farmPlant').disabled=!!plot?.crop||!(state.farmSeeds[state.farmSelectedCrop]>0);
- $('farmWater').disabled=!plot?.crop||plot.watered;
- $('farmFertilize').disabled=!plot?.crop||plot.fertilized||state.coins<4;
- $('farmHarvest').disabled=!ready;
+ const i=state.farmSelectedPlot||0,plot=state.farmPlots[i],locked=i>=state.farmUnlockedPlots,crop=plot?.crop?farmCrops[plot.crop]:null,ready=plot&&farmPlotReady(plot);
+ $('farmSelectedLabel').textContent='Petak '+(i+1)+(locked?' • Terkunci':crop?' • '+crop.name:' • Kosong');
+ $('farmPlayerStatus').textContent=locked?'Lahan terkunci. Beli lahan ini menggunakan koin hasil penjualan panen.':!plot?.crop?'Lahan siap diolah. Pilih benih lalu tanam.':!plot.watered?'Tanaman membutuhkan air.':ready?'Tanaman siap dipanen!':'Tanaman sedang tumbuh. Kembali sebentar lagi.';
+ $('farmPlant').disabled=locked||!!plot?.crop||!(state.farmSeeds[state.farmSelectedCrop]>0);
+ $('farmWater').disabled=locked||!plot?.crop||plot.watered;
+ $('farmFertilize').disabled=locked||!plot?.crop||plot.fertilized||state.coins<4;
+ $('farmHarvest').disabled=locked||!ready;
+ $('farmUnlock').disabled=!locked||i!==state.farmUnlockedPlots||state.coins<farmLandPrice(i);
+ $('farmUnlock').textContent=locked?'🔓 Buka '+farmLandPrice(i)+' 🪙':'🔓 Lahan terbuka';
  drawFarmWorld();
 }
-function farmNotify(msg){$('farmPlayerStatus').textContent=msg;}
-function farmSelectPlot(i){state.farmSelectedPlot=i;const p=farmPlotCenters[i];state.farmTarget={x:p.x,y:p.y+68};updateFarm();save();}
+function farmNotify(msg){$('farmPlayerStatus').textContent=msg;farmToast('Informasi',msg,'ℹ️');}
+function farmSelectPlot(i){state.farmSelectedPlot=i;const p=farmPlotCenters[i];if(i<state.farmUnlockedPlots)state.farmTarget={x:p.x,y:p.y+68};updateFarm();if(i>=state.farmUnlockedPlots)farmToast('Lahan terkunci','Kumpulkan koin dari penjualan panen untuk membeli lahan ini. Harga '+farmLandPrice(i)+' koin.','🔒');save();}
 function farmAct(action){
  const i=state.farmSelectedPlot,plot=state.farmPlots[i];
+ if(i>=state.farmUnlockedPlots)return farmNotify('Lahan ini masih terkunci. Beli terlebih dahulu.');
  if(action==='plant'){
    if(plot.crop)return farmNotify('Petak ini sudah ditanami.');if(!(state.farmSeeds[state.farmSelectedCrop]>0))return farmNotify('Benih habis. Kunjungi Toko Benih.');
-   state.farmSeeds[state.farmSelectedCrop]--;state.farmPlots[i]={crop:state.farmSelectedCrop,stage:1,watered:false,fertilized:false,plantedAt:Date.now()};reward(2,0);farmNotify('Benih '+farmCrops[state.farmSelectedCrop].name+' berhasil ditanam.');
+   state.farmSeeds[state.farmSelectedCrop]--;state.farmPlots[i]={crop:state.farmSelectedCrop,stage:1,watered:false,fertilized:false,plantedAt:Date.now()};reward(2,0);farmNotify('Benih '+farmCrops[state.farmSelectedCrop].name+' berhasil ditanam.');farmToast('Penanaman berhasil','Kamu menanam '+farmCrops[state.farmSelectedCrop].name+'. +2 XP','🌱');
  }else if(action==='water'){
-   if(!plot.crop||plot.watered)return;plot.watered=true;plot.plantedAt=Date.now();plot.stage=2;reward(3,0);farmNotify('Tanaman disiram. Tunggu hingga siap panen.');
+   if(!plot.crop||plot.watered)return;plot.watered=true;plot.plantedAt=Date.now();plot.stage=2;reward(3,0);farmNotify('Tanaman disiram. Tunggu hingga siap panen.');farmToast('Penyiraman berhasil','Tanaman mendapat air. +3 XP','💧');
  }else if(action==='fertilize'){
-   if(!plot.crop||plot.fertilized||state.coins<4)return;state.coins-=4;plot.fertilized=true;farmNotify('Pupuk diberikan. Pertumbuhan lebih cepat.');
+   if(!plot.crop||plot.fertilized||state.coins<4)return;state.coins-=4;plot.fertilized=true;farmNotify('Pupuk diberikan. Pertumbuhan lebih cepat.');farmToast('Pemupukan berhasil','Biaya 4 koin. Pertumbuhan tanaman lebih cepat.','🧪');
  }else if(action==='harvest'){
    if(!farmPlotReady(plot))return farmNotify('Tanaman belum siap dipanen.');
-   const crop=farmCrops[plot.crop];state.farmProduce[plot.crop]=(state.farmProduce[plot.crop]||0)+1;state.harvestCount++;reward(crop.xp,0);farmNotify('Panen '+crop.name+' berhasil! Hasil masuk inventaris.');
+   const crop=farmCrops[plot.crop];state.farmProduce[plot.crop]=(state.farmProduce[plot.crop]||0)+1;state.harvestCount++;reward(crop.xp,0);farmNotify('Panen '+crop.name+' berhasil! Hasil masuk inventaris.');farmToast('Selamat! Panen berhasil','Kamu memperoleh 1 '+crop.name+'. +'+crop.xp+' XP','🏆');
    state.farmPlots[i]={crop:null,stage:0,watered:false,fertilized:false,plantedAt:0};state.farmDay++;
  }
  updateFarm();save();
+}
+function unlockFarmPlot(){
+ const i=state.farmUnlockedPlots,price=farmLandPrice(i);
+ if(i>=farmPlotCenters.length)return farmToast('Semua lahan terbuka','Kamu sudah memiliki seluruh petak kebun.','🏡');
+ if(state.coins<price)return farmToast('Koin belum cukup','Kamu membutuhkan '+price+' koin untuk membuka lahan berikutnya.','🪙');
+ state.coins-=price;state.farmUnlockedPlots++;state.farmSelectedPlot=i;save();updateFarm();
+ farmToast('Selamat! Lahan baru terbuka','Petak '+(i+1)+' berhasil dibeli seharga '+price+' koin. Terus kembangkan kebunmu!','🎊');
 }
 function openFarmDialog(kind){
  const title=$('farmDialogTitle'),body=$('farmDialogBody');let content='';
  if(kind==='shop'){
   title.textContent='🏪 Toko Benih';
-  content='<p class="farm-dialog-note">Pilih benih untuk dibeli. Harga menggunakan koin permainan.</p><div class="farm-shop-list">'+Object.entries(farmCrops).map(([id,c])=>'<div class="farm-shop-item"><span>'+c.emoji+' <b>'+c.name+'</b><br>Harga '+c.seedPrice+' koin • Jual '+c.sell+' koin</span><button data-buy-seed="'+id+'">Beli 1</button></div>').join('')+'</div>';
+  content='<p class="farm-dialog-note">Pilih benih untuk dibeli. Harga menggunakan koin permainan.</p><div class="farm-shop-list">'+Object.entries(farmCrops).map(([id,c])=>'<div class="farm-shop-item"><span>'+c.emoji+' <b>'+c.name+'</b><br>Stok: '+(state.farmSeeds[id]||0)+' benih<br>Harga '+c.seedPrice+' koin • Jual '+c.sell+' koin</span><button data-buy-seed="'+id+'">Beli 1</button></div>').join('')+'</div>';
  }else if(kind==='inventory'){
   title.textContent='🎒 Inventaris';content='<h4>Benih</h4><div class="farm-inventory-list">'+Object.entries(farmCrops).map(([id,c])=>'<div class="farm-inventory-item">'+c.emoji+' '+c.name+': <b>'+(state.farmSeeds[id]||0)+'</b></div>').join('')+'</div><h4>Hasil panen</h4><div class="farm-inventory-list">'+Object.entries(farmCrops).map(([id,c])=>'<div class="farm-inventory-item">'+c.emoji+' '+c.name+': <b>'+(state.farmProduce[id]||0)+'</b></div>').join('')+'</div>';
  }else{
   title.textContent='🧺 Pasar Hasil Panen';content='<p class="farm-dialog-note">Jual hasil panen untuk mendapatkan koin.</p><div class="farm-shop-list">'+Object.entries(farmCrops).map(([id,c])=>'<div class="farm-shop-item"><span>'+c.emoji+' <b>'+c.name+'</b><br>Stok: '+(state.farmProduce[id]||0)+' • '+c.sell+' koin/buah</span><button data-sell-crop="'+id+'" '+(!(state.farmProduce[id]>0)?'disabled':'')+'>Jual 1</button></div>').join('')+'</div>';
  }
  body.innerHTML=content;$('farmDialog').classList.remove('hidden');
- body.querySelectorAll('[data-buy-seed]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.buySeed,c=farmCrops[id];if(state.coins<c.seedPrice){farmNotify('Koin belum cukup untuk membeli benih.');return;}state.coins-=c.seedPrice;state.farmSeeds[id]=(state.farmSeeds[id]||0)+1;state.farmSelectedCrop=id;save();updateFarm();openFarmDialog('shop');}));
- body.querySelectorAll('[data-sell-crop]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.sellCrop;if(!(state.farmProduce[id]>0))return;state.farmProduce[id]--;reward(0,farmCrops[id].sell);save();updateFarm();openFarmDialog('market');}));
+ body.querySelectorAll('[data-buy-seed]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.buySeed,c=farmCrops[id];if(state.coins<c.seedPrice){farmNotify('Koin belum cukup untuk membeli benih.');return;}state.coins-=c.seedPrice;state.farmSeeds[id]=(state.farmSeeds[id]||0)+1;state.farmSelectedCrop=id;save();updateFarm();farmToast('Pembelian berhasil','1 benih '+c.name+' dibeli. -'+c.seedPrice+' koin. Sisa stok: '+state.farmSeeds[id]+'.','🛍️');openFarmDialog('shop');}));
+ body.querySelectorAll('[data-sell-crop]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.sellCrop;if(!(state.farmProduce[id]>0))return;state.farmProduce[id]--;reward(0,farmCrops[id].sell);save();updateFarm();farmToast('Penjualan berhasil','1 '+farmCrops[id].name+' terjual. +'+farmCrops[id].sell+' koin.','💰');openFarmDialog('market');}));
 }
 $('farmCanvas').addEventListener('click',e=>{
  const r=farmCanvas.getBoundingClientRect(),x=(e.clientX-r.left)*900/r.width,y=(e.clientY-r.top)*510/r.height;
  let nearest=-1,dist=Infinity;farmPlotCenters.forEach((p,i)=>{const d=Math.hypot(x-p.x,y-p.y);if(d<dist){dist=d;nearest=i;}});
  if(dist<94)farmSelectPlot(nearest);else{state.farmTarget={x:Math.max(20,Math.min(880,x)),y:Math.max(45,Math.min(475,y))};}
 });
-$('farmPlant').addEventListener('click',()=>farmAct('plant'));$('farmWater').addEventListener('click',()=>farmAct('water'));$('farmFertilize').addEventListener('click',()=>farmAct('fertilize'));$('farmHarvest').addEventListener('click',()=>farmAct('harvest'));
+$('farmUnlock').addEventListener('click',unlockFarmPlot);$('farmPlant').addEventListener('click',()=>farmAct('plant'));$('farmWater').addEventListener('click',()=>farmAct('water'));$('farmFertilize').addEventListener('click',()=>farmAct('fertilize'));$('farmHarvest').addEventListener('click',()=>farmAct('harvest'));
 $('farmShop').addEventListener('click',()=>openFarmDialog('shop'));$('farmInventory').addEventListener('click',()=>openFarmDialog('inventory'));$('farmMarket').addEventListener('click',()=>openFarmDialog('market'));
 $('farmDialogClose').addEventListener('click',()=>$('farmDialog').classList.add('hidden'));
 document.querySelectorAll('[data-farm-dir]').forEach(btn=>btn.addEventListener('click',()=>{const d=btn.dataset.farmDir,p=state.farmPlayer,delta={up:[0,-40],down:[0,40],left:[-40,0],right:[40,0]}[d];state.farmTarget={x:Math.max(20,Math.min(880,p.x+delta[0])),y:Math.max(45,Math.min(475,p.y+delta[1]))};}));

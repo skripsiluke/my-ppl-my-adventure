@@ -190,3 +190,11 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Enam petak lahan, empat jenis tanaman, toko benih, inventaris, pasar hasil panen.
 - Tanam, siram, pupuk, tunggu pertumbuhan, dan panen dengan hadiah XP/koin.
 - Data kebun disimpan pada save game yang sama; progres dan fitur versi sebelumnya tetap dipertahankan.
+
+
+## v0.16.1 — Ekonomi kebun dan pembukaan lahan bertahap
+- Notifikasi pembelian benih, penjualan hasil panen, penanaman, penyiraman, pemupukan, panen, dan pembukaan lahan.
+- Stok benih ditampilkan per jenis tanaman pada layar kebun dan toko.
+- Hanya petak pertama yang terbuka di awal. Petak berikutnya dibeli berurutan menggunakan koin.
+- Harga pembukaan lahan: 35, 55, 80, 110, dan 150 koin.
+- Save lama tetap dibaca; petak lama yang sudah memiliki tanaman tetap dibuka agar tanaman/progres tidak hilang. Data lahan, stok benih, hasil panen, dan lahan terbuka kini ikut disimpan.

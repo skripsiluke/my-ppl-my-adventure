@@ -83,6 +83,18 @@
 .farm-inventory-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}.farm-inventory-item{padding:11px;border-radius:11px;background:#f0f6e9;font-size:12px}
 .farm-dialog-note{font-size:12px;line-height:1.6;color:#647665}
 @media(max-width:600px){.farm-mobile-controls{display:flex}.farm-action-bar{grid-template-columns:repeat(2,minmax(0,1fr))}.farm-player-hud{font-size:10px}.farm-hud strong{font-size:15px}.farm-management-grid{gap:6px}.farm-manage-card{padding:10px 4px}}
+
+
+/* Farm economy feedback and progressive land unlock */
+.farm-seed-stocks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:2px 0 8px}
+.farm-seed-chip{padding:7px 5px;border-radius:10px;background:#f0f7e9;border:1px solid #dcebd2;text-align:center;color:#385f3d;font-size:10px}
+.farm-seed-chip b{display:block;font-size:12px;margin-top:2px}
+.farm-toast{position:fixed;z-index:12000;left:50%;top:18px;transform:translateX(-50%);width:min(calc(100vw - 28px),390px);display:flex;align-items:center;gap:11px;padding:13px 16px;border:1px solid #d9edc7;border-radius:16px;background:rgba(250,255,244,.96);backdrop-filter:blur(12px);box-shadow:0 12px 35px #0003;color:#245337;animation:farmToastIn .25s ease-out}
+.farm-toast.hidden{display:none}.farm-toast>span{font-size:27px}.farm-toast div{display:grid;gap:2px}.farm-toast b{font-size:13px}.farm-toast small{font-size:11px;color:#5e745f;line-height:1.4}
+@keyframes farmToastIn{from{opacity:0;transform:translate(-50%,-12px)}to{opacity:1;transform:translate(-50%,0)}}
+.farm-action-bar{grid-template-columns:repeat(5,minmax(0,1fr))}
+.farm-action-bar .button{font-size:11px}
+@media(max-width:600px){.farm-seed-stocks{grid-template-columns:repeat(4,minmax(0,1fr))}.farm-action-bar{grid-template-columns:repeat(2,minmax(0,1fr))}.farm-toast{top:8px}}
   </style>
 </head>
 <body>
@@ -195,14 +207,14 @@
       </div>
     </div>
     <div id="farmPanel" class="game-panel hidden">
-      <div class="farm-hud"><div><span class="farm-kicker">FARM SIMULATOR</span><strong>🌤️ Kebun Belajar</strong><small id="farmWeather">Cuaca cerah • Hari 1</small></div><div class="farm-wallet"><span>🪙 <b id="farmCoins">0</b></span><span>🌱 <b id="farmSeedCount">0</b></span></div></div>
+      <div class="farm-hud"><div><span class="farm-kicker">FARM SIMULATOR</span><strong>🌤️ Kebun Belajar</strong><small id="farmWeather">Cuaca cerah • Hari 1</small></div><div class="farm-wallet"><span>🪙 <b id="farmCoins">0</b></span><span>🌱 <b>Stok benih</b></span></div></div>
       <div class="farm-world-wrap"><canvas id="farmCanvas" width="900" height="510" aria-label="Area kebun. Ketuk petak untuk memilih, ketuk area untuk berjalan."></canvas><div class="farm-world-tip">Ketuk petak untuk memilih • Ketuk area untuk berjalan</div></div>
-      <div class="farm-player-hud"><span id="farmPlayerStatus">Pilih petak untuk mulai bertani.</span><span id="farmSelectedLabel">Belum ada petak dipilih</span></div>
-      <div class="farm-action-bar"><button id="farmPlant" class="button button-primary">🌱 Tanam</button><button id="farmWater" class="button button-secondary">💧 Siram</button><button id="farmFertilize" class="button button-secondary">🧪 Pupuk</button><button id="farmHarvest" class="button button-secondary">🧺 Panen</button></div>
+      <div class="farm-seed-stocks" id="farmSeedStocks"></div><div class="farm-player-hud"><span id="farmPlayerStatus">Pilih petak untuk mulai bertani.</span><span id="farmSelectedLabel">Belum ada petak dipilih</span></div>
+      <div class="farm-action-bar"><button id="farmPlant" class="button button-primary">🌱 Tanam</button><button id="farmWater" class="button button-secondary">💧 Siram</button><button id="farmFertilize" class="button button-secondary">🧪 Pupuk</button><button id="farmHarvest" class="button button-secondary">🧺 Panen</button><button id="farmUnlock" class="button button-secondary">🔓 Buka Lahan</button></div>
       <div class="farm-management-grid"><button id="farmShop" class="farm-manage-card">🏪 <b>Toko Benih</b><small>Beli benih tanaman</small></button><button id="farmInventory" class="farm-manage-card">🎒 <b>Inventaris</b><small>Lihat benih & hasil panen</small></button><button id="farmMarket" class="farm-manage-card">🧺 <b>Pasar</b><small>Jual hasil panen</small></button></div>
       <div class="farm-mobile-controls"><button data-farm-dir="up">▲</button><div><button data-farm-dir="left">◀</button><button data-farm-dir="down">▼</button><button data-farm-dir="right">▶</button></div></div>
       <p class="muted small">Berjalan dengan WASD/tombol panah atau tombol arah di HP. Pilih petak untuk mengolah kebun.</p>
-      <div id="farmDialog" class="farm-dialog hidden"><div class="farm-dialog-card"><button id="farmDialogClose" class="farm-dialog-close">✕</button><h3 id="farmDialogTitle">Toko Benih</h3><div id="farmDialogBody"></div></div></div>
+      <div id="farmToast" class="farm-toast hidden" role="status" aria-live="polite"><span id="farmToastIcon">🎉</span><div><b id="farmToastTitle">Berhasil!</b><small id="farmToastText"></small></div></div><div id="farmDialog" class="farm-dialog hidden"><div class="farm-dialog-card"><button id="farmDialogClose" class="farm-dialog-close">✕</button><h3 id="farmDialogTitle">Toko Benih</h3><div id="farmDialogBody"></div></div></div>
     </div>
     <div id="quizPanel" class="game-panel hidden"><div class="quiz-top"><span class="status-pill">KUIS PERTANIAN</span><span id="questionCount">Soal 1 dari 5</span></div><h3 id="questionText">Apa tujuan utama penyuluhan pertanian?</h3><div id="answerList" class="answer-list"></div><p id="quizFeedback" class="quiz-feedback" aria-live="polite"></p><button id="nextQuestionButton" class="button button-primary hidden">Soal berikutnya →</button></div>
   </section>
