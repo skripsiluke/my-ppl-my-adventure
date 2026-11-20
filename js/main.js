@@ -907,7 +907,20 @@ function movePlayer(dx,dy){
  if(startBlocked || !blocked(nx,startY))state.player.x=nx;
  if(startBlocked || !blocked(state.player.x,ny))state.player.y=ny;
 }
-function loop(ts){const dt=Math.min((ts-last)/16||1,2);last=ts;let dx=(state.keys.ArrowRight||state.keys.d?1:0)-(state.keys.ArrowLeft||state.keys.a?1:0);let dy=(state.keys.ArrowDown||state.keys.s?1:0)-(state.keys.ArrowUp||state.keys.w?1:0);dx+=state.analog.x;dy+=state.analog.y;if(dx||dy)movePlayer(dx*dt,dy*dt);if(state.catOwned&&state.scene==='village'){const len=Math.hypot(dx,dy)||1,tx=state.player.x-(dx/len)*27,ty=state.player.y-(dy/len)*20;state.catFollower.x+=(tx-state.catFollower.x)*.16;state.catFollower.y+=(ty-state.catFollower.y)*.16;}drawWorld(ts);raf=requestAnimationFrame(loop);}
+function loop(ts){
+ // Jadwalkan frame berikutnya sebelum memproses dunia. Jika satu frame mengalami
+ // error saat animasi/efek tabrakan, loop kontrol tidak ikut berhenti permanen.
+ raf=requestAnimationFrame(loop);
+ try{
+  const dt=Math.min((ts-last)/16||1,2);last=ts;
+  let dx=(state.keys.ArrowRight||state.keys.d?1:0)-(state.keys.ArrowLeft||state.keys.a?1:0);
+  let dy=(state.keys.ArrowDown||state.keys.s?1:0)-(state.keys.ArrowUp||state.keys.w?1:0);
+  dx+=state.analog.x;dy+=state.analog.y;
+  if(dx||dy)movePlayer(dx*dt,dy*dt);
+  if(state.catOwned&&state.scene==='village'){const len=Math.hypot(dx,dy)||1,tx=state.player.x-(dx/len)*27,ty=state.player.y-(dy/len)*20;state.catFollower.x+=(tx-state.catFollower.x)*.16;state.catFollower.y+=(ty-state.catFollower.y)*.16;}
+  drawWorld(ts);
+ }catch(err){console.error('Game frame error (loop tetap berjalan):',err);}
+}
 function startWorld(){stopWorld();last=0;drawWorld();raf=requestAnimationFrame(loop);}
 function stopWorld(){if(raf)cancelAnimationFrame(raf);raf=0;state.keys={};}
 function interact(){
