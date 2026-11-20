@@ -1,4 +1,4 @@
-## Update v0.20.16
+## Update v0.20.18
 - Farm Simulator: pembelian benih dan pestisida langsung menyegarkan seluruh indikator koin setelah transaksi tersimpan.
 - Sinkronisasi saldo juga diterapkan pada pembelian pupuk dan pembukaan lahan.
 
@@ -291,3 +291,8 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 ## v0.20.15
 - Siklus tambang berulang: setelah Boss dikalahkan, jeda 30 detik lalu lima kelabang kecil muncul kembali sebelum Boss berikutnya.
 - Notifikasi kemenangan Boss menggunakan tampilan overlay bergaya naik level dengan pesan dan hadiah lebih meriah.
+
+
+## v0.20.21
+- Memindahkan pintu masuk Tambang Emas ke area kosong di sisi jalan desa (koordinat peta 760, 760), termasuk papan nama, petunjuk, dan titik interaksi.
+- Tidak mengubah struktur penyimpanan progres permainan.
