@@ -835,16 +835,69 @@ const farmHit={seeds:[],actions:[],buildings:[]};
 let farmRaf=0,farmLastFrame=0,farmUiLast=0,farmHeldDir=null,farmHoldTimer=null;
 function farmPlotReady(plot){return !!plot.crop&&plot.watered&&Date.now()-(plot.plantedAt||0)>=(farmCrops[plot.crop]?.grow||18000)*(plot.fertilized?.65:1);}
 function drawFarmWorld(){
- const c=farmCtx;c.clearRect(0,0,900,650);
- const grad=c.createLinearGradient(0,0,900,650);grad.addColorStop(0,'#b6df91');grad.addColorStop(1,'#79b967');c.fillStyle=grad;c.fillRect(0,0,900,650);
- for(let i=0;i<150;i++){const x=(i*97)%900,y=(i*61)%650;c.fillStyle=i%2?'#8bc56e':'#c0e39b';c.globalAlpha=.55;c.fillRect(x,y,11,3);}c.globalAlpha=1;
- c.fillStyle='#eaf5d9';c.fillRect(0,0,900,62);c.fillStyle='#315b35';c.font='bold 17px Nunito,sans-serif';c.textAlign='left';c.fillText('KEBUN BELAJAR',18,25);c.font='bold 10px Nunito';c.fillText('KOIN: '+state.coins,18,45);
- farmHit.seeds=[];let sx=340;Object.entries(farmCrops).forEach(([id,cr],n)=>{const x=sx+n*137,y=9,w=124,h=44,selected=state.farmSelectedCrop===id,stock=state.farmSeeds[id]||0;c.fillStyle=stock<=0?'#d8e3d0':selected?'#fff0a8':'#f7fbef';roundRect(c,x,y,w,h,12);c.fill();c.strokeStyle=selected?'#397e42':'#d2e5c9';c.lineWidth=selected?3:1;c.stroke();c.textAlign='center';c.font='23px serif';c.fillStyle=stock<=0?'#9aab98':'#315b35';c.fillText(cr.emoji,x+36,y+29);c.font='bold 16px Nunito';c.fillText(String(stock),x+88,y+28);if(selected){c.font='bold 8px Nunito';c.fillText('DIPILIH',x+88,y+39);}farmHit.seeds.push({id,x,y,w,h});});
- farmHit.buildings=[];const buildings=[{id:'shop',x:55,emoji:'🌱',name:'TOKO BENIH',sub:'BELI BENIH',roof:'#bd8051',wall:'#f8dfb2'},{id:'inventory',x:365,emoji:'📦',name:'GUDANG',sub:'INVENTARIS',roof:'#8c9b75',wall:'#e8e4c8'},{id:'market',x:675,emoji:'🧺',name:'PASAR',sub:'JUAL PANEN',roof:'#bd6d54',wall:'#f7d9ae'}];
- buildings.forEach(b=>{c.fillStyle='#795033';c.fillRect(b.x,143,170,88);c.fillStyle=b.roof;c.beginPath();c.moveTo(b.x-8,150);c.lineTo(b.x+85,91);c.lineTo(b.x+178,150);c.closePath();c.fill();c.fillStyle=b.wall;c.fillRect(b.x+12,155,146,66);c.fillStyle='#75482d';c.fillRect(b.x+65,184,40,37);c.fillStyle='#fff8e8';roundRect(c,b.x+22,160,126,23,5);c.fill();c.textAlign='center';c.fillStyle='#315b35';c.font='bold 11px Nunito';c.fillText(b.name,b.x+85,176);c.font='24px serif';c.fillText(b.emoji,b.x+85,204);c.font='bold 8px Nunito';c.fillStyle='#fff';c.fillText('KLIK UNTUK BUKA',b.x+85,241);farmHit.buildings.push({id:b.id,x:b.x-8,y:91,w:186,h:154});});
+ const c=farmCtx;c.clearRect(0,0,900,510);
+ const grad=c.createLinearGradient(0,0,900,510);grad.addColorStop(0,'#a8d987');grad.addColorStop(1,'#78b75f');c.fillStyle=grad;c.fillRect(0,0,900,510);
+ for(let i=0;i<125;i++){const x=(i*97)%900,y=(i*61)%510;c.fillStyle=i%2?'#8bc56e':'#b4df8d';c.globalAlpha=.65;c.fillRect(x,y,10,3);}c.globalAlpha=1;
+ // tidy village paths
+ c.fillStyle='#d8bd88';c.fillRect(0,205,900,12);c.fillRect(0,445,900,65);c.fillStyle='#c9ad78';c.fillRect(0,452,900,4);
+ c.fillStyle='#eaf5d9';c.fillRect(0,0,900,34);c.fillStyle='#315b35';c.font='bold 15px Nunito, sans-serif';c.textAlign='left';c.fillText('KEBUN BELAJAR',16,22);
+ // crop selection icons
+ farmHit.seeds=[];let sx=260;Object.entries(farmCrops).forEach(([id,cr],n)=>{const x=sx+n*150,y=17,w=136,h=48,selected=state.farmSelectedCrop===id,stock=state.farmSeeds[id]||0;c.fillStyle=stock<=0?'#d8e3d0':selected?'#fff0a8':'#f4f9e9';roundRect(c,x,y,w,h,12);c.fill();c.strokeStyle=selected?'#397e42':'#d2e5c9';c.lineWidth=selected?3:1;c.stroke();c.textAlign='center';c.font='22px serif';c.fillStyle=stock<=0?'#9aab98':'#315b35';c.fillText(cr.emoji,x+34,y+30);c.font='bold 15px Nunito';c.fillText(String(stock),x+91,y+29);if(selected){c.font='bold 8px Nunito';c.fillText('DIPILIH',x+91,y+41);}farmHit.seeds.push({id,x,y,w,h});});
+ // Three distinct, proportionate buildings with readable interaction labels
+ farmHit.buildings=[];
+ const buildings=[
+  {id:'shop',x:48,type:'shop',name:'TOKO BENIH',sub:'Klik untuk buka'},
+  {id:'inventory',x:365,type:'warehouse',name:'GUDANG',sub:'Klik untuk buka'},
+  {id:'market',x:682,type:'market',name:'PASAR TANI',sub:'Klik untuk buka'}
+ ];
+ buildings.forEach(b=>{
+  const x=b.x,y=104,w=170,h=91;
+  // soft shadow and foundation
+  c.fillStyle='#315b3540';c.fillRect(x+7,y+86,w,9);
+  if(b.type==='shop'){
+   // warm wooden kiosk, striped awning and open counter
+   c.fillStyle='#80502f';c.fillRect(x+8,y+27,154,58);
+   c.fillStyle='#f4d9a8';c.fillRect(x+16,y+36,138,43);
+   c.fillStyle='#fff0cf';c.fillRect(x+28,y+43,114,29);
+   c.fillStyle='#d96c49';c.fillRect(x+8,y+20,154,17);
+   for(let k=0;k<7;k++){c.fillStyle=k%2?'#fff0cf':'#d96c49';c.fillRect(x+8+k*22,y+20,22,17);}
+   c.fillStyle='#6d4328';c.fillRect(x+53,y+57,64,28);
+   c.fillStyle='#fff8e8';c.fillRect(x+59,y+61,52,7);
+   c.fillStyle='#4c8c47';c.fillRect(x+62,y+70,46,5);
+   c.fillStyle='#315b35';c.font='bold 11px Nunito';c.textAlign='center';c.fillText('TOKO BENIH',x+85,y+13);
+  }else if(b.type==='warehouse'){
+   // high-roof timber barn, double doors and vent
+   c.fillStyle='#8a6747';c.fillRect(x+9,y+31,152,54);
+   c.fillStyle='#b9a17a';c.beginPath();c.moveTo(x+1,y+33);c.lineTo(x+85,y-7);c.lineTo(x+169,y+33);c.closePath();c.fill();
+   c.fillStyle='#e6d9b8';c.fillRect(x+19,y+39,132,40);
+   c.fillStyle='#805333';c.fillRect(x+54,y+45,62,40);
+   c.strokeStyle='#d7b17a';c.lineWidth=3;c.strokeRect(x+54,y+45,62,40);
+   c.beginPath();c.moveTo(x+85,y+45);c.lineTo(x+85,y+85);c.stroke();
+   c.fillStyle='#5d4934';c.fillRect(x+67,y+9,36,8);
+   c.fillStyle='#315b35';c.font='bold 11px Nunito';c.textAlign='center';c.fillText('GUDANG',x+85,y+3);
+  }else{
+   // market stall with canopy, counter and produce baskets
+   c.fillStyle='#815334';c.fillRect(x+8,y+32,154,53);
+   c.fillStyle='#f5dfb4';c.fillRect(x+17,y+43,136,35);
+   c.fillStyle='#c65f4e';c.fillRect(x+4,y+19,162,18);
+   for(let k=0;k<6;k++){c.fillStyle=k%2?'#fff0d0':'#c65f4e';c.fillRect(x+4+k*27,y+19,27,18);}
+   c.fillStyle='#80502f';c.fillRect(x+23,y+57,124,28);
+   ['🍅','🌽','🌶️'].forEach((e,i)=>{c.font='20px serif';c.fillText(e,x+48+i*38,y+76);});
+   c.fillStyle='#315b35';c.font='bold 11px Nunito';c.textAlign='center';c.fillText('PASAR TANI',x+85,y+13);
+  }
+  // legible click ribbon beneath each facade
+  c.fillStyle='#315b35';roundRect(c,x+13,y+94,144,18,7);c.fill();
+  c.fillStyle='#fff';c.font='bold 9px Nunito';c.textAlign='center';c.fillText(b.sub,x+85,y+106);
+  farmHit.buildings.push({id:b.id,x:x-3,y:y-9,w:176,h:124});
+ });
+ // field plots
  farmPlotCenters.forEach((p,i)=>{const plot=state.farmPlots[i]||{crop:null,stage:0},locked=i>=state.farmUnlockedPlots;c.fillStyle=state.farmSelectedPlot===i?'#f4d45b':'#8a5935';c.fillRect(p.x-83,p.y-43,166,86);c.fillStyle=locked?'#6c6c55':'#9e7047';c.fillRect(p.x-78,p.y-38,156,76);for(let r=0;r<3;r++){c.fillStyle=locked?'#62624e':'#805432';c.fillRect(p.x-68,p.y-25+r*24,136,4);}c.textAlign='center';if(locked){c.fillStyle='#fff8df';c.font='23px serif';c.fillText('🔒',p.x,p.y-2);c.font='bold 10px Nunito';c.fillText('BUKA '+farmLandPrice(i)+' KOIN',p.x,p.y+26);}else if(plot.crop){const crop=farmCrops[plot.crop],ready=farmPlotReady(plot),icon=ready?crop.emoji:(plot.stage===1?'🌱':'🌿');c.font='25px serif';for(let j=0;j<5;j++)c.fillText(icon,p.x-46+j*23,p.y-2+(j%2)*14);c.font='bold 9px Nunito';c.fillStyle='#fff5d8';c.fillText(!plot.watered?'BUTUH AIR':ready?'SIAP PANEN':'TUMBUH',p.x,p.y-27);}else{c.fillStyle='#f5e6c9';c.font='bold 11px Nunito';c.fillText('PETAK '+(i+1),p.x,p.y+5);}if(state.farmSelectedPlot===i){c.strokeStyle='#fff6a5';c.lineWidth=4;c.strokeRect(p.x-86,p.y-46,172,92);}});
- farmHit.actions=[];const actions=[['plant','🌱','TANAM'],['water','💧','SIRAM'],['fertilize','🧪','PUPUK'],['harvest','🧺','PANEN'],['unlock','🔓','BUKA LAHAN']];actions.forEach((a,i)=>{const x=12+i*177,y=590,w=165,h=45;c.fillStyle=i===0?'#17643e':'#f5f7e9';roundRect(c,x,y,w,h,11);c.fill();c.strokeStyle=i===0?'#d4edc7':'#d6e3c9';c.lineWidth=1;c.stroke();c.textAlign='center';c.fillStyle=i===0?'#fff':'#315b35';c.font='bold 12px Nunito';c.fillText(a[1]+' '+a[2],x+w/2,y+28);farmHit.actions.push({id:a[0],x,y,w,h});});
- const p=state.farmPlayer||{x:450,y:510};c.fillStyle='#29442b55';c.beginPath();c.ellipse(p.x,p.y+15,16,6,0,0,Math.PI*2);c.fill();c.fillStyle='#244e36';c.fillRect(p.x-9,p.y-7,18,22);c.fillStyle='#f0bd91';c.beginPath();c.arc(p.x,p.y-15,9,0,Math.PI*2);c.fill();c.fillStyle='#d9b45d';c.beginPath();c.arc(p.x,p.y-21,12,Math.PI,Math.PI*2);c.fill();c.fillStyle='#172b1c';c.fillRect(p.x-6,p.y+13,5,8);c.fillRect(p.x+2,p.y+13,5,8);c.textAlign='left';c.fillStyle='#315b35';c.font='bold 10px Nunito';c.fillText('Pilih benih • Klik bangunan • Pilih petak • Gunakan tombol aktivitas',14,570);
+ // compact action dock in the play area
+ farmHit.actions=[];const actions=[['plant','🌱','TANAM'],['water','💧','SIRAM'],['fertilize','🧪','PUPUK'],['harvest','🧺','PANEN'],['unlock','🔓','BUKA LAHAN']];
+ actions.forEach((a,i)=>{const x=12+i*177,y=462,w=165,h=38;c.fillStyle=i===0?'#17643e':'#f5f7e9';roundRect(c,x,y,w,h,10);c.fill();c.strokeStyle=i===0?'#d4edc7':'#d6e3c9';c.lineWidth=1;c.stroke();c.textAlign='center';c.fillStyle=i===0?'#fff':'#315b35';c.font='bold 12px Nunito';c.fillText(a[1]+' '+a[2],x+w/2,y+24);farmHit.actions.push({id:a[0],x,y,w,h});});
+ // player
+ const p=state.farmPlayer||{x:450,y:430};c.fillStyle='#29442b55';c.beginPath();c.ellipse(p.x,p.y+15,16,6,0,0,Math.PI*2);c.fill();c.fillStyle='#244e36';c.fillRect(p.x-9,p.y-7,18,22);c.fillStyle='#f0bd91';c.beginPath();c.arc(p.x,p.y-15,9,0,Math.PI*2);c.fill();c.fillStyle='#d9b45d';c.beginPath();c.arc(p.x,p.y-21,12,Math.PI,Math.PI*2);c.fill();c.fillStyle='#172b1c';c.fillRect(p.x-6,p.y+13,5,8);c.fillRect(p.x+2,p.y+13,5,8);
+ c.textAlign='left';c.fillStyle='#315b35';c.font='bold 10px Nunito';c.fillText('Pilih ikon benih • Tap bangunan • Pilih petak • Gerakkan karakter',14,435);
 }
 function roundRect(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
 function farmDrawLoop(t){if(t-farmLastFrame>25){farmLastFrame=t;drawFarmWorld();}if(t-farmUiLast>500){farmUiLast=t;updateFarm();}if(state.farmTarget){const p=state.farmPlayer,dx=state.farmTarget.x-p.x,dy=state.farmTarget.y-p.y,d=Math.hypot(dx,dy);if(d>2){const step=Math.min(2.7,d);p.x+=dx/d*step;p.y+=dy/d*step;}else state.farmTarget=null;}farmRaf=requestAnimationFrame(farmDrawLoop);}
@@ -916,19 +969,19 @@ function openFarmDialog(kind){
  body.querySelectorAll('[data-sell-crop]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.sellCrop;if(!(state.farmProduce[id]>0))return;state.farmProduce[id]--;reward(0,farmCrops[id].sell);save();updateFarm();farmToast('Penjualan berhasil','1 '+farmCrops[id].name+' terjual. +'+farmCrops[id].sell+' koin.','💰');openFarmDialog('market');}));
 }
 $('farmCanvas').addEventListener('click',e=>{
- const r=farmCanvas.getBoundingClientRect(),x=(e.clientX-r.left)*900/r.width,y=(e.clientY-r.top)*650/r.height;
+ const r=farmCanvas.getBoundingClientRect(),x=(e.clientX-r.left)*900/r.width,y=(e.clientY-r.top)*510/r.height;
  const hit=(arr)=>arr.find(a=>x>=a.x&&x<=a.x+a.w&&y>=a.y&&y<=a.y+a.h);
  const seed=hit(farmHit.seeds);if(seed){if(!(state.farmSeeds[seed.id]>0))return farmToast('Stok benih habis','Beli benih di Toko Benih.','🌱');state.farmSelectedCrop=seed.id;updateFarm();save();farmToast('Benih dipilih',farmCrops[seed.id].name+' siap ditanam.','🌱');return;}
  const action=hit(farmHit.actions);if(action){if(action.id==='unlock')unlockFarmPlot();else farmAct(action.id);return;}
  const building=hit(farmHit.buildings);if(building){openFarmDialog(building.id);return;}
  let nearest=-1,dist=Infinity;farmPlotCenters.forEach((p,i)=>{const d=Math.hypot(x-p.x,y-p.y);if(d<dist){dist=d;nearest=i;}});
- if(dist<94)farmSelectPlot(nearest);else if(y>215&&y<445){state.farmTarget={x:Math.max(20,Math.min(880,x)),y:Math.max(220,Math.min(440,y))};}
+ if(dist<94)farmSelectPlot(nearest);else if(y>65&&y<450){state.farmTarget={x:Math.max(20,Math.min(880,x)),y:Math.max(215,Math.min(440,y))};}
 });
 $('farmUnlock').addEventListener('click',unlockFarmPlot);$('farmPlant').addEventListener('click',()=>farmAct('plant'));$('farmWater').addEventListener('click',()=>farmAct('water'));$('farmFertilize').addEventListener('click',()=>farmAct('fertilize'));$('farmHarvest').addEventListener('click',()=>farmAct('harvest'));
 $('farmShop').addEventListener('click',()=>openFarmDialog('shop'));$('farmInventory').addEventListener('click',()=>openFarmDialog('inventory'));$('farmMarket').addEventListener('click',()=>openFarmDialog('market'));
 $('farmDialogClose').addEventListener('click',()=>$('farmDialog').classList.add('hidden'));
 document.querySelectorAll('[data-farm-dir]').forEach(btn=>btn.addEventListener('click',()=>{const d=btn.dataset.farmDir,p=state.farmPlayer,delta={up:[0,-40],down:[0,40],left:[-40,0],right:[40,0]}[d];state.farmTarget={x:Math.max(20,Math.min(880,p.x+delta[0])),y:Math.max(45,Math.min(475,p.y+delta[1]))};}));
-document.addEventListener('keydown',e=>{if(!['gameScreen'].some(id=>!$(id).classList.contains('hidden'))||$('farmPanel').classList.contains('hidden')||$('farmDialog')&&!$('farmDialog').classList.contains('hidden'))return;const map={ArrowUp:[0,-45],w:[0,-45],ArrowDown:[0,45],s:[0,45],ArrowLeft:[-45,0],a:[-45,0],ArrowRight:[45,0],d:[45,0]},v=map[e.key];if(v){e.preventDefault();const p=state.farmPlayer;state.farmTarget={x:Math.max(20,Math.min(880,p.x+v[0])),y:Math.max(65,Math.min(555,p.y+v[1]))};}});
+document.addEventListener('keydown',e=>{if(!['gameScreen'].some(id=>!$(id).classList.contains('hidden'))||$('farmPanel').classList.contains('hidden')||$('farmDialog')&&!$('farmDialog').classList.contains('hidden'))return;const map={ArrowUp:[0,-45],w:[0,-45],ArrowDown:[0,45],s:[0,45],ArrowLeft:[-45,0],a:[-45,0],ArrowRight:[45,0],d:[45,0]},v=map[e.key];if(v){e.preventDefault();const p=state.farmPlayer;state.farmTarget={x:Math.max(20,Math.min(880,p.x+v[0])),y:Math.max(45,Math.min(475,p.y+v[1]))};}});
 /* Quiz */
 const questionBank=[
 {q:'Apa tujuan utama penyuluhan pertanian?',a:['Menggantikan seluruh keputusan petani','Meningkatkan pengetahuan, keterampilan, dan sikap petani','Menjual sarana produksi sebanyak-banyaknya','Mewajibkan satu teknologi untuk semua petani'],c:1,why:'Penyuluhan membantu petani meningkatkan kapasitas agar mampu mengambil keputusan secara mandiri.'},
