@@ -928,7 +928,7 @@ function farmToast(title,message,icon='🎉'){
 function updateFarm(){
  if(!$('farmPanel'))return;
  $('farmCoins').textContent=state.coins;
- const seedTotal=Object.values(state.farmSeeds||{}).reduce((sum,n)=>sum+(Number(n)||0),0);if($('farmSeedTotal'))$('farmSeedTotal').textContent=seedTotal;
+ const seedTotal=Object.values(state.farmSeeds||{}).reduce((sum,n)=>sum+(Number(n)||0),0);if($('farmSeedTotal'))$('farmSeedTotal').textContent=seedTotal;if($('farmPesticideTotal'))$('farmPesticideTotal').textContent=Number(state.farmPesticides)||0;
  $('farmSeedStocks').innerHTML='';
  $('farmSeedStocks').querySelectorAll('[data-select-farm-seed]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.selectFarmSeed;if(!(state.farmSeeds[id]>0))return;state.farmSelectedCrop=id;updateFarm();save();farmToast('Benih dipilih',farmCrops[id].name+' dipilih. Tekan tombol Tanam untuk menanam benih ini.','🌱');}));
  $('farmWeather').textContent='Cuaca '+state.farmLastWeather+' • Hari '+state.farmDay;
