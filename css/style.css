@@ -180,3 +180,6 @@
 /* Farm Simulator v0.17.2: click-to-move, no directional pad */
 .farm-mobile-controls{display:none!important}
 #farmCanvas{touch-action:manipulation;cursor:crosshair}
+
+/* v0.17.3: remove overlapping canvas helper label */
+.farm-world-tip{display:none!important}
