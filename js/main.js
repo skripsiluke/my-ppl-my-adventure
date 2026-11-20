@@ -533,14 +533,15 @@ if(state.catQuestNpcId!=='catcaretaker'){state.catQuestNpcId='catcaretaker';save
 const buildings=[
 {x:220,y:210,w:150,h:110,name:'Rumah Bu Rina',roof:'#a65f3e',wall:'#f1dfb7',door:'#6b986b'},
 {x:600,y:150,w:170,h:125,name:'Balai Kelompok Tani',roof:'#9b5638',wall:'#f4e5bd',door:'#5d8c63'},
-{x:1420,y:180,w:150,h:110,name:'Kios Pertanian',roof:'#b36c3e',wall:'#f5e6c7',door:'#638e68'}
+{x:1420,y:180,w:150,h:110,name:'Kios Pertanian',roof:'#b36c3e',wall:'#f5e6c7',door:'#638e68'},
+{x:835,y:365,w:210,h:120,name:'Koperasi Desa Merah Putih Sukamaju',type:'kopdes',roof:'#b9c4c8',wall:'#f0f1ed',door:'#a8322c'}
 ];
 const obstacles=[...buildings.map(b=>({x:b.x-5,y:b.y-15,w:b.w+10,h:b.h+20})),{x:990,y:720,w:600,h:280},
  // Pagar kandang, kandang ternak, kebun berpagar, dan pepohonan besar
  {x:1330,y:475,w:280,h:165},{x:1350,y:500,w:95,h:85},{x:1500,y:500,w:95,h:85},
  {x:45,y:200,w:120,h:75},{x:445,y:745,w:145,h:88},{x:805,y:345,w:130,h:80},{x:1245,y:335,w:130,h:80},
  {x:1650,y:685,w:130,h:80},{x:590,y:1015,w:130,h:80},{x:320,y:165,w:45,h:45},{x:1490,y:1110,w:45,h:45},
- {x:82,y:142,w:38,h:38},{x:442,y:112,w:38,h:38},{x:892,y:152,w:38,h:38},{x:1072,y:232,w:38,h:38},{x:1692,y:202,w:38,h:38}];
+ {x:82,y:142,w:38,h:38},{x:442,y:112,w:38,h:38},{x:892,y:152,w:38,h:38},{x:1072,y:232,w:38,h:38},{x:1692,y:202,w:38,h:38},{x:828,y:350,w:224,h:150}];
 function roundedRect(c,x,y,w,h,r,fill){c.fillStyle=fill;c.beginPath();c.roundRect(x,y,w,h,r);c.fill();}
 function drawTree(x,y){
  // soft shadow, layered canopy and small highlights
@@ -550,6 +551,24 @@ function drawTree(x,y){
  ctx.fillStyle='rgba(220,244,150,.42)';ctx.beginPath();ctx.arc(x-9,y-20,6,0,Math.PI*2);ctx.fill();
 }
 function drawHouse(b){
+ if(b.type==='kopdes'){
+   // Koperasi Desa Merah Putih: long white facade, silver sheet roof and red rolling doors
+   ctx.fillStyle='rgba(48,69,42,.22)';ctx.beginPath();ctx.ellipse(b.x+b.w/2,b.y+b.h+10,b.w*.62,13,0,0,Math.PI*2);ctx.fill();
+   roundedRect(ctx,b.x-5,b.y+8,b.w+10,b.h-2,4,'#a9aaa4');
+   ctx.fillStyle='#f1f2ee';ctx.fillRect(b.x,b.y+8,b.w,b.h-12);
+   // broad corrugated metal canopy
+   ctx.fillStyle='#87979c';ctx.beginPath();ctx.moveTo(b.x-13,b.y+9);ctx.lineTo(b.x+b.w/2,b.y-27);ctx.lineTo(b.x+b.w+13,b.y+9);ctx.closePath();ctx.fill();
+   ctx.fillStyle='#c5d0d3';ctx.beginPath();ctx.moveTo(b.x-9,b.y+7);ctx.lineTo(b.x+b.w/2,b.y-23);ctx.lineTo(b.x+b.w+9,b.y+7);ctx.closePath();ctx.fill();
+   ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=1.4;for(let k=0;k<18;k++){const xx=b.x-5+k*(b.w+10)/17;ctx.beginPath();ctx.moveTo(xx,b.y+7);ctx.lineTo(b.x+b.w/2+(xx-(b.x+b.w/2))*.15,b.y-21);ctx.stroke();}
+   // three red shutter bays and one wider loading bay
+   const doorY=b.y+35,doorH=72,doorW=36;
+   for(let k=0;k<3;k++){const dx=b.x+8+k*43;ctx.fillStyle='#a52e2b';ctx.fillRect(dx,doorY,doorW,doorH);ctx.strokeStyle='#7f2523';ctx.lineWidth=1;ctx.strokeRect(dx,doorY,doorW,doorH);ctx.strokeStyle='rgba(255,205,190,.32)';for(let yy=doorY+7;yy<doorY+doorH;yy+=7){ctx.beginPath();ctx.moveTo(dx+2,yy);ctx.lineTo(dx+doorW-2,yy);ctx.stroke();}}
+   ctx.fillStyle='#d7d9d5';ctx.fillRect(b.x+142,doorY-4,60,76);ctx.fillStyle='#3b2928';ctx.fillRect(b.x+150,doorY+3,44,69);
+   // sign panel
+   ctx.fillStyle='#e5e8e5';ctx.fillRect(b.x+112,b.y+14,86,20);ctx.fillStyle='#a52e2b';ctx.font='bold 7px Nunito';ctx.textAlign='center';ctx.fillText('KOPERASI DESA',b.x+155,b.y+23);ctx.font='bold 7px Nunito';ctx.fillText('MERAH PUTIH',b.x+155,b.y+31);
+   ctx.fillStyle='#fff';ctx.font='bold 8px Nunito';ctx.textAlign='center';ctx.fillText('SUKAMAJU',b.x+b.w/2,b.y+b.h+23);
+   return;
+ }
  // building shadow and foundation
  ctx.fillStyle='rgba(48,69,42,.20)';ctx.beginPath();ctx.ellipse(b.x+b.w/2,b.y+b.h+9,b.w*.62,13,0,0,Math.PI*2);ctx.fill();
  roundedRect(ctx,b.x-5,b.y-2,b.w+10,b.h+8,7,'#b9a27b');
@@ -1115,14 +1134,19 @@ function drawFarmWorld(){
    c.fillStyle='#5d4934';c.fillRect(x+67,y+9,36,8);
    c.fillStyle='#315b35';c.font='bold 11px Nunito';c.textAlign='center';c.fillText('GUDANG',x+85,y+3);
   }else{
-   // market stall with canopy, counter and produce baskets
-   c.fillStyle='#815334';c.fillRect(x+8,y+32,154,53);
-   c.fillStyle='#f5dfb4';c.fillRect(x+17,y+43,136,35);
-   c.fillStyle='#c65f4e';c.fillRect(x+4,y+19,162,18);
-   for(let k=0;k<6;k++){c.fillStyle=k%2?'#fff0d0':'#c65f4e';c.fillRect(x+4+k*27,y+19,27,18);}
-   c.fillStyle='#80502f';c.fillRect(x+23,y+57,124,28);
-   ['🍅','🌽','🌶️'].forEach((e,i)=>{c.font='20px serif';c.fillText(e,x+48+i*38,y+76);});
+   // Pasar Tani memakai bentuk fasad Koperasi Merah Putih: atap seng, dinding putih, rolling door merah
+   c.fillStyle='#315b3540';c.fillRect(x+7,y+82,w,9);
+   c.fillStyle='#aeb7b7';c.fillRect(x+5,y+25,w-10,62);
+   c.fillStyle='#f0f1ed';c.fillRect(x+9,y+28,w-18,55);
+   // metal roof with corrugated highlights
+   c.fillStyle='#849398';c.beginPath();c.moveTo(x,y+28);c.lineTo(x+85,y-5);c.lineTo(x+170,y+28);c.closePath();c.fill();
+   c.fillStyle='#c5d0d3';c.beginPath();c.moveTo(x+5,y+26);c.lineTo(x+85,y-1);c.lineTo(x+165,y+26);c.closePath();c.fill();
+   c.strokeStyle='rgba(255,255,255,.55)';c.lineWidth=1;for(let k=0;k<13;k++){const xx=x+7+k*13;c.beginPath();c.moveTo(xx,y+25);c.lineTo(x+85+(xx-x-85)*.13,y);c.stroke();}
+   for(let k=0;k<3;k++){const dx=x+14+k*35;c.fillStyle='#ad302c';c.fillRect(dx,y+42,29,40);c.strokeStyle='#7f2523';c.strokeRect(dx,y+42,29,40);c.strokeStyle='rgba(255,210,190,.35)';for(let yy=y+48;yy<y+80;yy+=6){c.beginPath();c.moveTo(dx+2,yy);c.lineTo(dx+27,yy);c.stroke();}}
+   c.fillStyle='#d5d9d6';c.fillRect(x+121,y+39,38,44);c.fillStyle='#44302d';c.fillRect(x+126,y+43,28,40);
+   c.fillStyle='#a52e2b';c.font='bold 7px Nunito';c.textAlign='center';c.fillText('PASAR TANI',x+139,y+35);
    c.fillStyle='#315b35';c.font='bold 11px Nunito';c.textAlign='center';c.fillText('PASAR TANI',x+85,y+13);
+   ['🍅','🌽','🌶️'].forEach((e,i)=>{c.font='12px serif';c.fillText(e,x+32+i*36,y+77);});
   }
   // legible click ribbon beneath each facade
   c.fillStyle='#315b35';roundRect(c,x+13,y+94,144,18,7);c.fill();
