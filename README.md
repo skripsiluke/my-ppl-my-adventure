@@ -80,3 +80,12 @@ Workflow pada `.github/workflows/deploy.yml` juga disediakan untuk deployment ot
 - Posisi tempat pemasangan diacak/tidak mengikuti urutan kartu komponen.
 - Ilustrasi mesin di bagian atas memperlihatkan komponen secara bertahap hanya setelah dipasang.
 - Roda, drum benih, poros, rangka, dan pegangan memiliki lapisan visual terpisah.
+
+## Versi 0.10.0 — Pendampingan Adopter PM-AAS Lima Tahap
+- Setiap calon adopter menjalani 5 tahapan dan 14 langkah: persiapan lahan; pemilihan benih dan Tabela; pemeliharaan air dan pemupukan; pengendalian gulma dan OPT; panen dan pascapanen.
+- Setiap langkah menampilkan uraian pekerjaan lapangan, lalu pemain menyelesaikannya satu per satu.
+- Progres setiap petani/kelompok tani disimpan terpisah.
+- Hadiah XP diberikan per langkah, bonus ketika satu tahapan selesai, dan bonus adopsi ketika seluruh tahapan selesai.
+- Adopsi kelompok tani tetap memperoleh bonus lebih besar daripada petani perorangan.
+- Data adopsi yang telah selesai pada versi sebelumnya tetap dikenali; progres lama yang belum selesai perlu mengikuti rangkaian lima tahap yang baru.
+- Herbisida hanya disebut sebagai pilihan bila diperlukan dan harus mengikuti label/petunjuk; rincian teknis mengikuti materi yang diberikan pengguna.
