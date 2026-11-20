@@ -3,7 +3,7 @@
 const $ = id => document.getElementById(id);
 const KEY = 'myPplMyAdventure.save.v1';
 const XP_PER_LEVEL=250;
-const state = {name:'Penyuluh Muda',xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0},player:{x:145,y:390},keys:{},interact:false};
+const state = {name:'Penyuluh Muda',xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false},player:{x:145,y:390},keys:{},interact:false};
 const screens=['homeScreen','menuScreen','gameScreen'];
 function save(){
   localStorage.setItem(KEY, JSON.stringify({
@@ -48,10 +48,10 @@ function load(){
   state.achievementRewardsClaimed=Array.isArray(state.achievementRewardsClaimed)?state.achievementRewardsClaimed:[];
   state.highestLevelReached=Math.max(1,Math.min(Number(state.highestLevelReached)||Math.floor(state.xp/XP_PER_LEVEL)+1,Math.floor(state.xp/XP_PER_LEVEL)+1));
   state.missionFlags=state.missionFlags&&typeof state.missionFlags==='object'?state.missionFlags:{};
-  state.pmaas=state.pmaas&&typeof state.pmaas==='object'?state.pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0};
+  state.pmaas=state.pmaas&&typeof state.pmaas==='object'?state.pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false};
   state.pmaas.stages=state.pmaas.stages&&typeof state.pmaas.stages==='object'?state.pmaas.stages:{};
   state.pmaas.milestones=Array.isArray(state.pmaas.milestones)?state.pmaas.milestones:[];
-  state.pmaas.farmers=Number(state.pmaas.farmers)||0;state.pmaas.groups=Number(state.pmaas.groups)||0;state.pmaas.xpEarned=Number(state.pmaas.xpEarned)||0;
+  state.pmaas.farmers=Number(state.pmaas.farmers)||0;state.pmaas.groups=Number(state.pmaas.groups)||0;state.pmaas.xpEarned=Number(state.pmaas.xpEarned)||0;state.pmaas.drumSeederCompleted=!!state.pmaas.drumSeederCompleted;
   save();
 }
 function showScreen(id){screens.forEach(s=>$(s).classList.toggle('hidden',s!==id));}
@@ -131,7 +131,75 @@ function advancePMAASTarget(id){
  }
  renderPMAAS();save();
 }
-$('pmaasOpen').addEventListener('click',()=>{$('pmaasPanel').classList.remove('hidden');renderPMAAS();$('pmaasPanel').scrollIntoView({behavior:'smooth',block:'start'});});
+
+/* Mini-game PM-AAS: merakit drum seeder */
+const drumParts=[
+ {id:'handle',name:'Pegangan / rangka atas',icon:'🟠',hint:'Bagian yang dipegang operator untuk mendorong alat.'},
+ {id:'frame',name:'Rangka utama',icon:'🟧',hint:'Rangka penghubung seluruh komponen alat.'},
+ {id:'axle',name:'Poros roda',icon:'➖',hint:'Batang melintang yang menjadi sumbu roda dan drum.'},
+ {id:'drums',name:'Tabung penjatah benih',icon:'🔵',hint:'Tabung berlubang untuk menyalurkan benih secara teratur.'},
+ {id:'wheels',name:'Roda kiri dan kanan',icon:'⚫',hint:'Roda membantu alat bergerak di permukaan lahan.'}
+];
+const drumSlots=[
+ {id:'handle',label:'1. Pegangan',desc:'Bagian atas untuk kendali operator'},
+ {id:'frame',label:'2. Rangka utama',desc:'Struktur penyangga alat'},
+ {id:'axle',label:'3. Poros melintang',desc:'Sumbu penghubung komponen'},
+ {id:'drums',label:'4. Tabung benih',desc:'Unit penjatah benih'},
+ {id:'wheels',label:'5. Roda',desc:'Sepasang roda di kedua sisi'}
+];
+let drumSelected=null,drumPlaced={},drumAttempts=0;
+function renderDrumSeeder(){
+ const done=!!state.pmaas.drumSeederCompleted;
+ $('drumSeederStatus').textContent=done?'Misi selesai! Drum seeder berhasil dirakit dan diperiksa.':`Pilih komponen, lalu pilih tempat pemasangannya. Komponen benar: ${Object.keys(drumPlaced).length}/5.`;
+ $('drumSeederParts').innerHTML=drumParts.map(p=>{
+  const used=Object.values(drumPlaced).includes(p.id);
+  return `<button type="button" class="drum-part ${used?'used':''} ${drumSelected===p.id?'selected':''}" data-drum-part="${p.id}" draggable="${!used&&!done}" ${used||done?'disabled':''}><span>${p.icon}</span><b>${p.name}</b><small>${used?'Sudah dipasang':'Pilih / seret komponen'}</small></button>`;
+ }).join('');
+ $('drumSeederSlots').innerHTML=drumSlots.map((s,i)=>{
+  const partId=drumPlaced[s.id];const part=drumParts.find(p=>p.id===partId);
+  return `<button type="button" class="drum-slot ${part?'filled':''}" data-drum-slot="${s.id}" ${done?'disabled':''}><span class="slot-number">${i+1}</span><b>${part?part.icon+' '+part.name:s.label}</b><small>${part?'Terpasang ✓':s.desc}</small></button>`;
+ }).join('');
+ $('drumSeederCheck').disabled=done||Object.keys(drumPlaced).length!==5;
+ $('drumSeederCheck').textContent=done?'✓ Misi selesai':'Periksa hasil rakitan';
+}
+function selectDrumPart(id){
+ if(state.pmaas.drumSeederCompleted||Object.values(drumPlaced).includes(id))return;
+ drumSelected=id;renderDrumSeeder();
+ const p=drumParts.find(x=>x.id===id);
+ $('drumSeederFeedback').textContent=p?p.hint:'';
+}
+function placeDrumPart(slotId,partId){
+ if(state.pmaas.drumSeederCompleted)return;
+ const id=partId||drumSelected;if(!id)return;
+ if(Object.values(drumPlaced).includes(id))return;
+ if(drumPlaced[slotId]){ $('drumSeederFeedback').textContent='Tempat ini sudah terisi. Pilih tempat yang masih kosong.';return;}
+ drumAttempts++;
+ if(id!==slotId){
+  $('drumSeederFeedback').textContent='Belum cocok. Perhatikan fungsi komponen dan coba tempat lain.';
+  $('drumSeederFeedback').className='drum-feedback wrong';
+  return;
+ }
+ drumPlaced[slotId]=id;drumSelected=null;
+ $('drumSeederFeedback').textContent='Tepat! '+drumParts.find(p=>p.id===id).hint;
+ $('drumSeederFeedback').className='drum-feedback';
+ renderDrumSeeder();
+}
+$('drumSeederParts').addEventListener('click',e=>{const b=e.target.closest('[data-drum-part]');if(b)selectDrumPart(b.dataset.drumPart);});
+$('drumSeederSlots').addEventListener('click',e=>{const b=e.target.closest('[data-drum-slot]');if(b)placeDrumPart(b.dataset.drumSlot);});
+$('drumSeederParts').addEventListener('dragstart',e=>{const b=e.target.closest('[data-drum-part]');if(!b)return;e.dataTransfer.setData('text/plain',b.dataset.drumPart);});
+$('drumSeederSlots').addEventListener('dragover',e=>{if(e.target.closest('[data-drum-slot]'))e.preventDefault();});
+$('drumSeederSlots').addEventListener('drop',e=>{const b=e.target.closest('[data-drum-slot]');if(!b)return;e.preventDefault();placeDrumPart(b.dataset.drumSlot,e.dataTransfer.getData('text/plain'));});
+$('drumSeederCheck').addEventListener('click',()=>{
+ if(state.pmaas.drumSeederCompleted||Object.keys(drumPlaced).length!==5)return;
+ state.pmaas.drumSeederCompleted=true;
+ state.pmaas.xpEarned+=20;reward(20,5);
+ if(drumAttempts<=5){state.pmaas.xpEarned+=10;reward(10,0);$('drumSeederFeedback').textContent='Sempurna! Semua komponen tepat pada percobaan pertama. Bonus +10 XP!';
+ }else{$('drumSeederFeedback').textContent='Bagus! Alat berhasil dirakit. Kamu memperoleh 20 XP dan 5 koin.';}
+ $('drumSeederFeedback').className='drum-feedback success';
+ renderDrumSeeder();save();
+});
+
+$('pmaasOpen').addEventListener('click',()=>{$('pmaasPanel').classList.remove('hidden');renderPMAAS();renderDrumSeeder();$('pmaasPanel').scrollIntoView({behavior:'smooth',block:'start'});});
 $('pmaasClose').addEventListener('click',()=>$('pmaasPanel').classList.add('hidden'));
 $('pmaasTargets').addEventListener('click',e=>{const b=e.target.closest('[data-pmaas-id]');if(b)advancePMAASTarget(b.dataset.pmaasId);});
 
