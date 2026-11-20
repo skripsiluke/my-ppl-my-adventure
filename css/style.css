@@ -21,3 +21,14 @@
 .drum-feedback,.drum-status{min-height:20px;margin:11px 0 4px;font-size:12px;line-height:1.5;font-weight:800;color:#537548}.drum-feedback.wrong{color:#a45d38}.drum-feedback.success{color:#287b49}.drum-status{color:var(--muted);font-weight:700}
 .drum-check{width:100%;margin:8px 0 10px}.drum-disclaimer{font-size:10px}
 @media(max-width:560px){.drum-game-grid{grid-template-columns:1fr}.drum-mission{padding:13px}.drum-mission-head h4{font-size:15px}}
+
+/* v0.9.1: illustrated draggable drum seeder components */
+.drum-part{display:flex;flex-direction:column;justify-content:flex-start;align-items:center;gap:5px;min-height:130px;padding:7px;cursor:grab;touch-action:pan-y}
+.drum-part img{display:block;width:100%;height:76px;object-fit:contain;border-radius:7px;background:#fff8e9}
+.drum-part b{text-align:center;font-size:10px;min-height:26px}
+.drum-part small{text-align:center;font-size:9px}
+.drum-slot{min-height:115px;padding:8px 6px 8px 32px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;touch-action:pan-y}
+.drum-slot img{width:100%;height:62px;max-width:145px;object-fit:contain;border-radius:6px;background:#fff9ed}
+.drum-slot b{text-align:center;font-size:10px}.drum-slot small{text-align:center;font-size:9px}
+.drum-part.selected{transform:translateY(-2px);box-shadow:0 0 0 2px #75a85a,0 5px 12px #456c3922}
+@media(max-width:560px){.drum-part{min-height:112px}.drum-part img{height:62px}.drum-slot{min-height:100px}.drum-slot img{height:52px}}
