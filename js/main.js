@@ -970,10 +970,6 @@ function mineInteract(){
 
 let bppPcWindow=null;
 let bppCoffeeDrag=null,bppCoffeeCupX=835;
-const bppMuRugImage=new Image();
-bppMuRugImage.onload=()=>{if(state.scene==='bpp')drawWorld();};
-bppMuRugImage.src='assets/images/bpp-mu-rug.jpg';
-
 let bppCoffeeStepRun=0,bppCoffeeAnimUntil=0;
 function updateBppBackButton(){
  let btn=document.getElementById('bppSceneBack');
@@ -1012,17 +1008,62 @@ function drawBpp(t=0){
  ctx.fillStyle='#d9e9c6';ctx.fillRect(0,0,w,h*.68);ctx.fillStyle='#5d9a62';ctx.fillRect(0,h*.68,w,h*.32);
  ctx.fillStyle='#3c7548';ctx.fillRect(0,h*.66,w,9);
  for(let x=0;x<w;x+=64){ctx.strokeStyle='rgba(255,255,255,.16)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,h*.68);ctx.lineTo(x,h);ctx.stroke();}
- // Tikar MU asli di lantai, memakai tekstur foto dan perspektif dari bentuk karpet.
+ // Tikar merah bergaya karpet suporter MU, digambar ulang secara vektor
+ // agar motif tajam dan perspektifnya menyatu dengan lantai kantor.
  ctx.save();
  const rugX=w*.355,rugY=h*.685,rugW=w*.30,rugH=h*.285;
- ctx.fillStyle='rgba(25,45,25,.22)';ctx.beginPath();ctx.moveTo(rugX+28,rugY+5);ctx.lineTo(rugX+rugW-28,rugY+5);ctx.lineTo(rugX+rugW+5,rugY+rugH+5);ctx.lineTo(rugX-5,rugY+rugH+5);ctx.closePath();ctx.fill();
- ctx.beginPath();ctx.moveTo(rugX+30,rugY);ctx.lineTo(rugX+rugW-30,rugY);ctx.lineTo(rugX+rugW,rugY+rugH);ctx.lineTo(rugX,rugY+rugH);ctx.closePath();ctx.clip();
- if(bppMuRugImage.complete&&bppMuRugImage.naturalWidth){
-  ctx.drawImage(bppMuRugImage,rugX,rugY,rugW,rugH);
- }else{
-  ctx.fillStyle='#9c2028';ctx.fillRect(rugX,rugY,rugW,rugH);
-  ctx.fillStyle='#e6bd55';ctx.font='bold 28px Georgia';ctx.textAlign='center';ctx.fillText('MANCHESTER',rugX+rugW/2,rugY+rugH/2);ctx.fillText('UNITED',rugX+rugW/2,rugY+rugH/2+30);
+ // Bayangan tipis di bawah karpet.
+ ctx.fillStyle='rgba(25,45,25,.24)';ctx.beginPath();
+ ctx.moveTo(rugX+31,rugY+7);ctx.lineTo(rugX+rugW-31,rugY+7);
+ ctx.lineTo(rugX+rugW+8,rugY+rugH+7);ctx.lineTo(rugX-8,rugY+rugH+7);ctx.closePath();ctx.fill();
+ // Bentuk karpet trapesium: sisi atas lebih jauh, sisi bawah lebih lebar.
+ ctx.beginPath();ctx.moveTo(rugX+30,rugY);ctx.lineTo(rugX+rugW-30,rugY);
+ ctx.lineTo(rugX+rugW,rugY+rugH);ctx.lineTo(rugX,rugY+rugH);ctx.closePath();ctx.clip();
+ const rugBg=ctx.createLinearGradient(rugX,rugY,rugX+rugW,rugY+rugH);
+ rugBg.addColorStop(0,'#8f1720');rugBg.addColorStop(.5,'#c52b32');rugBg.addColorStop(1,'#78131c');
+ ctx.fillStyle=rugBg;ctx.fillRect(rugX,rugY,rugW,rugH);
+ // Border hitam dan emas.
+ ctx.strokeStyle='#171719';ctx.lineWidth=7;ctx.strokeRect(rugX+3,rugY+3,rugW-6,rugH-6);
+ ctx.strokeStyle='#e4b64e';ctx.lineWidth=3;ctx.strokeRect(rugX+10,rugY+10,rugW-20,rugH-20);
+ // Pola kain berulang dengan garis ornamental dan motif bintang.
+ for(let row=0;row<8;row++){
+  const yy=rugY+18+row*(rugH-36)/7;
+  ctx.strokeStyle=row%2?'rgba(245,205,105,.34)':'rgba(35,12,14,.28)';
+  ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(rugX+12,yy);ctx.lineTo(rugX+rugW-12,yy);ctx.stroke();
+  for(let col=0;col<5;col++){
+   const xx=rugX+22+col*(rugW-44)/4;
+   ctx.fillStyle='rgba(245,205,105,.78)';ctx.font='bold 9px Georgia';ctx.textAlign='center';
+   ctx.fillText('✦',xx,yy+4);
+  }
  }
+ // Perisai crest generik bernuansa Manchester United, berulang mengikuti motif tikar.
+ const crest=(cx,cy,s)=>{
+  ctx.save();ctx.translate(cx,cy);ctx.scale(s,s);
+  ctx.fillStyle='#e5b84f';ctx.beginPath();ctx.moveTo(-15,-19);ctx.lineTo(15,-19);ctx.lineTo(13,9);ctx.quadraticCurveTo(0,25,-13,9);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#211719';ctx.lineWidth=2;ctx.stroke();
+  ctx.fillStyle='#b21f2b';ctx.fillRect(-11,-15,22,23);
+  ctx.fillStyle='#f5d77b';ctx.font='bold 7px Georgia';ctx.textAlign='center';ctx.fillText('MU',0,0);
+  ctx.strokeStyle='#f5d77b';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-8,5);ctx.lineTo(8,5);ctx.stroke();
+  ctx.fillStyle='#e8c35c';ctx.beginPath();ctx.arc(0,-20,3,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+ };
+ const rows=[{y:.18,s:.55,n:4},{y:.42,s:.72,n:4},{y:.68,s:.88,n:3},{y:.88,s:.72,n:4}];
+ rows.forEach((r,ri)=>{
+  const yy=rugY+r.y*rugH;
+  for(let j=0;j<r.n;j++){
+   const xx=rugX+24+(j+.5)*(rugW-48)/r.n;
+   crest(xx,yy,r.s);
+  }
+ });
+ // Panel utama dengan tulisan dan lambang tengah.
+ ctx.fillStyle='rgba(30,10,13,.55)';ctx.fillRect(rugX+22,rugY+rugH*.34,rugW-44,rugH*.31);
+ crest(rugX+rugW/2,rugY+rugH*.48,1.12);
+ ctx.fillStyle='#f7d778';ctx.font='bold 10px Georgia';ctx.textAlign='center';
+ ctx.fillText('MANCHESTER UNITED',rugX+rugW/2,rugY+rugH*.73);
+ ctx.font='bold 8px Georgia';ctx.fillText('RED • GOLD • BLACK',rugX+rugW/2,rugY+rugH*.80);
+ // Fringe at the near edge for a woven rug appearance.
+ ctx.strokeStyle='#e4b64e';ctx.lineWidth=2;
+ for(let k=0;k<17;k++){const xx=rugX+8+k*(rugW-16)/16;ctx.beginPath();ctx.moveTo(xx,rugY+rugH-5);ctx.lineTo(xx-2,rugY+rugH+3);ctx.stroke();}
  ctx.restore();
  // Banner kantor.
  roundedRect(ctx,w*.29,24,w*.42,66,8,'#f6f0d5');ctx.fillStyle='#27613b';ctx.textAlign='center';ctx.font='bold 18px Nunito';ctx.fillText('BPP KECAMATAN SUKASENANG',w*.5,51);ctx.font='12px Nunito';ctx.fillText('BALAI PENYULUHAN PERTANIAN',w*.5,72);
