@@ -968,7 +968,7 @@ function mineInteract(){
  if(idx>=0&&best<75){state.mineNodes[idx]=null;mineRespawnQueue=mineRespawnQueue.filter(item=>item.index!==idx);mineRespawnQueue.push({index:idx,at:performance.now()+12000});state.mineGold++;state.xp+=3;updateStats();checkAchievements();save();$('worldLocation').textContent='⛏️ Emas terkumpul: '+state.mineGold+' • +3 XP langsung';const hud=document.querySelector('.game-heading .game-coin');if(hud)hud.textContent='⭐ '+state.xp+' XP';}
 }
 
-let bppPcWindow=null;
+let bppPcWindow=null,bppPrintStep=0;
 let bppCoffeeDrag=null,bppCoffeeCupX=835;
 let bppCoffeeStepRun=0,bppCoffeeAnimUntil=0;
 function updateBppBackButton(){
@@ -985,7 +985,7 @@ function updateBppBackButton(){
  btn.classList.toggle('coffee-scene',state.scene==='coffee');
 }
 function enterBppCoffee(){
- state.scene='coffee';bppCoffeeStepRun=state.bppCoffeeDone?5:0;bppCoffeeAnimUntil=0;bppCoffeeDrag=null;bppCoffeeCupX=835;
+ state.scene='coffee';bppCoffeeStepRun=0;bppCoffeeAnimUntil=0;bppCoffeeDrag=null;bppCoffeeCupX=835;
  state.keys={};state.analog={x:0,y:0};save();drawWorld();
 }
 function enterBpp(){
@@ -1163,7 +1163,7 @@ function drawBppCoffee(t=0){
  }
  // Progress and clear task instruction.
  const tasks=['1. Pindahkan cangkir dari rak ke tempat racik','2. Tambahkan satu sendok kopi','3. Tambahkan gula secukupnya','4. Tuangkan air panas','5. Aduk kopi hingga rata'];
- const completed=state.bppCoffeeDone||bppCoffeeStepRun>=5;
+ const completed=bppCoffeeStepRun>=5;
  roundedRect(ctx,35,125,890,48,9,'rgba(255,250,229,.96)');ctx.fillStyle='#315b39';ctx.font='bold 15px Nunito';ctx.textAlign='center';
  ctx.fillText(completed?'☕ Kopi siap disajikan! Terima kasih, Penyuluh.':(tasks[Math.min(bppCoffeeStepRun,4)]+' — GESER peralatan ke cangkir'),480,155);
  ctx.fillStyle='#315b39';ctx.font='bold 11px Nunito';ctx.fillText('GESER: CANGKIR → KOPI → GULA → AIR PANAS → SENDOK  |  ESC / KEMBALI',480,205);
@@ -1226,7 +1226,7 @@ function bppCoffeePointerUp(x,y){
  drawWorld();return true;
 }
 function bppComputer(){
- closeBppPortal();state.scene='pc';bppPcWindow=null;state.keys={};state.analog={x:0,y:0};save();
+ closeBppPortal();state.scene='pc';bppPcWindow=null;bppPrintStep=0;state.keys={};state.analog={x:0,y:0};save();
  $('worldLocation').textContent='💻 Komputer BPP • Desktop Windows 98';
  $('worldObjective').textContent='Klik ikon SIMLUHTAN, e-RDKK, atau e-Banper. Tekan ESC untuk keluar.';
  drawWorld();
@@ -1246,16 +1246,32 @@ function drawBppPc(t=0){
  const icon=(x,y,emoji,label)=>{ctx.font='27px Arial';ctx.textAlign='center';ctx.fillText(emoji,x,y);ctx.font='bold 11px Arial';ctx.fillStyle='#fff';ctx.fillText(label,x,y+28);ctx.fillStyle='#fff';};
  icon(215,92,'🖥️','My Computer');icon(215,164,'📁','Dokumen');icon(215,236,'🌐','Internet');
  icon(295,92,'📋','SIMLUHTAN');icon(295,164,'🌾','e-RDKK');icon(295,236,'📦','e-Banper');
+ icon(375,92,'📕','ERDKK.pdf');
  // Desktop wallpaper details and taskbar.
  ctx.fillStyle='#0b4c85';ctx.fillRect(176,378,608,33);ctx.fillStyle='#c0c0c0';ctx.fillRect(181,382,72,25);ctx.fillStyle='#111';ctx.font='bold 12px Arial';ctx.textAlign='center';ctx.fillText('Start',217,399);
  ctx.fillStyle='#e5e5e5';ctx.fillRect(260,383,515,23);ctx.fillStyle='#333';ctx.textAlign='left';ctx.font='11px Arial';ctx.fillText('BPP Kecamatan Sukasenang  •  Sistem Informasi Penyuluh',270,398);
  // Explorer windows for My Computer and Documents, rendered inside the CRT screen.
  if(bppPcWindow){
   roundedRect(ctx,250,70,510,285,5,'#c0c0c0');ctx.fillStyle='#082d83';ctx.fillRect(255,75,500,25);
-  ctx.fillStyle='#fff';ctx.font='bold 13px Arial';ctx.textAlign='left';ctx.fillText(bppPcWindow==='computer'?'My Computer':'My Documents',266,92);
+  ctx.fillStyle='#fff';ctx.font='bold 13px Arial';ctx.textAlign='left';ctx.fillText(bppPcWindow==='computer'?'My Computer':bppPcWindow==='documents'?'My Documents':'ERDKK.pdf — Adobe Reader',266,92);
   ctx.fillStyle='#c0c0c0';ctx.fillRect(730,78,18,18);ctx.fillStyle='#111';ctx.textAlign='center';ctx.font='bold 14px Arial';ctx.fillText('X',739,92);
   ctx.fillStyle='#fff';ctx.fillRect(258,104,494,244);ctx.fillStyle='#111';ctx.font='12px Arial';ctx.textAlign='left';
-  if(bppPcWindow==='computer'){
+  if(bppPcWindow==='erdkkpdf'){
+   ctx.fillStyle='#d7d7d7';ctx.fillRect(258,104,494,31);
+   ctx.fillStyle='#333';ctx.font='bold 11px Arial';ctx.fillText('File   Edit   View   Tools   Help',270,124);
+   ctx.fillStyle='#fff';ctx.fillRect(350,142,310,195);ctx.strokeStyle='#bbb';ctx.strokeRect(350,142,310,195);
+   ctx.fillStyle='#234c36';ctx.textAlign='center';ctx.font='bold 12px Arial';ctx.fillText('RENCANA DEFINITIF KEBUTUHAN KELOMPOK',505,164);
+   ctx.font='bold 10px Arial';ctx.fillText('(RDKK) PUPUK BERSUBSIDI',505,179);
+   ctx.fillStyle='#444';ctx.font='8px Arial';ctx.fillText('TAHUN ANGGARAN 2026',505,194);
+   ctx.strokeStyle='#9a9a9a';ctx.lineWidth=1;for(let rr=0;rr<5;rr++){ctx.beginPath();ctx.moveTo(370,210+rr*22);ctx.lineTo(640,210+rr*22);ctx.stroke();}
+   for(let cc=0;cc<4;cc++){ctx.beginPath();ctx.moveTo(370+cc*67,210);ctx.lineTo(370+cc*67,298);ctx.stroke();}
+   ctx.fillStyle='#555';ctx.font='8px Arial';ctx.textAlign='left';ctx.fillText('Nama Kelompok Tani: Tani Makmur',370,326);
+   // Print button inside the PDF viewer.
+   roundedRect(ctx,668,110,76,22,4,bppPrintStep>=2?'#b7d7b8':'#d9e1eb');
+   ctx.fillStyle='#172b42';ctx.font='bold 10px Arial';ctx.textAlign='center';ctx.fillText('🖨 PRINT',706,125);
+   ctx.fillStyle='#333';ctx.font='9px Arial';ctx.textAlign='left';
+   ctx.fillText(bppPrintStep===0?'1. Buka PDF • 2. Sambungkan printer • 3. Klik PRINT':bppPrintStep===1?'Sambungkan PC ke printer di samping monitor.':'Printer terhubung. Klik tombol PRINT.',270,337);
+  }else if(bppPcWindow==='computer'){
    ctx.fillText('Address: My Computer',270,124);
    [['💾','Local Disk (C:)','Hard Disk'],['💽','CD-ROM (D:)','CD Drive'],['📁','Shared Documents','Folder'],['🖨️','Printers','System Folder']].forEach((a,i)=>{const x=285+(i%2)*220,y=160+Math.floor(i/2)*82;ctx.font='25px Arial';ctx.fillText(a[0],x,y);ctx.font='bold 12px Arial';ctx.fillText(a[1],x+38,y-5);ctx.font='10px Arial';ctx.fillStyle='#555';ctx.fillText(a[2],x+38,y+12);ctx.fillStyle='#111';});
   }else{
@@ -1271,11 +1287,19 @@ function drawBppPc(t=0){
  ctx.fillStyle='#353a3a';ctx.beginPath();ctx.moveTo(280,490);ctx.lineTo(680,490);ctx.lineTo(740,560);ctx.lineTo(220,560);ctx.closePath();ctx.fill();
  for(let r=0;r<3;r++)for(let c=0;c<14;c++){ctx.fillStyle='#aeb4b0';roundedRect(ctx,244+c*34-r*3,500+r*17,28,12,2,'#aeb4b0');}
  ctx.fillStyle='#333';ctx.beginPath();ctx.ellipse(805,526,22,34,.1,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#aaa';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(805,496);ctx.lineTo(805,520);ctx.stroke();
+ // Printer beside the PC, available for the print-document mission.
+ ctx.fillStyle='#30383a';roundedRect(ctx,835,365,112,86,8,'#30383a');
+ ctx.fillStyle='#d5d8d5';roundedRect(ctx,844,374,94,54,5,'#d5d8d5');
+ ctx.fillStyle='#f7f7ef';ctx.fillRect(855,360,72,20);
+ ctx.fillStyle='#555';ctx.fillRect(855,402,72,5);
+ ctx.fillStyle='#aeb7b4';roundedRect(ctx,851,430,80,14,3,'#aeb7b4');
+ ctx.fillStyle='#263b32';ctx.font='bold 10px Nunito';ctx.textAlign='center';ctx.fillText('PRINTER',891,466);
+ if(bppPrintStep===1){ctx.fillStyle='#fff6d6';roundedRect(ctx,820,470,130,25,7,'#fff6d6');ctx.fillStyle='#315b39';ctx.font='bold 10px Nunito';ctx.fillText('KLIK UNTUK HUBUNGKAN',885,486);}
  // Click targets and instructions.
- roundedRect(ctx,270,570,420,24,8,'rgba(255,248,220,.96)');ctx.fillStyle='#243c2b';ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillText('KLIK IKON DI MONITOR UNTUK MEMBUKA APLIKASI • ESC UNTUK KELUAR',480,586);
+ roundedRect(ctx,270,570,420,24,8,'rgba(255,248,220,.96)');ctx.fillStyle='#243c2b';ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillText('BUKA ERDKK.pdf → HUBUNGKAN PRINTER → PRINT • ESC UNTUK KELUAR',480,586);
  $('worldLocation').textContent='💻 Komputer BPP • Desktop Windows 98';
- $('worldObjective').textContent='Pilih ikon aplikasi pada layar monitor. Tekan ESC untuk kembali ke kantor.';
- const hint=$('canvasHint');if(hint)hint.textContent='Klik ikon SIMLUHTAN, e-RDKK, atau e-Banper pada layar monitor. Tekan ESC untuk keluar dari misi PC.';
+ $('worldObjective').textContent='Buka ERDKK.pdf, sambungkan printer, lalu tekan PRINT. Misi dapat diulang setiap masuk PC.';
+ const hint=$('canvasHint');if(hint)hint.textContent='Klik ERDKK.pdf untuk misi cetak. Sambungkan printer di samping monitor lalu tekan PRINT. Misi dapat diulang.';
 }
 let bppPortalFrame=null;
 function closeBppPortal(){
@@ -1464,10 +1488,21 @@ canvas.addEventListener('click',e=>{
  if(state.scene!=='pc')return;
  if(bppPcWindow){
   if(x>=725&&x<=755&&y>=75&&y<=103){bppPcWindow=null;drawWorld();return;}
+  if(bppPcWindow==='erdkkpdf'&&x>=660&&x<=750&&y>=105&&y<=135){
+   if(bppPrintStep<2){showPalmToast('Hubungkan PC ke printer terlebih dahulu.');return;}
+   bppPrintStep=3;reward(5,0);save();
+   $('missionDescription').textContent='🖨️ Berhasil! Dokumen e-RDKK selesai dicetak. Hadiah +5 XP.';
+   showPalmToast('🎉 Misi berhasil! Dokumen e-RDKK telah dicetak. +5 XP');
+   drawWorld();return;
+  }
   return;
  }
+ if(x>=350&&x<=400&&y>=65&&y<=125){bppPcWindow='erdkkpdf';bppPrintStep=0;drawWorld();return;}
  if(x>=185&&x<=245&&y>=65&&y<=125){bppPcWindow='computer';drawWorld();return;}
  if(x>=185&&x<=245&&y>=137&&y<=197){bppPcWindow='documents';drawWorld();return;}
+ if(x>=825&&x<=955&&y>=360&&y<=500&&bppPcWindow==='erdkkpdf'&&bppPrintStep===0){
+  bppPrintStep=2;showPalmToast('PC berhasil terhubung ke printer. Sekarang klik tombol PRINT pada dokumen.');drawWorld();return;
+ }
  if(x>=260&&x<=330&&y>=65&&y<=125)openBppPortal('https://simluh.pertanian.go.id/','SIMLUHTAN');
  else if(x>=260&&x<=330&&y>=137&&y<=197)openBppPortal('https://erdkk.pertanian.go.id/','e-RDKK');
  else if(x>=260&&x<=330&&y>=209&&y<=269)openBppPortal('https://ebanper.pertanian.go.id/login','e-Banper');
