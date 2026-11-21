@@ -1095,7 +1095,7 @@ function drawBpp(t=0){
  // Tiga bingkai foto pejabat negara dan Garuda Pancasila pada dinding.
  if(bppWallPortraits.complete&&bppWallPortraits.naturalWidth){
   ctx.save();ctx.shadowColor='rgba(34,48,29,.28)';ctx.shadowBlur=7;ctx.shadowOffsetY=3;
-  ctx.drawImage(bppWallPortraits,w*.375,h*.145,w*.335,h*.134);
+  ctx.drawImage(bppWallPortraits,w*.372,h*.165,w*.256,h*.091);
   ctx.restore();
  }
  ctx.restore();
