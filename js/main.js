@@ -6,6 +6,8 @@ const TUTORIAL_KEY='myPplMyAdventure.tutorial.v1';
 let mineMonster=null,mineNextMonsterAt=0,mineLastFrame=0,mineHitCooldown=0,mineToastTimer=0,mineRespawnQueue=[];
 let mineCommonSpawnCount=0,mineBoss=null,mineBossWarningAt=0,mineBossNextAt=0,minePickaxeOwned=false,minePickaxeHitAt=0,mineTreasureChest=null;
 
+const bppWallPortraits=new Image();
+bppWallPortraits.src='assets/images/bpp-wall-portraits.png';
 const FIRST_LEVEL_XP=150, XP_PER_LEVEL=250;
 function xpThreshold(level){return level<=1?0:FIRST_LEVEL_XP+(level-2)*XP_PER_LEVEL;}
 function levelFromXP(xp){let level=1;while(xp>=xpThreshold(level+1))level++;return level;}
@@ -1004,8 +1006,20 @@ function drawBpp(t=0){
  ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
  ctx.clearRect(0,0,w,h);ctx.fillStyle='#b8d99b';ctx.fillRect(0,0,w,h);ctx.save();
  const bg=ctx.createLinearGradient(0,0,0,h);bg.addColorStop(0,'#b8d99b');bg.addColorStop(1,'#79ad70');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
- // Dinding kantor hijau dengan lis dan lantai keramik.
- ctx.fillStyle='#d9e9c6';ctx.fillRect(0,0,w,h*.68);ctx.fillStyle='#5d9a62';ctx.fillRect(0,h*.68,w,h*.32);
+ // Dinding kantor BPP: cat hijau muda, tekstur plester halus, lis dan lantai keramik.
+ const wallPaint=ctx.createLinearGradient(0,0,w,h*.68);
+ wallPaint.addColorStop(0,'#e4edda');wallPaint.addColorStop(.55,'#d5e4c8');wallPaint.addColorStop(1,'#c5d8b8');
+ ctx.fillStyle=wallPaint;ctx.fillRect(0,0,w,h*.68);
+ // Bintik tekstur plester dan sapuan cat yang sangat halus.
+ for(let yy=8;yy<h*.66;yy+=17)for(let xx=6;xx<w;xx+=19){
+  const v=((xx*7+yy*11)%13);
+  ctx.fillStyle=v<4?'rgba(255,255,255,.12)':v<8?'rgba(92,125,78,.045)':'rgba(255,255,255,.055)';
+  ctx.fillRect(xx+(yy%3),yy,2+(v%3),1+(v%2));
+ }
+ ctx.fillStyle='rgba(255,255,255,.22)';ctx.fillRect(0,h*.12,w,2);ctx.fillRect(0,h*.32,w,1);
+ ctx.fillStyle='#a8c397';ctx.fillRect(0,h*.645,w,10);
+ ctx.fillStyle='#f2f0e5';ctx.fillRect(0,h*.66,w,5);
+ ctx.fillStyle='#5d9a62';ctx.fillRect(0,h*.68,w,h*.32);
  ctx.fillStyle='#3c7548';ctx.fillRect(0,h*.66,w,9);
  for(let x=0;x<w;x+=64){ctx.strokeStyle='rgba(255,255,255,.16)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,h*.68);ctx.lineTo(x,h);ctx.stroke();}
  // Tikar merah bergaya karpet suporter MU, digambar ulang secara vektor
@@ -1064,6 +1078,26 @@ function drawBpp(t=0){
  // Fringe at the near edge for a woven rug appearance.
  ctx.strokeStyle='#e4b64e';ctx.lineWidth=2;
  for(let k=0;k<17;k++){const xx=rugX+8+k*(rugW-16)/16;ctx.beginPath();ctx.moveTo(xx,rugY+rugH-5);ctx.lineTo(xx-2,rugY+rugH+3);ctx.stroke();}
+ ctx.restore();
+ // Pintu kantor kayu di sisi kiri dinding, lengkap kusen, panel dan gagang.
+ ctx.save();
+ ctx.fillStyle='rgba(47,69,43,.18)';roundedRect(ctx,w*.285+4,h*.13+5,w*.085,h*.40,5,'rgba(47,69,43,.18)');
+ roundedRect(ctx,w*.282,h*.125,w*.087,h*.405,4,'#76513a');
+ roundedRect(ctx,w*.291,h*.14,w*.069,h*.375,2,'#a9784c');
+ ctx.strokeStyle='rgba(239,208,153,.65)';ctx.lineWidth=2;
+ for(let k=0;k<3;k++)ctx.strokeRect(w*.298,h*(.17+k*.105),w*.055,h*.075);
+ ctx.fillStyle='#e0bd70';ctx.beginPath();ctx.arc(w*.347,h*.34,3.2,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#f5f0df';ctx.font='bold 9px Nunito';ctx.textAlign='center';ctx.fillText('PINTU KANTOR',w*.325,h*.55);
+ // Jendela kaca dengan kusen putih pada dinding kanan.
+ roundedRect(ctx,w*.735,h*.13,w*.075,h*.15,4,'#fffdf0');
+ ctx.fillStyle='#a8d5d0';roundedRect(ctx,w*.742,h*.14,w*.061,h*.13,2,'#a8d5d0');
+ ctx.strokeStyle='#fffdf0';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(w*.772,h*.14);ctx.lineTo(w*.772,h*.27);ctx.moveTo(w*.742,h*.205);ctx.lineTo(w*.803,h*.205);ctx.stroke();
+ // Tiga bingkai foto pejabat negara dan Garuda Pancasila pada dinding.
+ if(bppWallPortraits.complete&&bppWallPortraits.naturalWidth){
+  ctx.save();ctx.shadowColor='rgba(34,48,29,.28)';ctx.shadowBlur=7;ctx.shadowOffsetY=3;
+  ctx.drawImage(bppWallPortraits,w*.375,h*.145,w*.335,h*.134);
+  ctx.restore();
+ }
  ctx.restore();
  // Banner kantor.
  roundedRect(ctx,w*.29,24,w*.42,66,8,'#f6f0d5');ctx.fillStyle='#27613b';ctx.textAlign='center';ctx.font='bold 18px Nunito';ctx.fillText('BPP KECAMATAN SUKASENANG',w*.5,51);ctx.font='12px Nunito';ctx.fillText('BALAI PENYULUHAN PERTANIAN',w*.5,72);
