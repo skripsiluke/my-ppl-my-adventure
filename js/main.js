@@ -969,7 +969,7 @@ function mineInteract(){
 }
 
 let bppPcWindow=null;
-let bppCoffeeDrag=null,bppCoffeeCupX=710;
+let bppCoffeeDrag=null,bppCoffeeCupX=835;
 let bppCoffeeStepRun=0,bppCoffeeAnimUntil=0;
 function updateBppBackButton(){
  let btn=document.getElementById('bppSceneBack');
@@ -985,7 +985,7 @@ function updateBppBackButton(){
  btn.classList.toggle('coffee-scene',state.scene==='coffee');
 }
 function enterBppCoffee(){
- state.scene='coffee';bppCoffeeStepRun=state.bppCoffeeDone?5:0;bppCoffeeAnimUntil=0;bppCoffeeDrag=null;bppCoffeeCupX=710;
+ state.scene='coffee';bppCoffeeStepRun=state.bppCoffeeDone?5:0;bppCoffeeAnimUntil=0;bppCoffeeDrag=null;bppCoffeeCupX=835;
  state.keys={};state.analog={x:0,y:0};save();drawWorld();
 }
 function enterBpp(){
@@ -1077,6 +1077,12 @@ function drawBppCoffee(t=0){
  // Spoon
  ctx.strokeStyle='#c9cdd0';ctx.lineWidth=8;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(490,378);ctx.lineTo(545,431);ctx.stroke();ctx.fillStyle='#d9dfe0';ctx.beginPath();ctx.ellipse(486,374,14,9,-.6,0,Math.PI*2);ctx.fill();
  ctx.fillStyle='#fff';ctx.font='bold 12px Nunito';ctx.fillText('SENDOK',518,455);
+ // Tempat racik khusus: awalnya kosong, cangkir harus dipindahkan dari rak ke sini.
+ ctx.fillStyle='rgba(255,245,215,.18)';ctx.beginPath();ctx.ellipse(600,435,68,18,0,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='#f2d9a7';ctx.lineWidth=3;ctx.setLineDash([8,6]);ctx.beginPath();ctx.ellipse(600,435,68,18,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+ ctx.fillStyle='#fff8df';roundedRect(ctx,545,470,110,22,6,'#fff8df');ctx.fillStyle='#4a3425';ctx.font='bold 11px Nunito';ctx.textAlign='center';ctx.fillText('TEMPAT RACIK',600,485);
+ // Rak cangkir terpisah di sisi kanan meja.
+ roundedRect(ctx,790,325,130,130,10,'#9b704b');ctx.fillStyle='#d4ae7c';ctx.fillRect(800,337,110,8);ctx.fillStyle='#fff8df';ctx.font='bold 11px Nunito';ctx.fillText('RAK CANGKIR',855,472);
  // Cup and saucer, liquid changes as steps progress
  ctx.fillStyle='#e8e1d1';ctx.beginPath();ctx.ellipse(bppCoffeeCupX,435,66,18,0,0,Math.PI*2);ctx.fill();
  roundedRect(ctx,bppCoffeeCupX-49,350,98,83,12,'#f5f2e9');ctx.strokeStyle='#e2d9c7';ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(bppCoffeeCupX+50,390,22,25,-.1,-1.3,1.3);ctx.stroke();
@@ -1097,7 +1103,7 @@ function drawBppCoffee(t=0){
   if(bppCoffeeStepRun===5){ctx.strokeStyle='#d9e0e0';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(520,385);ctx.lineTo(bppCoffeeCupX+Math.sin(t/55)*22,356+Math.cos(t/55)*5);ctx.stroke();}
  }
  // Progress and clear task instruction.
- const tasks=['1. Ambil cangkir bersih','2. Tambahkan satu sendok kopi','3. Tambahkan gula secukupnya','4. Tuangkan air panas','5. Aduk kopi hingga rata'];
+ const tasks=['1. Pindahkan cangkir dari rak ke tempat racik','2. Tambahkan satu sendok kopi','3. Tambahkan gula secukupnya','4. Tuangkan air panas','5. Aduk kopi hingga rata'];
  const completed=state.bppCoffeeDone||bppCoffeeStepRun>=5;
  roundedRect(ctx,35,125,890,48,9,'rgba(255,250,229,.96)');ctx.fillStyle='#315b39';ctx.font='bold 15px Nunito';ctx.textAlign='center';
  ctx.fillText(completed?'☕ Kopi siap disajikan! Terima kasih, Penyuluh.':(tasks[Math.min(bppCoffeeStepRun,4)]+' — GESER peralatan ke cangkir'),480,155);
@@ -1111,7 +1117,7 @@ function drawBppCoffee(t=0){
 }
 function bppCoffeeSource(item){
  const sources={
-  cup:{x:710,y:390,r:58},
+  cup:{x:855,y:390,r:58},
   coffee:{x:138,y:400,r:55},
   sugar:{x:263,y:400,r:55},
   tea:{x:388,y:400,r:55},
