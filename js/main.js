@@ -8,6 +8,8 @@ let mineCommonSpawnCount=0,mineBoss=null,mineBossWarningAt=0,mineBossNextAt=0,mi
 
 const bppWallPortraits=new Image();
 bppWallPortraits.src='assets/images/bpp-wall-portraits.png';
+const kopdesTruckImage=new Image();
+kopdesTruckImage.src='assets/images/kopdes-truck.png';
 const FIRST_LEVEL_XP=150, XP_PER_LEVEL=250;
 function xpThreshold(level){return level<=1?0:FIRST_LEVEL_XP+(level-2)*XP_PER_LEVEL;}
 function levelFromXP(xp){let level=1;while(xp>=xpThreshold(level+1))level++;return level;}
@@ -570,11 +572,9 @@ function drawHouse(b){
    const doorY=b.y+35,doorH=72,doorW=36;
    for(let k=0;k<3;k++){const dx=b.x+8+k*43;ctx.fillStyle='#a52e2b';ctx.fillRect(dx,doorY,doorW,doorH);ctx.strokeStyle='#7f2523';ctx.lineWidth=1;ctx.strokeRect(dx,doorY,doorW,doorH);ctx.strokeStyle='rgba(255,205,190,.32)';for(let yy=doorY+7;yy<doorY+doorH;yy+=7){ctx.beginPath();ctx.moveTo(dx+2,yy);ctx.lineTo(dx+doorW-2,yy);ctx.stroke();}}
    ctx.fillStyle='#d7d9d5';ctx.fillRect(b.x+142,doorY-4,60,76);ctx.fillStyle='#3b2928';ctx.fillRect(b.x+150,doorY+3,44,69);
-   // Signboard: combine cooperative name and village name into one panel
-   ctx.fillStyle='#e5e8e5';ctx.fillRect(b.x+95,b.y+11,120,27);
-   ctx.fillStyle='#a52e2b';ctx.font='bold 6.5px Nunito';ctx.textAlign='center';
-   ctx.fillText('KOPERASI DESA MERAH PUTIH',b.x+155,b.y+22);
-   ctx.font='bold 7px Nunito';ctx.fillText('DESA SUKAMAJU',b.x+155,b.y+32);
+   // sign panel
+   ctx.fillStyle='#e5e8e5';ctx.fillRect(b.x+112,b.y+14,86,20);ctx.fillStyle='#a52e2b';ctx.font='bold 7px Nunito';ctx.textAlign='center';ctx.fillText('KOPERASI DESA',b.x+155,b.y+23);ctx.font='bold 7px Nunito';ctx.fillText('MERAH PUTIH',b.x+155,b.y+31);
+   ctx.fillStyle='#fff';ctx.font='bold 8px Nunito';ctx.textAlign='center';ctx.fillText('SUKAMAJU',b.x+b.w/2,b.y+b.h+23);
    return;
  }
  // building shadow and foundation
@@ -779,6 +779,19 @@ function drawWorld(t=0){
  // area labels with subtle backing
  ctx.textAlign='left';ctx.font='900 20px Nunito';ctx.fillStyle='rgba(255,255,235,.72)';ctx.fillText('DESA SUKAMAJU',43,54);ctx.fillStyle='#315c37';ctx.fillText('DESA SUKAMAJU',40,51);
  ctx.font='bold 16px Nunito';ctx.fillStyle='#315c37';ctx.fillText('AREA PERSAWAHAN',1190,690);ctx.textAlign='center';ctx.font='900 17px Nunito';ctx.lineWidth=4;ctx.strokeStyle='rgba(95,70,43,.48)';ctx.strokeText('JALAN DESA',900,575);ctx.fillStyle='#fff4d8';ctx.fillText('JALAN DESA',900,575);
+ // Truk Koperasi Desa Merah Putih berkeliling di jalan desa secara bolak-balik.
+ // Diletakkan pada lapisan jalan, di belakang NPC dan pemain; dekoratif tanpa mengubah collision.
+ if(kopdesTruckImage.complete&&kopdesTruckImage.naturalWidth>0){
+  const roadLeft=105,roadRight=1695,truckSpeed=58,travel=roadRight-roadLeft;
+  const phase=((Math.max(0,t)/1000*truckSpeed)%(travel*2));
+  const movingLeft=phase>travel;
+  const truckX=movingLeft?roadRight-(phase-travel):roadLeft+phase;
+  const truckW=158,truckH=truckW*kopdesTruckImage.naturalHeight/kopdesTruckImage.naturalWidth;
+  ctx.save();ctx.translate(truckX,570);
+  if(movingLeft)ctx.scale(-1,1);
+  ctx.drawImage(kopdesTruckImage,-truckW/2,-truckH/2,truckW,truckH);
+  ctx.restore();
+ }
  // Karakter NPC digambar solid dengan badan, tangan, kaki, dan pakaian.
  npcs.forEach((n,i)=>{const done=missionDone(n.id);ctx.font='bold 12px Nunito';drawFarmer(n.x,n.y,{shirt:['#3979b9','#bd6686','#3f8a57','#c58a38'][i%4],pants:'#394d43',hat:['#d6a34d','#d8b86d','#6b8e57'][i%3]},i*.8,false);const labelW=Math.max(76,Math.min(132,ctx.measureText(n.name).width+22));roundedRect(ctx,n.x-labelW/2,n.y+28,labelW,23,10,'rgba(255,255,245,.98)');ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillStyle='#23452c';ctx.fillText(n.name,n.x,n.y+44);if(n.kind==='mission'||n.kind==='special'){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(n.x,n.y-43,14,0,Math.PI*2);ctx.fill();ctx.strokeStyle=done?'#23834b':'#d88b1f';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=done?'#23834b':'#d88b1f';ctx.font='bold 17px Nunito';ctx.fillText(n.kind==='special'?(state.catOwned?'✓':(state.catHintShown?'!':'🐾')):(done?'✓':'!'),n.x,n.y-37);if(n.id==='catcaretaker'&&state.catHintShown&&!state.catOwned){ctx.strokeStyle='rgba(255,211,76,.9)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(n.x,n.y-43,20,0,Math.PI*2);ctx.stroke();}}});
  if(state.catOwned)drawPetCat(state.catFollower.x,state.catFollower.y,t);
