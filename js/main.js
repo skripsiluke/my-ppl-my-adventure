@@ -570,9 +570,11 @@ function drawHouse(b){
    const doorY=b.y+35,doorH=72,doorW=36;
    for(let k=0;k<3;k++){const dx=b.x+8+k*43;ctx.fillStyle='#a52e2b';ctx.fillRect(dx,doorY,doorW,doorH);ctx.strokeStyle='#7f2523';ctx.lineWidth=1;ctx.strokeRect(dx,doorY,doorW,doorH);ctx.strokeStyle='rgba(255,205,190,.32)';for(let yy=doorY+7;yy<doorY+doorH;yy+=7){ctx.beginPath();ctx.moveTo(dx+2,yy);ctx.lineTo(dx+doorW-2,yy);ctx.stroke();}}
    ctx.fillStyle='#d7d9d5';ctx.fillRect(b.x+142,doorY-4,60,76);ctx.fillStyle='#3b2928';ctx.fillRect(b.x+150,doorY+3,44,69);
-   // sign panel
-   ctx.fillStyle='#e5e8e5';ctx.fillRect(b.x+112,b.y+14,86,20);ctx.fillStyle='#a52e2b';ctx.font='bold 7px Nunito';ctx.textAlign='center';ctx.fillText('KOPERASI DESA',b.x+155,b.y+23);ctx.font='bold 7px Nunito';ctx.fillText('MERAH PUTIH',b.x+155,b.y+31);
-   ctx.fillStyle='#fff';ctx.font='bold 8px Nunito';ctx.textAlign='center';ctx.fillText('SUKAMAJU',b.x+b.w/2,b.y+b.h+23);
+   // Signboard: combine cooperative name and village name into one panel
+   ctx.fillStyle='#e5e8e5';ctx.fillRect(b.x+95,b.y+11,120,27);
+   ctx.fillStyle='#a52e2b';ctx.font='bold 6.5px Nunito';ctx.textAlign='center';
+   ctx.fillText('KOPERASI DESA MERAH PUTIH',b.x+155,b.y+22);
+   ctx.font='bold 7px Nunito';ctx.fillText('DESA SUKAMAJU',b.x+155,b.y+32);
    return;
  }
  // building shadow and foundation
