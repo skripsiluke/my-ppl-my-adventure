@@ -661,7 +661,7 @@ function drawPetCat(x,y,t=0){
 }
 
 function drawWorld(t=0){
- if(state.scene==='mine'){drawMine(t);return;}if(state.scene==='palm'){drawPalm(t);return;}if(state.scene==='bpp'){drawBpp(t);updateBppBackButton();return;}if(state.scene==='pc'){drawBppPc(t);updateBppBackButton();return;}if(state.scene==='coffee'){drawBppCoffee(t);updateBppBackButton();return;}
+ if(state.scene==='mine'){drawMine(t);return;}if(state.scene==='palm'){drawPalm(t);return;}if(state.scene==='bpp'){drawBpp(t);updateBppBackButton();return;}if(state.scene==='pc'){drawBppPc(t);updateBppBackButton();return;}if(state.scene==='coffee'){drawBppCoffee(t);updateBppBackButton();return;}if(state.scene==='phone'){drawBppPhone(t);updateBppBackButton();return;}
  const camX=Math.max(0,Math.min(WORLD.w-canvas.width,state.player.x-canvas.width/2));
  const camY=Math.max(0,Math.min(WORLD.h-canvas.height,state.player.y-canvas.height/2));
  ctx.clearRect(0,0,canvas.width,canvas.height);ctx.save();ctx.translate(-camX,-camY);
@@ -971,6 +971,7 @@ function mineInteract(){
 }
 
 let bppPcWindow=null,bppPrintStep=0,bppPrintStartedAt=0;
+let bppPhoneStep='home',bppPhoneMissionDone=false;
 let bppCoffeeDrag=null,bppCoffeeCupX=835;
 let bppCoffeeStepRun=0,bppCoffeeAnimUntil=0;
 function updateBppBackButton(){
@@ -980,11 +981,11 @@ function updateBppBackButton(){
   btn.setAttribute('aria-label','Kembali ke kantor BPP');
   const wrap=canvas.closest('.canvas-wrap');if(wrap)wrap.appendChild(btn);
   btn.addEventListener('click',()=>{
-   if(state.scene==='pc'||state.scene==='coffee'){closeBppPortal();state.scene='bpp';state.keys={};state.analog={x:0,y:0};bppPcWindow=null;save();drawWorld();}
+   if(state.scene==='pc'||state.scene==='coffee'||state.scene==='phone'){closeBppPortal();state.scene='bpp';state.keys={};state.analog={x:0,y:0};bppPcWindow=null;save();drawWorld();}
   });
  }
- btn.classList.toggle('active',state.scene==='pc'||state.scene==='coffee');
- btn.classList.toggle('coffee-scene',state.scene==='coffee');
+ btn.classList.toggle('active',state.scene==='pc'||state.scene==='coffee'||state.scene==='phone');
+ btn.classList.toggle('coffee-scene',state.scene==='coffee'||state.scene==='phone');
 }
 function enterBppCoffee(){
  state.scene='coffee';bppCoffeeStepRun=0;bppCoffeeAnimUntil=0;bppCoffeeDrag=null;bppCoffeeCupX=835;
@@ -999,7 +1000,7 @@ function enterBpp(){
  state.returnPosition={x:state.player.x,y:state.player.y};state.scene='bpp';
  state.player={x:canvas.width*.5,y:canvas.height-125};save();
  $('worldLocation').textContent='🏢 BPP Kecamatan Sukasenang';
- $('worldObjective').textContent='Selamat datang di kantor BPP. Kunjungi meja kopi atau meja komputer.';
+ $('worldObjective').textContent='Selamat datang di kantor BPP. Kunjungi meja kopi, komputer, atau HP penyuluh.';
 }
 function drawBpp(t=0){
  const w=canvas.width,h=canvas.height;
@@ -1108,6 +1109,16 @@ function drawBpp(t=0){
  roundedRect(ctx,w*.42, h*.34,w*.36,72,8,'#9b663f');ctx.fillStyle='#d6a36a';ctx.fillRect(w*.43,h*.34+8,w*.34,9);
  roundedRect(ctx,w*.54,h*.34-52,74,49,5,'#333f42');ctx.fillStyle='#9bd3c4';roundedRect(ctx,w*.54+5,h*.34-47,64,37,3,'#9bd3c4');ctx.fillStyle='#334b42';ctx.fillRect(w*.57,h*.34-2,25,8);ctx.fillRect(w*.56,h*.34+5,42,4);
  ctx.fillStyle='#302e2a';roundedRect(ctx,w*.65,h*.34-18,27,13,3,'#302e2a');
+ // HP penyuluh di atas meja, di samping monitor.
+ ctx.save();ctx.translate(w*.705,h*.34+28);ctx.rotate(-.12);
+ ctx.shadowColor='rgba(25,35,25,.25)';ctx.shadowBlur=5;ctx.shadowOffsetY=3;
+ roundedRect(ctx,-17,-29,34,58,6,'#242b2d');ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+ roundedRect(ctx,-13,-24,26,48,3,'#a8d6a0');
+ ctx.fillStyle='#277b52';ctx.font='bold 6px Nunito';ctx.textAlign='center';ctx.fillText('10:24',0,-15);
+ roundedRect(ctx,-9,-9,8,8,2,'#2388d8');roundedRect(ctx,2,-9,8,8,2,'#e8b93d');
+ roundedRect(ctx,-9,2,8,8,2,'#8965b8');roundedRect(ctx,2,2,8,8,2,'#36a95d');
+ ctx.fillStyle='#fff';ctx.font='bold 5px Arial';ctx.fillText('☎',6,8);
+ ctx.restore();
  // Meja kopi.
  roundedRect(ctx,w*.08,h*.49,w*.27,55,8,'#95613d');ctx.fillStyle='#d4a16a';ctx.fillRect(w*.09,h*.49+8,w*.25,8);
  roundedRect(ctx,w*.15,h*.49-24,45,23,4,'#f4f0df');ctx.fillStyle='#634936';ctx.fillRect(w*.17,h*.49-20,36,4);ctx.fillStyle='#e9e1c8';ctx.beginPath();ctx.arc(w*.23,h*.49-17,8,0,Math.PI*2);ctx.fill();
@@ -1120,14 +1131,14 @@ function drawBpp(t=0){
  // Pintu keluar.
  roundedRect(ctx,w*.43,h-75,w*.14,50,5,'#f0d8a5');ctx.fillStyle='#356c43';ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillText('PINTU KELUAR',w*.5,h-19);
  drawFarmer(state.player.x,state.player.y,{shirt:'#287b49',pants:'#344b3a'},t/105,false,true);
- const coffee={x:w*.215,y:h*.49+30},pc={x:w*.60,y:h*.34+35},exit={x:w*.5,y:h-48};
- const dCoffee=Math.hypot(state.player.x-coffee.x,state.player.y-coffee.y),dPc=Math.hypot(state.player.x-pc.x,state.player.y-pc.y),dExit=Math.hypot(state.player.x-exit.x,state.player.y-exit.y);
- const label=dCoffee<100?'E / INTERAKSI • BUAT KOPI':dPc<110?'E / INTERAKSI • AKSES KOMPUTER':dExit<100?'E / INTERAKSI • KELUAR BPP':'Jelajahi kantor dan dekati meja';
+ const coffee={x:w*.215,y:h*.49+30},pc={x:w*.60,y:h*.34+35},phone={x:w*.705,y:h*.34+28},exit={x:w*.5,y:h-48};
+ const dCoffee=Math.hypot(state.player.x-coffee.x,state.player.y-coffee.y),dPc=Math.hypot(state.player.x-pc.x,state.player.y-pc.y),dPhone=Math.hypot(state.player.x-phone.x,state.player.y-phone.y),dExit=Math.hypot(state.player.x-exit.x,state.player.y-exit.y);
+ const label=dCoffee<100?'E / INTERAKSI • BUAT KOPI':dPhone<85?'E / INTERAKSI • BUKA HP PENYULUH':dPc<110?'E / INTERAKSI • AKSES KOMPUTER':dExit<100?'E / INTERAKSI • KELUAR BPP':'Jelajahi kantor dan dekati meja';
  roundedRect(ctx,Math.max(8,w/2-145),h-34,290,25,10,'rgba(255,250,225,.94)');ctx.fillStyle='#254d32';ctx.font='bold 11px Nunito';ctx.fillText(label,w/2,h-17);
  ctx.restore();
  $('worldLocation').textContent='🏢 BPP Kecamatan Sukasenang';
  $('worldObjective').textContent='☕ Misi kantor: buat kopi • 💻 Akses SIMLUHTAN, RDKK, dan e-Banper';
- const hint=$('canvasHint');if(hint)hint.textContent='Gerakkan penyuluh. Dekati meja kopi atau meja komputer, lalu tekan E / INTERAKSI. Pintu bawah untuk keluar.';
+ const hint=$('canvasHint');if(hint)hint.textContent='Gerakkan penyuluh. Dekati meja kopi, komputer, atau HP di meja PC lalu tekan E / INTERAKSI. Pintu bawah untuk keluar.';
 }
 function bppCoffee(){
  enterBppCoffee();
@@ -1422,13 +1433,81 @@ function openBppPortal(url,title){
 }
 function bppInteract(){
  const w=canvas.width,h=canvas.height;
- const coffee={x:w*.215,y:h*.49+30},pc={x:w*.60,y:h*.34+35},exit={x:w*.5,y:h-48};
+ const coffee={x:w*.215,y:h*.49+30},pc={x:w*.60,y:h*.34+35},phone={x:w*.705,y:h*.34+28},exit={x:w*.5,y:h-48};
  if(Math.hypot(state.player.x-coffee.x,state.player.y-coffee.y)<105){bppCoffee();return;}
+ if(Math.hypot(state.player.x-phone.x,state.player.y-phone.y)<88){enterBppPhone();return;}
  if(Math.hypot(state.player.x-pc.x,state.player.y-pc.y)<115){bppComputer();return;}
  if(Math.hypot(state.player.x-exit.x,state.player.y-exit.y)<125){state.scene='village';state.player={...state.returnPosition};save();return;}
- $('missionDescription').textContent='Dekati meja kopi, meja komputer, atau pintu keluar untuk berinteraksi.';
+ $('missionDescription').textContent='Dekati meja kopi, HP penyuluh, meja komputer, atau pintu keluar untuk berinteraksi.';
 }
 
+function enterBppPhone(){
+ state.scene='phone';bppPhoneStep='home';bppPhoneMissionDone=false;
+ state.keys={};state.analog={x:0,y:0};save();drawWorld();
+}
+function drawBppPhone(t=0){
+ const w=canvas.width,h=canvas.height;
+ ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+ ctx.clearRect(0,0,w,h);
+ const bg=ctx.createLinearGradient(0,0,0,h);bg.addColorStop(0,'#dcebd2');bg.addColorStop(1,'#a4c994');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+ // First-person tabletop and soft office backdrop.
+ ctx.fillStyle='#d7e5cd';ctx.fillRect(0,0,w,340);
+ ctx.fillStyle='#765238';ctx.fillRect(0,340,w,260);ctx.fillStyle='#a8794d';ctx.fillRect(0,340,w,12);
+ for(let x=0;x<w;x+=90){ctx.strokeStyle='rgba(255,255,255,.08)';ctx.beginPath();ctx.moveTo(x,352);ctx.lineTo(x,600);ctx.stroke();}
+ // Large smartphone frame.
+ ctx.save();ctx.shadowColor='rgba(20,35,25,.3)';ctx.shadowBlur=18;ctx.shadowOffsetY=8;
+ roundedRect(ctx,300,18,360,565,38,'#202729');ctx.restore();
+ roundedRect(ctx,312,30,336,541,29,'#101718');
+ const screen=ctx.createLinearGradient(0,65,0,545);screen.addColorStop(0,'#b8e5a9');screen.addColorStop(1,'#68b77b');
+ roundedRect(ctx,324,56,312,492,18,screen);
+ ctx.fillStyle='#173c36';roundedRect(ctx,430,38,100,8,4,'#173c36');
+ ctx.fillStyle='#fff';ctx.font='bold 13px Nunito';ctx.textAlign='left';ctx.fillText('10:24',345,82);
+ ctx.textAlign='right';ctx.fillText('▮▮▮  92%',615,82);
+ if(bppPhoneStep==='home'){
+  ctx.fillStyle='#1c5b42';ctx.textAlign='center';ctx.font='bold 19px Nunito';ctx.fillText('HP PENYULUH',480,125);
+  const apps=[{x:390,y:205,c:'#2589df',ico:'●',label:'KONTAK'},{x:535,y:205,c:'#e8b83d',ico:'✉',label:'PESAN'},{x:390,y:345,c:'#8268bd',ico:'▣',label:'KAMERA'},{x:535,y:345,c:'#35a85b',ico:'☎',label:'TELEPON'}];
+  apps.forEach(a=>{roundedRect(ctx,a.x-48,a.y-45,96,90,18,a.c);ctx.fillStyle='#fff';ctx.font='bold 38px Arial';ctx.textAlign='center';ctx.fillText(a.ico,a.x,a.y+7);ctx.font='bold 12px Nunito';ctx.fillText(a.label,a.x,a.y+65);});
+  ctx.fillStyle='#276044';ctx.font='bold 11px Nunito';ctx.fillText('Pilih aplikasi Kontak untuk mencari ketua kelompok tani',480,485);
+ }else if(bppPhoneStep==='contacts'){
+  ctx.fillStyle='#155b43';ctx.textAlign='center';ctx.font='bold 20px Nunito';ctx.fillText('KONTAK',480,125);
+  const contacts=[['Pak Ketua','Ketua Kelompok Tani'],['Bu Rina','Anggota Kelompok Tani'],['Pak Asep','Peternak']];
+  contacts.forEach((c,i)=>{const y=178+i*100;roundedRect(ctx,350,y,260,78,12,'rgba(255,255,255,.88)');ctx.fillStyle=['#2589df','#d18b54','#35a85b'][i];ctx.beginPath();ctx.arc(385,y+38,22,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 18px Nunito';ctx.textAlign='center';ctx.fillText(c[0].split(' ').map(s=>s[0]).join(''),385,y+44);ctx.fillStyle='#214b36';ctx.textAlign='left';ctx.font='bold 15px Nunito';ctx.fillText(c[0],420,y+32);ctx.font='11px Nunito';ctx.fillText(c[1],420,y+52);});
+  ctx.fillStyle='#315e43';ctx.textAlign='center';ctx.font='11px Nunito';ctx.fillText('Pilih kontak Pak Ketua',480,505);
+ }else if(bppPhoneStep==='contact'){
+  ctx.fillStyle='#155b43';ctx.textAlign='center';ctx.font='bold 20px Nunito';ctx.fillText('DETAIL KONTAK',480,125);
+  roundedRect(ctx,370,165,220,190,16,'rgba(255,255,255,.9)');ctx.fillStyle='#2589df';ctx.beginPath();ctx.arc(480,220,37,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 24px Nunito';ctx.fillText('PK',480,228);
+  ctx.fillStyle='#204d37';ctx.font='bold 20px Nunito';ctx.fillText('Pak Ketua',480,286);ctx.font='12px Nunito';ctx.fillText('Ketua Kelompok Tani',480,310);
+  roundedRect(ctx,410,385,140,55,14,'#35a85b');ctx.fillStyle='#fff';ctx.font='bold 16px Nunito';ctx.fillText('☎ TELEPON',480,419);
+ }else if(bppPhoneStep==='calling'){
+  ctx.fillStyle='#155b43';ctx.textAlign='center';ctx.font='bold 22px Nunito';ctx.fillText('PANGGILAN BERLANGSUNG',480,130);
+  ctx.fillStyle='#2589df';ctx.beginPath();ctx.arc(480,225,58,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 32px Nunito';ctx.fillText('PK',480,237);
+  ctx.fillStyle='#214b36';ctx.font='bold 21px Nunito';ctx.fillText('Pak Ketua',480,320);ctx.font='13px Nunito';ctx.fillText('Ketua Kelompok Tani • Tersambung',480,345);
+  roundedRect(ctx,365,385,230,65,14,'#f0c84e');ctx.fillStyle='#3e3419';ctx.font='bold 13px Nunito';ctx.fillText('KABARI BANTUAN BENIH DATANG',480,412);ctx.font='11px Nunito';ctx.fillText('Ketuk untuk menyampaikan kabar',480,432);
+ }else if(bppPhoneStep==='message'){
+  ctx.fillStyle='#155b43';ctx.textAlign='center';ctx.font='bold 20px Nunito';ctx.fillText('PESAN TERSAMPAIKAN',480,130);
+  roundedRect(ctx,350,180,260,135,14,'rgba(255,255,255,.92)');ctx.fillStyle='#214b36';ctx.font='bold 14px Nunito';ctx.fillText('“Pak Ketua, kami kabarkan',480,225);ctx.fillText('bantuan benih sudah datang.',480,250);ctx.fillText('Silakan diinformasikan ke anggota.”',480,275);
+  ctx.fillStyle='#214b36';ctx.font='12px Nunito';ctx.fillText('Tutup telepon untuk menyelesaikan misi.',480,350);
+  roundedRect(ctx,400,385,160,58,16,'#dc5147');ctx.fillStyle='#fff';ctx.font='bold 16px Nunito';ctx.fillText('TUTUP TELEPON',480,420);
+ }else if(bppPhoneStep==='done'){
+  ctx.fillStyle='#155b43';ctx.textAlign='center';ctx.font='bold 24px Nunito';ctx.fillText('MISI SELESAI!',480,190);
+  ctx.font='42px Arial';ctx.fillText('✓',480,265);ctx.font='bold 18px Nunito';ctx.fillText('Kabar bantuan benih telah disampaikan.',480,320);
+  ctx.fillStyle='#fff';roundedRect(ctx,390,365,180,58,14,'#fff');ctx.fillStyle='#24603d';ctx.font='bold 15px Nunito';ctx.fillText('KEMBALI KE KANTOR',480,400);
+  ctx.fillStyle='#fff5c9';roundedRect(ctx,425,450,110,32,12,'#fff5c9');ctx.fillStyle='#74531b';ctx.font='bold 14px Nunito';ctx.fillText('+5 XP',480,471);
+ }
+ ctx.fillStyle='#f3f4ed';ctx.beginPath();ctx.arc(480,558,7,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#315a42';ctx.font='bold 11px Nunito';ctx.textAlign='center';ctx.fillText('HP PENYULUH • BPP SUKASENANG',480,596);
+ $('worldLocation').textContent='📱 HP Penyuluh • BPP Kecamatan Sukasenang';
+ $('worldObjective').textContent=bppPhoneStep==='home'?'Misi telepon: buka aplikasi Kontak.':bppPhoneStep==='contacts'?'Cari kontak Pak Ketua.':bppPhoneStep==='contact'?'Pilih Telepon untuk menghubungi Pak Ketua.':bppPhoneStep==='calling'?'Kabari Pak Ketua bahwa bantuan benih sudah datang.':bppPhoneStep==='message'?'Tutup telepon untuk menyelesaikan misi.':'Misi selesai • +5 XP';
+ const hint=$('canvasHint');if(hint)hint.textContent='Klik / tap ikon dan tombol pada layar HP. Tekan ESC atau tombol Kembali untuk kembali ke kantor.';
+}
+function handleBppPhoneClick(x,y){
+ if(bppPhoneStep==='home'&&x>=335&&x<=450&&y>=150&&y<=270){bppPhoneStep='contacts';drawWorld();return;}
+ if(bppPhoneStep==='contacts'&&x>=340&&x<=620&&y>=165&&y<=265){bppPhoneStep='contact';drawWorld();return;}
+ if(bppPhoneStep==='contact'&&x>=400&&x<=560&&y>=375&&y<=450){bppPhoneStep='calling';drawWorld();return;}
+ if(bppPhoneStep==='calling'&&x>=350&&x<=610&&y>=375&&y<=460){bppPhoneStep='message';drawWorld();return;}
+ if(bppPhoneStep==='message'&&x>=390&&x<=570&&y>=375&&y<=450){bppPhoneStep='done';reward(5,0);save();showPalmToast('📞 Misi berhasil! Pak Ketua sudah diberi kabar. +5 XP');drawWorld();return;}
+ if(bppPhoneStep==='done'&&x>=380&&x<=580&&y>=350&&y<=435){state.scene='bpp';state.keys={};state.analog={x:0,y:0};save();drawWorld();return;}
+}
 function enterMine(){state.returnPosition={x:state.player.x,y:state.player.y};state.scene='mine';mineMonster=null;mineBoss=null;mineTreasureChest=null;mineBossWarningAt=0;mineCommonSpawnCount=0;minePickaxeOwned=false;minePickaxeHitAt=0;mineLastFrame=0;mineNextMonsterAt=performance.now()+6500;mineHitCooldown=0;mineRespawnQueue=[];state.player={x:canvas.width*.5,y:canvas.height-180};if(!state.mineNodes.length)state.mineNodes=[[canvas.width*.28,canvas.height*.38],[canvas.width*.72,canvas.height*.34],[canvas.width*.5,canvas.height*.68],[canvas.width*.82,canvas.height*.7],[canvas.width*.18,canvas.height*.72]];else state.mineNodes=state.mineNodes.map((pt,i)=>pt||[[canvas.width*.28,canvas.height*.38],[canvas.width*.72,canvas.height*.34],[canvas.width*.5,canvas.height*.68],[canvas.width*.82,canvas.height*.7],[canvas.width*.18,canvas.height*.72]][i%5]);save();const md=$('missionDescription');if(md)md.textContent='⛏️ PERLENGKAPAN TAMBANG: Dekati Kapak Tambang di dekat jalur masuk lalu tekan E / INTERAKSI untuk mengambilnya sebelum melawan Boss Kelabang!';}
 function nearestNpc(){let best=null,dist=Infinity;for(const n of npcs){const d=Math.hypot(n.x-state.player.x,n.y-state.player.y);if(d<dist){dist=d;best=n;}}return best;}
 function blocked(x,y){if(state.scene==='mine'||state.scene==='palm'||state.scene==='bpp')return false;if(obstacles.some(o=>x>o.x-18&&x<o.x+o.w+18&&y>o.y-10&&y<o.y+o.h+10))return true;const trunks=[[90,160],[450,130],[900,170],[1080,250],[1700,220],[850,850],[650,960],[1750,850],[920,1080],[1660,1120],[500,920],[1320,1110],[1770,390],[610,260],[880,760],[1720,500],[1320,80],[250,1120]];if(trunks.some(([tx,ty])=>Math.hypot(x-tx,y-(ty+18))<22))return true;return npcs.some(n=>Math.hypot(x-n.x,y-n.y)<22);}
@@ -1543,7 +1622,7 @@ function completeMission(id,xp,coins){
 }
 function addChoice(label,correct,after){const b=document.createElement('button');b.className='answer-option';b.textContent=label;b.addEventListener('click',()=>{document.querySelectorAll('#dialogChoices button').forEach(x=>x.disabled=true);if(correct){b.classList.add('correct');$('dialogText').textContent='Tepat!';}else{b.classList.add('wrong');$('dialogText').textContent='Coba pikirkan kembali jawaban yang paling tepat.';}after();});$('dialogChoices').appendChild(b);}
 $('closeDialog').addEventListener('click',()=>{$('dialog').classList.add('hidden');dialogOpen=false;startWorld();});
-window.addEventListener('keydown',e=>{if(state.scene==='pc'&&e.key==='Escape'&&document.getElementById('bppPortalWindow')){e.preventDefault();closeBppPortal();return;}if((state.scene==='pc'||state.scene==='coffee')&&e.key==='Escape'){e.preventDefault();closeBppPortal();state.scene='bpp';state.keys={};state.analog={x:0,y:0};bppPcWindow=null;save();drawWorld();return;}if(state.scene==='pc'||state.scene==='coffee')return;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();state.keys[e.key]=true;if(e.key==='e'||e.key==='E'||e.key===' '){if(!$('dialog').classList.contains('hidden'))return;interact();}});
+window.addEventListener('keydown',e=>{if(state.scene==='pc'&&e.key==='Escape'&&document.getElementById('bppPortalWindow')){e.preventDefault();closeBppPortal();return;}if((state.scene==='pc'||state.scene==='coffee'||state.scene==='phone')&&e.key==='Escape'){e.preventDefault();closeBppPortal();state.scene='bpp';state.keys={};state.analog={x:0,y:0};bppPcWindow=null;save();drawWorld();return;}if(state.scene==='pc'||state.scene==='coffee'||state.scene==='phone')return;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();state.keys[e.key]=true;if(e.key==='e'||e.key==='E'||e.key===' '){if(!$('dialog').classList.contains('hidden'))return;interact();}});
 let bppCoffeePointerId=null;
 canvas.addEventListener('pointerdown',e=>{
  if(state.scene!=='coffee')return;
@@ -1564,6 +1643,7 @@ canvas.addEventListener('pointercancel',e=>{if(bppCoffeePointerId===e.pointerId)
 canvas.addEventListener('click',e=>{
  const r=canvas.getBoundingClientRect(),x=(e.clientX-r.left)*canvas.width/r.width,y=(e.clientY-r.top)*canvas.height/r.height;
  if(state.scene==='coffee')return;
+ if(state.scene==='phone'){handleBppPhoneClick(x,y);return;}
  if(state.scene!=='pc')return;
  if(bppPcWindow){
   if(x>=725&&x<=755&&y>=75&&y<=103){bppPcWindow=null;drawWorld();return;}
