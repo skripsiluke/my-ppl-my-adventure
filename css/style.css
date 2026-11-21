@@ -193,3 +193,14 @@
 @media(max-width:760px){
  #bppSceneBack.active.coffee-scene{bottom:82px;left:8px;right:auto}
 }
+
+/* Portal SIMLUHTAN/e-RDKK/e-Banper tampil sebagai jendela di area monitor PC. */
+.canvas-wrap{position:relative}
+#bppPortalWindow{position:absolute;z-index:15;left:18.2%;top:8.3%;width:63.6%;height:60.3%;display:flex;flex-direction:column;background:#c0c0c0;border:3px solid #333b3c;box-shadow:0 3px 12px rgba(0,0,0,.45);overflow:hidden}
+.bpp-portal-titlebar{height:28px;min-height:28px;display:flex;align-items:center;justify-content:space-between;gap:5px;padding:2px 5px 2px 9px;background:linear-gradient(90deg,#082d83,#1684bd);color:#fff;font:700 11px Arial,sans-serif}
+.bpp-portal-titlebar>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bpp-portal-actions{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.bpp-portal-actions a{color:#fff;font:10px Arial,sans-serif;text-decoration:underline}
+.bpp-portal-actions button{width:21px;height:21px;padding:0;border:2px outset #eee;background:#c0c0c0;color:#111;font:bold 17px Arial;line-height:15px;cursor:pointer}
+#bppPortalWindow iframe{width:100%;height:calc(100% - 28px);border:0;background:#fff}
+@media(max-width:760px){.bpp-portal-titlebar{height:24px;min-height:24px;font-size:9px;padding-left:5px}.bpp-portal-actions a{font-size:8px}.bpp-portal-actions button{width:19px;height:19px;font-size:15px}#bppPortalWindow iframe{height:calc(100% - 24px)}}

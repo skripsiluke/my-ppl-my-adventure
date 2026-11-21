@@ -982,7 +982,7 @@ function updateBppBackButton(){
   btn.setAttribute('aria-label','Kembali ke kantor BPP');
   const wrap=canvas.closest('.canvas-wrap');if(wrap)wrap.appendChild(btn);
   btn.addEventListener('click',()=>{
-   if(state.scene==='pc'||state.scene==='coffee'){state.scene='bpp';state.keys={};state.analog={x:0,y:0};bppPcWindow=null;save();drawWorld();}
+   if(state.scene==='pc'||state.scene==='coffee'){closeBppPortal();state.scene='bpp';state.keys={};state.analog={x:0,y:0};bppPcWindow=null;save();drawWorld();}
   });
  }
  btn.classList.toggle('active',state.scene==='pc'||state.scene==='coffee');
@@ -1185,7 +1185,7 @@ function bppCoffeePointerUp(x,y){
  drawWorld();return true;
 }
 function bppComputer(){
- state.scene='pc';bppPcWindow=null;state.keys={};state.analog={x:0,y:0};save();
+ closeBppPortal();state.scene='pc';bppPcWindow=null;state.keys={};state.analog={x:0,y:0};save();
  $('worldLocation').textContent='💻 Komputer BPP • Desktop Windows 98';
  $('worldObjective').textContent='Klik ikon SIMLUHTAN, e-RDKK, atau e-Banper. Tekan ESC untuk keluar.';
  drawWorld();
@@ -1236,9 +1236,45 @@ function drawBppPc(t=0){
  $('worldObjective').textContent='Pilih ikon aplikasi pada layar monitor. Tekan ESC untuk kembali ke kantor.';
  const hint=$('canvasHint');if(hint)hint.textContent='Klik ikon SIMLUHTAN, e-RDKK, atau e-Banper pada layar monitor. Tekan ESC untuk keluar dari misi PC.';
 }
-function openBppPortal(url){
- window.open(url,'_blank','noopener');
- $('missionDescription').textContent='Portal dibuka di tab baru. Kembali ke game dan tekan ESC untuk keluar dari tampilan komputer.';
+let bppPortalFrame=null;
+function closeBppPortal(){
+ const el=document.getElementById('bppPortalWindow');
+ if(el)el.remove();
+ bppPortalFrame=null;
+}
+function openBppPortal(url,title){
+ closeBppPortal();
+ const wrap=canvas.closest('.canvas-wrap');
+ if(!wrap)return;
+ const win=document.createElement('div');win.id='bppPortalWindow';
+ const bar=document.createElement('div');bar.className='bpp-portal-titlebar';
+ const name=document.createElement('span');name.textContent=title+' — BPP Workstation';
+ const actions=document.createElement('div');actions.className='bpp-portal-actions';
+ const external=document.createElement('a');external.href=url;external.target='_blank';external.rel='noopener';external.textContent='Buka tab baru';
+ const close=document.createElement('button');close.type='button';close.textContent='×';close.setAttribute('aria-label','Tutup jendela portal');
+ close.addEventListener('click',closeBppPortal);
+ actions.append(external,close);bar.append(name,actions);
+ const frame=document.createElement('iframe');frame.src=url;frame.title=title;frame.loading='eager';frame.referrerPolicy='strict-origin-when-cross-origin';
+ frame.setAttribute('allow','clipboard-read; clipboard-write');
+ win.append(bar,frame);wrap.appendChild(win);bppPortalFrame=win;
+ $('missionDescription').textContent=title+' dibuka di jendela monitor PC. Tutup jendela dengan tombol × untuk kembali ke desktop.';
+}
+function openBppPortal(url,title){
+ closeBppPortal();
+ const wrap=canvas.closest('.canvas-wrap');
+ if(!wrap)return;
+ const win=document.createElement('div');win.id='bppPortalWindow';
+ const bar=document.createElement('div');bar.className='bpp-portal-titlebar';
+ const name=document.createElement('span');name.textContent=title+' — BPP Workstation';
+ const actions=document.createElement('div');actions.className='bpp-portal-actions';
+ const external=document.createElement('a');external.href=url;external.target='_blank';external.rel='noopener';external.textContent='Buka tab baru';
+ const close=document.createElement('button');close.type='button';close.textContent='×';close.setAttribute('aria-label','Tutup jendela portal');
+ close.addEventListener('click',()=>{win.remove();bppPortalFrame=null;});
+ actions.append(external,close);bar.append(name,actions);
+ const frame=document.createElement('iframe');frame.src=url;frame.title=title;frame.loading='eager';frame.referrerPolicy='strict-origin-when-cross-origin';
+ frame.setAttribute('allow','clipboard-read; clipboard-write');
+ win.append(bar,frame);wrap.appendChild(win);bppPortalFrame=win;
+ $('missionDescription').textContent=title+' dibuka di jendela monitor PC. Tutup dengan tombol × untuk kembali ke desktop.';
 }
 function bppInteract(){
  const w=canvas.width,h=canvas.height;
@@ -1363,7 +1399,7 @@ function completeMission(id,xp,coins){
 }
 function addChoice(label,correct,after){const b=document.createElement('button');b.className='answer-option';b.textContent=label;b.addEventListener('click',()=>{document.querySelectorAll('#dialogChoices button').forEach(x=>x.disabled=true);if(correct){b.classList.add('correct');$('dialogText').textContent='Tepat!';}else{b.classList.add('wrong');$('dialogText').textContent='Coba pikirkan kembali jawaban yang paling tepat.';}after();});$('dialogChoices').appendChild(b);}
 $('closeDialog').addEventListener('click',()=>{$('dialog').classList.add('hidden');dialogOpen=false;startWorld();});
-window.addEventListener('keydown',e=>{if((state.scene==='pc'||state.scene==='coffee')&&e.key==='Escape'){e.preventDefault();state.scene='bpp';state.keys={};state.analog={x:0,y:0};bppPcWindow=null;save();drawWorld();return;}if(state.scene==='pc'||state.scene==='coffee')return;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();state.keys[e.key]=true;if(e.key==='e'||e.key==='E'||e.key===' '){if(!$('dialog').classList.contains('hidden'))return;interact();}});
+window.addEventListener('keydown',e=>{if(state.scene==='pc'&&e.key==='Escape'&&document.getElementById('bppPortalWindow')){e.preventDefault();closeBppPortal();return;}if((state.scene==='pc'||state.scene==='coffee')&&e.key==='Escape'){e.preventDefault();closeBppPortal();state.scene='bpp';state.keys={};state.analog={x:0,y:0};bppPcWindow=null;save();drawWorld();return;}if(state.scene==='pc'||state.scene==='coffee')return;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();state.keys[e.key]=true;if(e.key==='e'||e.key==='E'||e.key===' '){if(!$('dialog').classList.contains('hidden'))return;interact();}});
 let bppCoffeePointerId=null;
 canvas.addEventListener('pointerdown',e=>{
  if(state.scene!=='coffee')return;
@@ -1391,9 +1427,9 @@ canvas.addEventListener('click',e=>{
  }
  if(x>=185&&x<=245&&y>=65&&y<=125){bppPcWindow='computer';drawWorld();return;}
  if(x>=185&&x<=245&&y>=137&&y<=197){bppPcWindow='documents';drawWorld();return;}
- if(x>=260&&x<=330&&y>=65&&y<=125)openBppPortal('https://simluh.pertanian.go.id/');
- else if(x>=260&&x<=330&&y>=137&&y<=197)openBppPortal('https://erdkk.pertanian.go.id/');
- else if(x>=260&&x<=330&&y>=209&&y<=269)openBppPortal('https://ebanper.pertanian.go.id/login');
+ if(x>=260&&x<=330&&y>=65&&y<=125)openBppPortal('https://simluh.pertanian.go.id/','SIMLUHTAN');
+ else if(x>=260&&x<=330&&y>=137&&y<=197)openBppPortal('https://erdkk.pertanian.go.id/','e-RDKK');
+ else if(x>=260&&x<=330&&y>=209&&y<=269)openBppPortal('https://ebanper.pertanian.go.id/login','e-Banper');
 });
 window.addEventListener('keyup',e=>state.keys[e.key]=false);window.addEventListener('blur',()=>state.keys={});
 document.querySelectorAll('[data-key]').forEach(b=>{const k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture?.(e.pointerId);state.keys[k]=true;});['pointerup','pointercancel','lostpointercapture'].forEach(ev=>b.addEventListener(ev,()=>state.keys[k]=false));});
