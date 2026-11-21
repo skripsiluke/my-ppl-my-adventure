@@ -124,7 +124,7 @@ const missionInfo=[
 function missionDone(id){const m=missionInfo.find(x=>x.id===id);return m?m.done():false;}
 function missionTotal(){return missionInfo.filter(m=>m.done()).length;}
 function nextMission(){return missionInfo.find(m=>!m.done())||null;}
-function updateStats(){const count=missionTotal();$('missionStatus').textContent=count+'/'+missionInfo.length+' Misi selesai';$('missionStatus').classList.toggle('completed',count===missionInfo.length);$('xpValue').textContent=state.xp;$('coinValue').textContent=state.coins;$('gameCoins').textContent=state.coins;const lp=levelProgress(state.xp),level=lp.level,progress=lp.progress;$('levelLabel').textContent='LEVEL '+level;$('levelTitle').textContent=levelName(level);$('levelXp').textContent=progress;$('levelXpNeeded').textContent=lp.needed;$('levelProgress').style.width=(progress/lp.needed*100)+'%';updatePMAASLock();const next=nextMission();$('dailyMissionText').textContent=next?next.text:'Semua misi Adventure selesai! Jelajahi desa, simulasi, dan kuis.';$('dailyMissionReward').textContent=next?next.reward:'SEMUA SELESAI';$('missionDescription').textContent=next?next.text:'Semua misi Adventure selesai. Terima kasih telah membantu Desa Sukamaju!';updateProfile();renderPMAAS();}
+function updateStats(){const count=missionTotal();$('missionStatus').textContent=count+'/'+missionInfo.length+' Misi selesai';$('missionStatus').classList.toggle('completed',count===missionInfo.length);$('xpValue').textContent=state.xp;$('coinValue').textContent=state.coins;const lxp=$('landscapeXp'),lcoins=$('landscapeCoins');if(lxp)lxp.textContent=state.xp;if(lcoins)lcoins.textContent=state.coins;$('gameCoins').textContent=state.coins;const lp=levelProgress(state.xp),level=lp.level,progress=lp.progress;$('levelLabel').textContent='LEVEL '+level;$('levelTitle').textContent=levelName(level);$('levelXp').textContent=progress;$('levelXpNeeded').textContent=lp.needed;$('levelProgress').style.width=(progress/lp.needed*100)+'%';updatePMAASLock();const next=nextMission();$('dailyMissionText').textContent=next?next.text:'Semua misi Adventure selesai! Jelajahi desa, simulasi, dan kuis.';$('dailyMissionReward').textContent=next?next.reward:'SEMUA SELESAI';$('missionDescription').textContent=next?next.text:'Semua misi Adventure selesai. Terima kasih telah membantu Desa Sukamaju!';updateProfile();renderPMAAS();}
 
 const pmaasTargets=[
  {id:'farmer1',name:'Pak Asep',type:'farmer',label:'Petani padi',topic:'Tabela dan tanam rapat dalam baris'},
@@ -1728,26 +1728,34 @@ canvas.addEventListener('click',e=>{
 });
 window.addEventListener('keyup',e=>state.keys[e.key]=false);window.addEventListener('blur',()=>state.keys={});
 document.querySelectorAll('[data-key]').forEach(b=>{const k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture?.(e.pointerId);state.keys[k]=true;});['pointerup','pointercancel','lostpointercapture'].forEach(ev=>b.addEventListener(ev,()=>state.keys[k]=false));});
-// Android landscape gameplay: request fullscreen first, then lock orientation when supported.
+// Android landscape gameplay: switch orientation both ways when browser supports it.
 const landscapeButton=$('landscapeButton');
 function syncGameOrientation(){
- const landscape=window.matchMedia&&window.matchMedia('(orientation: landscape)').matches;
- document.body.classList.toggle('game-landscape',!!landscape&&window.innerWidth<=1024);
- if(landscapeButton)landscapeButton.textContent=landscape?'⛶ LANDSCAPE AKTIF':'⛶ LANDSCAPE';
+ const isLandscape=window.matchMedia&&window.matchMedia('(orientation: landscape)').matches;
+ const active=!!isLandscape&&window.innerWidth<=1024;
+ document.body.classList.toggle('game-landscape',active);
+ if(landscapeButton){
+  landscapeButton.textContent=active?'↩ PORTRAIT':'⛶ LANDSCAPE';
+  landscapeButton.setAttribute('aria-label',active?'Kembali ke mode portrait':'Aktifkan layar landscape');
+ }
 }
 if(landscapeButton){
  landscapeButton.addEventListener('click',async()=>{
+  const active=document.body.classList.contains('game-landscape');
   try{
-   const target=document.documentElement;
-   if(!document.fullscreenElement&&target.requestFullscreen)await target.requestFullscreen();
-   if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock('landscape');
-   syncGameOrientation();
+   if(active){
+    if(screen.orientation&&screen.orientation.unlock)screen.orientation.unlock();
+    if(document.fullscreenElement&&document.exitFullscreen)await document.exitFullscreen();
+   }else{
+    const target=document.documentElement;
+    if(!document.fullscreenElement&&target.requestFullscreen)await target.requestFullscreen();
+    if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock('landscape');
+   }
   }catch(err){
-   // Some browsers only permit rotation after the user rotates the device manually.
-   syncGameOrientation();
    const hint=$('canvasHint');
-   if(hint)hint.textContent='Putar HP ke posisi mendatar (landscape). Jika tersedia, aktifkan rotasi otomatis pada pengaturan HP.';
+   if(hint)hint.textContent=active?'Putar HP kembali ke posisi tegak (portrait).':'Putar HP ke posisi mendatar (landscape) dan aktifkan rotasi otomatis.';
   }
+  syncGameOrientation();
  });
 }
 window.addEventListener('resize',syncGameOrientation);
