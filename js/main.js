@@ -970,6 +970,10 @@ function mineInteract(){
 
 let bppPcWindow=null;
 let bppCoffeeDrag=null,bppCoffeeCupX=835;
+const bppMuRugImage=new Image();
+bppMuRugImage.onload=()=>{if(state.scene==='bpp')drawWorld();};
+bppMuRugImage.src='assets/images/bpp-mu-rug.jpg';
+
 let bppCoffeeStepRun=0,bppCoffeeAnimUntil=0;
 function updateBppBackButton(){
  let btn=document.getElementById('bppSceneBack');
@@ -1008,17 +1012,17 @@ function drawBpp(t=0){
  ctx.fillStyle='#d9e9c6';ctx.fillRect(0,0,w,h*.68);ctx.fillStyle='#5d9a62';ctx.fillRect(0,h*.68,w,h*.32);
  ctx.fillStyle='#3c7548';ctx.fillRect(0,h*.66,w,9);
  for(let x=0;x<w;x+=64){ctx.strokeStyle='rgba(255,255,255,.16)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,h*.68);ctx.lineTo(x,h);ctx.stroke();}
- // Karpet/tikar merah bermotif MU di antara meja kopi dan meja kerja.
+ // Tikar MU asli di lantai, memakai tekstur foto dan perspektif dari bentuk karpet.
  ctx.save();
- const rx=w*.365,ry=h*.585,rw=w*.27,rh=h*.18;
- roundedRect(ctx,rx,ry,rw,rh,12,'#7b1d22');
- ctx.strokeStyle='#e6b84b';ctx.lineWidth=7;roundedRect(ctx,rx+5,ry+5,rw-10,rh-10,9,'#e6b84b');
- ctx.strokeStyle='#201b1c';ctx.lineWidth=3;roundedRect(ctx,rx+13,ry+13,rw-26,rh-26,7,'#201b1c');
- // Simplified central MU crest and initials.
- ctx.fillStyle='#f4c64e';ctx.beginPath();ctx.moveTo(rx+rw*.5,ry+rh*.18);ctx.lineTo(rx+rw*.72,ry+rh*.32);ctx.lineTo(rx+rw*.68,ry+rh*.72);ctx.lineTo(rx+rw*.5,ry+rh*.86);ctx.lineTo(rx+rw*.32,ry+rh*.72);ctx.lineTo(rx+rw*.28,ry+rh*.32);ctx.closePath();ctx.fill();
- ctx.strokeStyle='#7b1d22';ctx.lineWidth=3;ctx.stroke();
- ctx.fillStyle='#7b1d22';ctx.textAlign='center';ctx.font='bold 25px Georgia';ctx.fillText('MU',rx+rw*.5,ry+rh*.57);
- ctx.font='bold 8px Nunito';ctx.fillText('MANCHESTER UNITED',rx+rw*.5,ry+rh*.78);
+ const rugX=w*.355,rugY=h*.685,rugW=w*.30,rugH=h*.285;
+ ctx.fillStyle='rgba(25,45,25,.22)';ctx.beginPath();ctx.moveTo(rugX+28,rugY+5);ctx.lineTo(rugX+rugW-28,rugY+5);ctx.lineTo(rugX+rugW+5,rugY+rugH+5);ctx.lineTo(rugX-5,rugY+rugH+5);ctx.closePath();ctx.fill();
+ ctx.beginPath();ctx.moveTo(rugX+30,rugY);ctx.lineTo(rugX+rugW-30,rugY);ctx.lineTo(rugX+rugW,rugY+rugH);ctx.lineTo(rugX,rugY+rugH);ctx.closePath();ctx.clip();
+ if(bppMuRugImage.complete&&bppMuRugImage.naturalWidth){
+  ctx.drawImage(bppMuRugImage,rugX,rugY,rugW,rugH);
+ }else{
+  ctx.fillStyle='#9c2028';ctx.fillRect(rugX,rugY,rugW,rugH);
+  ctx.fillStyle='#e6bd55';ctx.font='bold 28px Georgia';ctx.textAlign='center';ctx.fillText('MANCHESTER',rugX+rugW/2,rugY+rugH/2);ctx.fillText('UNITED',rugX+rugW/2,rugY+rugH/2+30);
+ }
  ctx.restore();
  // Banner kantor.
  roundedRect(ctx,w*.29,24,w*.42,66,8,'#f6f0d5');ctx.fillStyle='#27613b';ctx.textAlign='center';ctx.font='bold 18px Nunito';ctx.fillText('BPP KECAMATAN SUKASENANG',w*.5,51);ctx.font='12px Nunito';ctx.fillText('BALAI PENYULUHAN PERTANIAN',w*.5,72);
@@ -1089,6 +1093,20 @@ function drawBppCoffee(t=0){
  const filled=bppCoffeeStepRun>=3;ctx.fillStyle=filled?'#513426':'#b6b5a7';ctx.beginPath();ctx.ellipse(bppCoffeeCupX,357,42,10,0,0,Math.PI*2);ctx.fill();
  if(bppCoffeeStepRun>=4){ctx.strokeStyle='#c9b9a1';ctx.lineWidth=4;ctx.beginPath();ctx.arc(bppCoffeeCupX,357,24,(t/280)%6.28,(t/280)%6.28+4.7);ctx.stroke();}
  ctx.fillStyle='#fff';ctx.font='bold 12px Nunito';ctx.fillText('CANGKIR',bppCoffeeCupX,470);
+ // Asap/uap panas terus bergerak setelah kopi siap dinikmati.
+ if(state.bppCoffeeDone||bppCoffeeStepRun>=5){
+  const phase=(t||performance.now())/520;
+  for(let s=0;s<3;s++){
+   const sx=bppCoffeeCupX-18+s*18;
+   const sway=Math.sin(phase+s*1.7)*7;
+   ctx.save();ctx.globalAlpha=.48+Math.sin(phase+s)*.12;
+   ctx.strokeStyle='#fffdf0';ctx.lineWidth=4;ctx.lineCap='round';
+   ctx.beginPath();ctx.moveTo(sx,348);
+   ctx.bezierCurveTo(sx-10+sway,334,sx+10-sway,322,sx+sway,305-(s%2)*8);
+   ctx.stroke();ctx.restore();
+  }
+ }
+
  // Objek yang sedang diseret mengikuti pointer/touch pemain.
  if(bppCoffeeDrag){
   const d=bppCoffeeDrag;ctx.save();ctx.globalAlpha=.94;
@@ -1112,7 +1130,7 @@ function drawBppCoffee(t=0){
  ctx.fillStyle='#d5a06e';ctx.beginPath();ctx.moveTo(310,600);ctx.lineTo(360,520);ctx.lineTo(400,520);ctx.lineTo(430,600);ctx.fill();ctx.beginPath();ctx.moveTo(650,600);ctx.lineTo(690,520);ctx.lineTo(730,520);ctx.lineTo(770,600);ctx.fill();
  ctx.restore();
  $('worldLocation').textContent='☕ Sudut Kopi • BPP Kecamatan Sukasenang';
- $('worldObjective').textContent=completed?'⭐ Misi membuat kopi selesai • +25 XP dan +10 koin':'☕ '+tasks[Math.min(bppCoffeeStepRun,4)];
+ $('worldObjective').textContent=completed?'⭐ Misi membuat kopi selesai • +5 XP':'☕ '+tasks[Math.min(bppCoffeeStepRun,4)];
  const hint=$('canvasHint');if(hint)hint.textContent='Geser cangkir, kopi, gula, air panas, lalu sendok ke arah cangkir. Seret sendok melintasi cangkir untuk mengaduk. ESC atau tombol Kembali untuk keluar.';
 }
 function bppCoffeeSource(item){
@@ -1157,8 +1175,8 @@ function bppCoffeePointerUp(x,y){
   };
   showPalmToast(messages[item]);
   if(bppCoffeeStepRun>=5){
-   state.bppCoffeeDone=true;state.bppCoffeeStep=3;reward(25,10);save();
-   $('missionDescription').textContent='☕ Selamat! Kopi sudah siap dan dapat dinikmati. Hadiah +25 XP dan +10 koin.';
+   state.bppCoffeeDone=true;state.bppCoffeeStep=3;reward(5,0);save();
+   $('missionDescription').textContent='☕ Selamat! Kopi sudah siap dan dapat dinikmati. Hadiah +5 XP.';
    showPalmToast('🎉 Selamat! Kopi sudah dapat dinikmati!');
   }
  }else{
