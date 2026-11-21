@@ -185,6 +185,6 @@
 .farm-world-tip{display:none!important}
 
 /* BPP first-person scene mobile return control */
-#bppSceneBack{display:none;position:absolute;z-index:20;top:auto;left:auto;right:10px;bottom:10px;border:1px solid rgba(255,255,255,.9);border-radius:9px;padding:6px 9px;background:rgba(35,83,48,.92);color:#fff;font:700 11px Nunito,sans-serif;box-shadow:0 2px 7px rgba(0,0,0,.18);cursor:pointer}
+#bppSceneBack{display:none;position:absolute;z-index:20;top:auto;left:8px;right:auto;bottom:44px;border:1px solid rgba(255,255,255,.9);border-radius:9px;padding:6px 9px;background:rgba(35,83,48,.92);color:#fff;font:700 11px Nunito,sans-serif;box-shadow:0 2px 7px rgba(0,0,0,.18);cursor:pointer}
 #bppSceneBack.active{display:none}
-@media(max-width:760px){#bppSceneBack.active{display:block;right:8px;bottom:8px;padding:5px 8px;font-size:10px;border-radius:8px}}
+@media(max-width:760px){#bppSceneBack.active{display:block;left:8px;right:auto;bottom:44px;padding:5px 8px;font-size:10px;border-radius:8px}}
