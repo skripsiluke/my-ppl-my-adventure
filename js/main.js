@@ -704,7 +704,7 @@ function drawWorld(t=0){
  ctx.fillStyle='#f8e6a7';roundedRect(ctx,1102,250,76,22,7,'#f8e6a7');ctx.fillStyle='#315b39';ctx.font='bold 10px Nunito';ctx.fillText('MASUK  E',1140,265);
 
  // signboards and lamp posts
- ctx.fillStyle='#68482e';ctx.fillRect(908,118,5,34);roundedRect(ctx,855,108,112,25,5,'#f2dfad');ctx.fillStyle='#315b39';ctx.font='bold 11px Nunito';ctx.textAlign='center';ctx.fillText('BALAI KELOMPOK TANI',911,125);
+ ctx.fillStyle='#68482e';ctx.fillRect(908,132,5,25);roundedRect(ctx,842,105,138,34,5,'#f2dfad');ctx.strokeStyle='#d5bd86';ctx.lineWidth=1;ctx.strokeRect(842,105,138,34);ctx.fillStyle='#315b39';ctx.font='bold 9px Nunito';ctx.textAlign='center';ctx.fillText('BALAI KELOMPOK',911,119);ctx.fillText('TANI',911,131);
  ctx.fillStyle='#68482e';ctx.fillRect(1590,495,5,60);ctx.fillStyle='#f7e4a8';ctx.beginPath();ctx.arc(1592,490,10,0,Math.PI*2);ctx.fill();
  // Peternakan desa: kandang kecil di pojok tenggara persimpangan jalan desa dan jalan setapak BPP.
  // Diletakkan di area kosong, terpisah dari jalur pejalan kaki dan lahan tanaman.
@@ -726,7 +726,7 @@ function drawWorld(t=0){
  ctx.fillStyle='#f1d38d';ctx.fillRect(452,386,96,24);ctx.fillStyle='#5b3d25';ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillText('TAMBANG EMAS',500,402);
  const mineUnlocked=levelProgress(state.xp).level>=2;const mineSign=mineUnlocked?'Masuk: E':'🔒 TERKUNCI • LEVEL 2';ctx.save();ctx.font='bold 12px Nunito';ctx.textAlign='center';const signW=mineUnlocked?82:154;roundedRect(ctx,500-signW/2,482,signW,25,9,mineUnlocked?'rgba(42,91,48,.94)':'rgba(255,246,218,.97)');ctx.fillStyle=mineUnlocked?'#fff4c7':'#422b18';ctx.fillText(mineSign,500,499);ctx.restore();
  // decorative shrubs, flower beds and trees
- [[90,160],[450,130],[900,170],[990,250],[1700,220],[850,850],[650,960],[1750,850],[920,1080],[1660,1120],[500,920],[1320,1110],[1770,390]].forEach(p=>drawTree(...p));
+ [[90,160],[450,130],[1700,220],[850,850],[650,960],[1750,850],[920,1080],[1660,1120],[500,920],[1320,1110],[1770,390]].forEach(p=>drawTree(...p));
  for(let i=0;i<42;i++){const x=(i*149+60)%1760,y=(i*97+95)%1160;if((x>960&&x<1630&&y>690&&y<1060)||(x>110&&x<570&&y>780&&y<1050))continue;ctx.fillStyle=i%2?'#e9d778':'#f0e9bd';ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);ctx.fill();}
 
  // More village life: crop beds, orchard trees, benches, crates and flower borders.
@@ -1541,7 +1541,7 @@ function blocked(x,y){
  // Jembatan kayu di pertemuan jalan desa dan sungai: bebaskan area dek
  // beserta kedua ujung pendekatannya dari collision objek dekorasi/pagar.
  if(x>=625&&x<=775&&y>=990&&y<=1170)return false;
- if(obstacles.some(o=>x>o.x-18&&x<o.x+o.w+18&&y>o.y-10&&y<o.y+o.h+10))return true;const trunks=[[90,160],[450,130],[900,170],[1080,250],[1700,220],[850,850],[650,960],[1750,850],[920,1080],[1660,1120],[500,920],[1320,1110],[1770,390],[610,260],[880,760],[1720,500],[1320,80],[250,1120]];if(trunks.some(([tx,ty])=>Math.hypot(x-tx,y-(ty+18))<22))return true;return npcs.some(n=>Math.hypot(x-n.x,y-n.y)<22);}
+ if(obstacles.some(o=>x>o.x-18&&x<o.x+o.w+18&&y>o.y-10&&y<o.y+o.h+10))return true;const trunks=[[90,160],[450,130],[1080,250],[1700,220],[850,850],[650,960],[1750,850],[920,1080],[1660,1120],[500,920],[1320,1110],[1770,390],[610,260],[880,760],[1720,500],[1320,80],[250,1120]];if(trunks.some(([tx,ty])=>Math.hypot(x-tx,y-(ty+18))<22))return true;return npcs.some(n=>Math.hypot(x-n.x,y-n.y)<22);}
 function movePlayer(dx,dy){
  if(!dx&&!dy)return;
  const len=Math.hypot(dx,dy)||1;dx/=len;dy/=len;
