@@ -962,6 +962,11 @@ function mineInteract(){
 }
 
 function enterBpp(){
+ // Reset drawing surface when entering the office. This clears any stale
+ // transform/clip state left by the outdoor map so the interior fills the
+ // entire gameplay canvas instead of appearing as a split scene.
+ canvas.width=960;canvas.height=600;
+ ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
  state.returnPosition={x:state.player.x,y:state.player.y};state.scene='bpp';
  state.player={x:canvas.width*.5,y:canvas.height-125};save();
  $('worldLocation').textContent='🏢 BPP Kecamatan Sukasenang';
@@ -969,7 +974,8 @@ function enterBpp(){
 }
 function drawBpp(t=0){
  const w=canvas.width,h=canvas.height;
- ctx.clearRect(0,0,w,h);ctx.save();
+ ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+ ctx.clearRect(0,0,w,h);ctx.fillStyle='#b8d99b';ctx.fillRect(0,0,w,h);ctx.save();
  const bg=ctx.createLinearGradient(0,0,0,h);bg.addColorStop(0,'#b8d99b');bg.addColorStop(1,'#79ad70');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
  // Dinding kantor hijau dengan lis dan lantai keramik.
  ctx.fillStyle='#d9e9c6';ctx.fillRect(0,0,w,h*.68);ctx.fillStyle='#5d9a62';ctx.fillRect(0,h*.68,w,h*.32);
