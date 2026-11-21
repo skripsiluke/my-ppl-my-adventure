@@ -1293,31 +1293,33 @@ function drawBppPc(t=0){
   if(bppPcWindow==='erdkkpdf'){
    ctx.fillStyle='#d7d7d7';ctx.fillRect(258,104,494,31);
    ctx.fillStyle='#333';ctx.font='bold 11px Arial';ctx.fillText('File   Edit   View   Tools   Help',270,124);
-   ctx.fillStyle='#fff';ctx.fillRect(350,142,310,195);ctx.strokeStyle='#bbb';ctx.strokeRect(350,142,310,195);
+   ctx.fillStyle='#fff';ctx.fillRect(350,142,310,174);ctx.strokeStyle='#bbb';ctx.strokeRect(350,142,310,174);
    ctx.fillStyle='#234c36';ctx.textAlign='center';ctx.font='bold 10px Arial';ctx.fillText('RENCANA DEFINITIF KEBUTUHAN KELOMPOK',505,155);
    ctx.font='bold 9px Arial';ctx.fillText('(RDKK) PUPUK BERSUBSIDI',505,167);
-   ctx.fillStyle='#444';ctx.font='7px Arial';ctx.fillText('DAFTAR PETANI DESA SUKAMAJU',505,178);
+   ctx.fillStyle='#444';ctx.font='7px Arial';ctx.fillText('DAFTAR PETANI DESA SUKAMAJU',505,176);
    const rdkkNames=['Pak Tani','Bu Rina','Pak Ketua','Pak Asep','Bu Sari','Pak Dedi','Pak Hasan','Pak Ujang','Bu Yati','Pak Rahmat','Bu Nani'];
-   ctx.fillStyle='#e8eee8';ctx.fillRect(360,184,290,12);
+   ctx.fillStyle='#e8eee8';ctx.fillRect(360,181,290,12);
    ctx.fillStyle='#243d2d';ctx.font='bold 7px Arial';ctx.textAlign='left';
-   ctx.fillText('NO',365,193);ctx.fillText('NAMA PETANI',390,193);ctx.fillText('KELOMPOK',510,193);
-   ctx.fillText('STATUS',610,193);
+   ctx.fillText('NO',365,190);ctx.fillText('NAMA PETANI',390,190);ctx.fillText('KELOMPOK',510,190);
+   ctx.fillText('STATUS',610,190);
    ctx.font='7px Arial';
    rdkkNames.forEach((nm,idx)=>{
-    const yy=204+idx*10.5;
-    if(idx%2===0){ctx.fillStyle='#f3f6f1';ctx.fillRect(360,yy-8,290,10.5);}
+    const yy=200+idx*8.7;
+    if(idx%2===0){ctx.fillStyle='#f3f6f1';ctx.fillRect(360,yy-7,290,8.7);}
     ctx.fillStyle='#333';ctx.textAlign='left';
     ctx.fillText(String(idx+1),366,yy);ctx.fillText(nm,390,yy);
     ctx.fillText('Tani Makmur',510,yy);ctx.fillText('Terdaftar',610,yy);
    });
    ctx.strokeStyle='#c5cec5';ctx.lineWidth=.6;
-   for(let xx of [383,503,604]){ctx.beginPath();ctx.moveTo(xx,184);ctx.lineTo(xx,321);ctx.stroke();}
-   ctx.fillStyle='#555';ctx.font='6px Arial';ctx.textAlign='left';ctx.fillText('Data simulasi untuk gameplay My PPL My Adventure',362,331);
+   for(let xx of [383,503,604]){ctx.beginPath();ctx.moveTo(xx,181);ctx.lineTo(xx,298);ctx.stroke();}
+   ctx.fillStyle='#555';ctx.font='6px Arial';ctx.textAlign='left';ctx.fillText('Data simulasi gameplay • Bukan dokumen resmi',362,309);
    // Print button inside the PDF viewer.
    roundedRect(ctx,668,110,76,22,4,bppPrintStep>=2?'#b7d7b8':'#d9e1eb');
    ctx.fillStyle='#172b42';ctx.font='bold 10px Arial';ctx.textAlign='center';ctx.fillText('🖨 PRINT',706,125);
-   ctx.fillStyle='#333';ctx.font='9px Arial';ctx.textAlign='left';
-   ctx.fillText(bppPrintStep===0?'Langkah 2: klik tombol CONNECT pada printer di sebelah kanan monitor.':bppPrintStep===1?'Klik tombol CONNECT pada printer di sebelah kanan monitor.':bppPrintStep===2?'✓ PRINTER TERHUBUNG — klik tombol PRINT.':'Dokumen telah dicetak.',270,337);
+   // Status/instruksi berada di area bawah jendela, terpisah dari halaman PDF.
+   ctx.fillStyle='#333';ctx.font='bold 8px Arial';ctx.textAlign='center';
+   const printHint=bppPrintStep===0?['LANGKAH 2: TEKAN CONNECT PADA PRINTER','SETELAH TERHUBUNG, KLIK PRINT DI SINI']:bppPrintStep===1?['TEKAN CONNECT PADA PRINTER DI SAMPING MONITOR','LALU KLIK PRINT DI HALAMAN INI']:bppPrintStep===2?['✓ PRINTER TERHUBUNG','KLIK TOMBOL PRINT UNTUK MENYELESAIKAN']:['✓ DOKUMEN BERHASIL DICETAK','MISI SELESAI'];
+   ctx.fillText(printHint[0],505,328);ctx.fillText(printHint[1],505,340);
   }else if(bppPcWindow==='computer'){
    ctx.fillText('Address: My Computer',270,124);
    [['💾','Local Disk (C:)','Hard Disk'],['💽','CD-ROM (D:)','CD Drive'],['📁','Shared Documents','Folder'],['🖨️','Printers','System Folder']].forEach((a,i)=>{const x=285+(i%2)*220,y=160+Math.floor(i/2)*82;ctx.font='25px Arial';ctx.fillText(a[0],x,y);ctx.font='bold 12px Arial';ctx.fillText(a[1],x+38,y-5);ctx.font='10px Arial';ctx.fillStyle='#555';ctx.fillText(a[2],x+38,y+12);ctx.fillStyle='#111';});
