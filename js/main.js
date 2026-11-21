@@ -968,7 +968,7 @@ function mineInteract(){
  if(idx>=0&&best<75){state.mineNodes[idx]=null;mineRespawnQueue=mineRespawnQueue.filter(item=>item.index!==idx);mineRespawnQueue.push({index:idx,at:performance.now()+12000});state.mineGold++;state.xp+=3;updateStats();checkAchievements();save();$('worldLocation').textContent='⛏️ Emas terkumpul: '+state.mineGold+' • +3 XP langsung';const hud=document.querySelector('.game-heading .game-coin');if(hud)hud.textContent='⭐ '+state.xp+' XP';}
 }
 
-let bppPcWindow=null,bppPrintStep=0;
+let bppPcWindow=null,bppPrintStep=0,bppPrintStartedAt=0;
 let bppCoffeeDrag=null,bppCoffeeCupX=835;
 let bppCoffeeStepRun=0,bppCoffeeAnimUntil=0;
 function updateBppBackButton(){
@@ -1226,7 +1226,7 @@ function bppCoffeePointerUp(x,y){
  drawWorld();return true;
 }
 function bppComputer(){
- closeBppPortal();state.scene='pc';bppPcWindow=null;bppPrintStep=0;state.keys={};state.analog={x:0,y:0};save();
+ closeBppPortal();state.scene='pc';bppPcWindow=null;bppPrintStep=0;bppPrintStartedAt=0;state.keys={};state.analog={x:0,y:0};save();
  $('worldLocation').textContent='💻 Komputer BPP • Desktop Windows 98';
  $('worldObjective').textContent='Klik ikon SIMLUHTAN, e-RDKK, atau e-Banper. Tekan ESC untuk keluar.';
  drawWorld();
@@ -1307,6 +1307,28 @@ function drawBppPc(t=0){
  ctx.fillStyle='#555';ctx.fillRect(855,402,72,5);
  ctx.fillStyle='#aeb7b4';roundedRect(ctx,851,430,80,14,3,'#aeb7b4');
  ctx.fillStyle='#263b32';ctx.font='bold 10px Nunito';ctx.textAlign='center';ctx.fillText('PRINTER',891,466);
+ // Animasi lembar RDKK keluar perlahan dari slot atas printer setelah tombol PRINT ditekan.
+ if(bppPrintStep===3&&bppPrintStartedAt){
+  const elapsed=Math.max(0,t-bppPrintStartedAt);
+  const progress=Math.min(1,elapsed/1250);
+  const eased=1-Math.pow(1-progress,3);
+  const paperH=108*eased;
+  const px=858,py=360-paperH;
+  ctx.save();
+  ctx.shadowColor='rgba(0,0,0,.22)';ctx.shadowBlur=5;ctx.shadowOffsetY=2;
+  ctx.fillStyle='#fffdf4';ctx.strokeStyle='#aeb8b2';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(px,360);ctx.lineTo(px,py+5);ctx.quadraticCurveTo(px+32,py,px+64,py+5);ctx.lineTo(px+64,360);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+  if(paperH>22){
+   ctx.fillStyle='#39834b';ctx.fillRect(px+9,py+Math.min(13,paperH*.12),46,5);
+   ctx.fillStyle='#6ca875';ctx.fillRect(px+9,py+Math.min(23,paperH*.22),46,4);
+   ctx.fillStyle='#d7ddd8';
+   for(let line=0;line<Math.min(5,Math.floor((paperH-24)/11));line++){
+    ctx.fillRect(px+9,py+34+line*11,46-(line%2)*8,2.5);
+   }
+  }
+  ctx.restore();
+ }
  // Tombol fisik CONNECT pada panel depan printer.
  roundedRect(ctx,868,397,48,25,5,bppPrintStep>=2?'#9bd49b':'#d9f2c9');
  ctx.strokeStyle='#315b39';ctx.lineWidth=2;roundedRect(ctx,868,397,48,25,5,'rgba(0,0,0,0)'); 
@@ -1519,7 +1541,7 @@ canvas.addEventListener('click',e=>{
   }
   if(bppPcWindow==='erdkkpdf'&&x>=660&&x<=750&&y>=105&&y<=135){
    if(bppPrintStep<2){showPalmToast('Hubungkan PC ke printer terlebih dahulu.');return;}
-   bppPrintStep=3;reward(5,0);save();
+   bppPrintStep=3;bppPrintStartedAt=performance.now();reward(5,0);save();
    $('missionDescription').textContent='🖨️ Berhasil! Dokumen e-RDKK selesai dicetak. Hadiah +5 XP.';
    showPalmToast('🎉 Misi berhasil! Dokumen e-RDKK telah dicetak. +5 XP');
    drawWorld();return;
