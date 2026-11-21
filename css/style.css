@@ -204,3 +204,29 @@
 .bpp-portal-actions button{width:21px;height:21px;padding:0;border:2px outset #eee;background:#c0c0c0;color:#111;font:bold 17px Arial;line-height:15px;cursor:pointer}
 #bppPortalWindow iframe{width:100%;height:calc(100% - 28px);border:0;background:#fff}
 @media(max-width:760px){.bpp-portal-titlebar{height:24px;min-height:24px;font-size:9px;padding-left:5px}.bpp-portal-actions a{font-size:8px}.bpp-portal-actions button{width:19px;height:19px;font-size:15px}#bppPortalWindow iframe{height:calc(100% - 24px)}}
+
+
+/* v0.20.53 — Android landscape gameplay layout */
+.landscape-button{display:none}
+@media(max-width:760px){.landscape-button{display:block;border:1px solid #b7d1a8;border-radius:10px;padding:8px 10px;background:#244f35;color:#fff;font-size:10px;font-weight:900;white-space:nowrap;touch-action:manipulation}}
+@media screen and (orientation:landscape) and (max-height:600px) and (pointer:coarse){
+ body.game-landscape{overflow:hidden}
+ body.game-landscape .topbar,
+ body.game-landscape #adventurePanel .world-hud,
+ body.game-landscape #adventurePanel .game-info,
+ body.game-landscape #adventurePanel .canvas-hint{display:none!important}
+ body.game-landscape #adventurePanel{position:fixed!important;inset:0!important;z-index:1000!important;width:100vw!important;height:100dvh!important;max-width:none!important;margin:0!important;padding:4px!important;border-radius:0!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;background:#eef5e8!important}
+ body.game-landscape #adventurePanel .canvas-wrap{position:relative!important;flex:1 1 auto!important;width:100%!important;height:100%!important;min-height:0!important;border-radius:0!important;overflow:hidden!important}
+ body.game-landscape #worldCanvas{width:100%!important;height:100%!important;max-height:100%!important;object-fit:contain!important}
+ body.game-landscape #mobileControls{display:flex!important;position:absolute!important;z-index:30!important;left:10px!important;right:10px!important;bottom:8px!important;margin:0!important;padding:0!important;align-items:flex-end!important;justify-content:space-between!important;gap:12px!important;pointer-events:none!important}
+ body.game-landscape #mobileControls>*{pointer-events:auto}
+ body.game-landscape #mobileControls .joystick{flex:0 0 92px!important;width:92px!important}
+ body.game-landscape #mobileControls .joystick-ring{width:78px!important;height:78px!important}
+ body.game-landscape #mobileControls .joystick-knob{width:36px!important;height:36px!important}
+ body.game-landscape #mobileControls .joystick small{font-size:8px!important;color:#fff!important;text-shadow:0 1px 3px #183b20}
+ body.game-landscape #mobileControls .dpad{grid-template-columns:repeat(3,34px)!important;grid-template-rows:repeat(2,31px)!important}
+ body.game-landscape #mobileControls .dpad button{width:33px!important;height:30px!important}
+ body.game-landscape #interactButton{min-width:82px!important;max-width:100px!important;min-height:42px!important;padding:8px!important;font-size:10px!important}
+ body.game-landscape #landscapeButton{position:absolute!important;right:8px!important;top:8px!important;padding:6px 8px!important;font-size:9px!important;opacity:.9}
+ body.game-landscape #bppSceneBack.active{bottom:8px!important;left:110px!important}
+}

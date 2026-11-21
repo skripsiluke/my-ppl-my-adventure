@@ -1728,6 +1728,32 @@ canvas.addEventListener('click',e=>{
 });
 window.addEventListener('keyup',e=>state.keys[e.key]=false);window.addEventListener('blur',()=>state.keys={});
 document.querySelectorAll('[data-key]').forEach(b=>{const k=b.dataset.key;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture?.(e.pointerId);state.keys[k]=true;});['pointerup','pointercancel','lostpointercapture'].forEach(ev=>b.addEventListener(ev,()=>state.keys[k]=false));});
+// Android landscape gameplay: request fullscreen first, then lock orientation when supported.
+const landscapeButton=$('landscapeButton');
+function syncGameOrientation(){
+ const landscape=window.matchMedia&&window.matchMedia('(orientation: landscape)').matches;
+ document.body.classList.toggle('game-landscape',!!landscape&&window.innerWidth<=1024);
+ if(landscapeButton)landscapeButton.textContent=landscape?'⛶ LANDSCAPE AKTIF':'⛶ LANDSCAPE';
+}
+if(landscapeButton){
+ landscapeButton.addEventListener('click',async()=>{
+  try{
+   const target=document.documentElement;
+   if(!document.fullscreenElement&&target.requestFullscreen)await target.requestFullscreen();
+   if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock('landscape');
+   syncGameOrientation();
+  }catch(err){
+   // Some browsers only permit rotation after the user rotates the device manually.
+   syncGameOrientation();
+   const hint=$('canvasHint');
+   if(hint)hint.textContent='Putar HP ke posisi mendatar (landscape). Jika tersedia, aktifkan rotasi otomatis pada pengaturan HP.';
+  }
+ });
+}
+window.addEventListener('resize',syncGameOrientation);
+window.addEventListener('orientationchange',syncGameOrientation);
+document.addEventListener('fullscreenchange',syncGameOrientation);
+syncGameOrientation();
 const joystick=$('joystickControl'),joystickKnob=$('joystickKnob');
 if(joystick&&joystickKnob){
  let stickPointer=null;
