@@ -730,14 +730,40 @@ function drawWorld(t=0){
  for(let i=0;i<42;i++){const x=(i*149+60)%1760,y=(i*97+95)%1160;if((x>960&&x<1630&&y>690&&y<1060)||(x>110&&x<570&&y>780&&y<1050))continue;ctx.fillStyle=i%2?'#e9d778':'#f0e9bd';ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);ctx.fill();}
 
  // More village life: crop beds, orchard trees, benches, crates and flower borders.
- [[50,220],[470,760],[820,360],[1260,350],[1660,700],[610,1030],[340,180],[1510,1120]].forEach(([x,y],i)=>{
+ [[50,220],[470,760],[820,360],[1260,350],[1660,700],[340,180],[1510,1120]].forEach(([x,y],i)=>{
    roundedRect(ctx,x,y,116,66,9,'#8b6948');roundedRect(ctx,x+5,y+5,106,56,6,i%2?'#a77e4e':'#b58a56');
    for(let row=0;row<2;row++)for(let col=0;col<6;col++){const px=x+15+col*17,py=y+20+row*25;ctx.strokeStyle=i%3===0?'#397a3d':'#4d8d43';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(px,py+8);ctx.lineTo(px-4,py-2);ctx.moveTo(px,py+8);ctx.lineTo(px+5,py-3);ctx.stroke();ctx.fillStyle='#a7d568';ctx.beginPath();ctx.arc(px-4,py-2,2.5,0,Math.PI*2);ctx.arc(px+5,py-3,2.5,0,Math.PI*2);ctx.fill();}
  });
- [[70,900],[610,260],[880,760],[1720,500],[1320,80],[250,1120]].forEach(([x,y],i)=>{drawTree(x,y);ctx.fillStyle='#c7a36a';ctx.fillRect(x-4,y+19,8,18);if(i%2===0){ctx.fillStyle='#e6b94f';[[x-10,y-12],[x+9,y-17],[x+2,y+1]].forEach(([fx,fy])=>{ctx.beginPath();ctx.arc(fx,fy,3,0,Math.PI*2);ctx.fill();});}});
+ [[70,900],[610,260],[880,760],[1720,500],[1320,80]].forEach(([x,y],i)=>{drawTree(x,y);ctx.fillStyle='#c7a36a';ctx.fillRect(x-4,y+19,8,18);if(i%2===0){ctx.fillStyle='#e6b94f';[[x-10,y-12],[x+9,y-17],[x+2,y+1]].forEach(([fx,fy])=>{ctx.beginPath();ctx.arc(fx,fy,3,0,Math.PI*2);ctx.fill();});}});
  [[500,460],[840,650],[430,680],[1510,390],[720,990]].forEach(([x,y])=>{ctx.fillStyle='rgba(52,48,35,.2)';ctx.fillRect(x-17,y+10,38,5);ctx.fillStyle='#765033';ctx.fillRect(x-18,y-2,36,7);ctx.fillRect(x-14,y+5,4,10);ctx.fillRect(x+10,y+5,4,10);});
  [[430,470],[875,630],[1650,420],[1750,980],[70,700]].forEach(([x,y])=>{ctx.fillStyle='#9b7045';ctx.fillRect(x-10,y-10,20,20);ctx.strokeStyle='#e0bd83';ctx.lineWidth=2;ctx.strokeRect(x-10,y-10,20,20);ctx.beginPath();ctx.moveTo(x-8,y-8);ctx.lineTo(x+8,y+8);ctx.moveTo(x+8,y-8);ctx.lineTo(x-8,y+8);ctx.stroke();});
  for(let i=0;i<90;i++){const x=(i*173+95)%1760,y=(i*211+140)%1140;if((x>960&&x<1630&&y>690&&y<1060)||(x>110&&x<570&&y>780&&y<1050))continue;ctx.fillStyle=['#e7d16d','#e9a5a0','#f3e6ba','#d7b5e2'][i%4];ctx.beginPath();ctx.arc(x,y,3.2,0,Math.PI*2);ctx.fill();ctx.fillStyle='#4b8b43';ctx.fillRect(x-1,y+3,2,5);}
+
+ // Jembatan kayu kecil yang menyambungkan jalan desa melintasi sungai irigasi.
+ // Menggantikan tanaman hias yang sebelumnya menutupi titik pertemuan jalan dan sungai.
+ ctx.save();
+ ctx.lineCap='round';ctx.lineJoin='round';
+ // Bayangan dan sisi jembatan
+ ctx.fillStyle='rgba(49,66,43,.22)';
+ roundedRect(ctx,650,1037,100,105,8,'rgba(49,66,43,.22)');
+ // Balok sisi jembatan
+ roundedRect(ctx,654,1035,92,106,6,'#795332');
+ roundedRect(ctx,660,1035,80,106,4,'#b88750');
+ // Papan lantai melintang, mengikuti lebar jalan
+ for(let by=1041;by<1138;by+=13){
+  ctx.fillStyle=(Math.floor((by-1041)/13)%2===0)?'#d9b77b':'#c99e62';
+  ctx.fillRect(662,by,76,10);
+  ctx.strokeStyle='rgba(105,72,42,.55)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(662,by+10);ctx.lineTo(738,by+10);ctx.stroke();
+ }
+ // Pegangan rendah di kedua sisi, tetap terbuka dan mudah dilalui karakter
+ ctx.strokeStyle='#704a2d';ctx.lineWidth=5;
+ ctx.beginPath();ctx.moveTo(657,1040);ctx.lineTo(657,1137);ctx.moveTo(743,1040);ctx.lineTo(743,1137);ctx.stroke();
+ ctx.strokeStyle='#d4ad72';ctx.lineWidth=3;
+ ctx.beginPath();ctx.moveTo(657,1044);ctx.lineTo(657,1133);ctx.moveTo(743,1044);ctx.lineTo(743,1133);ctx.stroke();
+ // Sambungan pendek ke tepi jalan di kedua ujung
+ ctx.fillStyle='#b98c59';ctx.fillRect(660,1034,80,7);ctx.fillRect(660,1137,80,7);
+ ctx.restore();
 
  // Gerbang menuju Kebun Sawit di pojok tenggara desa
  ctx.fillStyle='#4d3828';ctx.fillRect(1615,1030,92,12);ctx.fillRect(1625,995,10,52);ctx.fillRect(1687,995,10,52);
