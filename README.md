@@ -296,3 +296,31 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 ## v0.20.21
 - Memindahkan pintu masuk Tambang Emas ke area kosong di sisi jalan desa (koordinat peta 760, 760), termasuk papan nama, petunjuk, dan titik interaksi.
 - Tidak mengubah struktur penyimpanan progres permainan.
+
+
+## Update v0.20.48
+- Mode Adventure: mengganti tanaman hias yang menutupi pertemuan jalan desa dan sungai dengan jembatan kayu kecil.
+- Jembatan disejajarkan dengan jalan desa, diberi papan lantai dan pegangan rendah, serta area pendekatannya dibersihkan.
+- Menghapus tanaman dan pohon dekoratif yang menempati titik jembatan. Tidak mengubah sistem misi, penyimpanan progres, maupun scene lainnya.
+
+
+## Update v0.20.49
+- Memperbaiki collision pada jembatan jalan desa yang melintasi sungai.
+- Area dek jembatan dan jalur pendekatannya kini dikecualikan dari collision dekorasi/pagar sehingga karakter dapat berjalan melintasinya.
+- Tidak mengubah tata letak jembatan, misi, penyimpanan, atau fitur gameplay lainnya.
+
+
+## Update v0.20.50
+- Menghilangkan dua pohon dekoratif yang tumbuh/bertumpuk di area bangunan Balai Kelompok Tani Sukamaju, termasuk collision batang pohon yang terkait.
+- Memperlebar papan nama Balai dan membagi tulisan menjadi dua baris agar seluruh teks berada di dalam border.
+- Tidak mengubah collision jembatan, misi, penyimpanan progres, maupun fitur gameplay lainnya.
+
+
+## Update v0.20.51
+- Menghapus bedeng tanaman dekoratif pada koordinat yang bertumpuk dengan barisan tanaman di lahan demonstrasi/area administrasi.
+- Menjaga bedeng dekoratif lainnya dan seluruh fitur gameplay, collision jembatan, serta progres tersimpan.
+
+
+## Update v0.20.52
+- Jendela portal SIMLUHTAN/e-RDKK/e-Banper kini diposisikan berdasarkan batas layar monitor CRT pada canvas, bukan persentase wrapper, sehingga konten terpotong rapi di dalam monitor.
+- Pita petunjuk misi PC diperlebar dan teks dipisah menjadi dua baris agar tetap berada di dalam border.
