@@ -981,6 +981,7 @@ function updateBppBackButton(){
   });
  }
  btn.classList.toggle('active',state.scene==='pc'||state.scene==='coffee');
+ btn.classList.toggle('coffee-scene',state.scene==='coffee');
 }
 function enterBppCoffee(){
  state.scene='coffee';bppCoffeeStepRun=state.bppCoffeeDone?5:0;bppCoffeeAnimUntil=0;
