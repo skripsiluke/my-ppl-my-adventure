@@ -592,7 +592,8 @@ function drawHouse(b){
  ctx.strokeStyle='#8b795d';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(b.x+31,b.y+30);ctx.lineTo(b.x+31,b.y+57);ctx.moveTo(b.x+17,b.y+43);ctx.lineTo(b.x+46,b.y+43);ctx.moveTo(b.x+b.w-32,b.y+30);ctx.lineTo(b.x+b.w-32,b.y+57);ctx.stroke();
  ctx.fillStyle=b.door;ctx.fillRect(b.x+b.w/2-14,b.y+b.h-49,28,49);ctx.fillStyle='#e6c878';ctx.beginPath();ctx.arc(b.x+b.w/2+7,b.y+b.h-25,2.5,0,Math.PI*2);ctx.fill();
  ctx.fillStyle='#b8a17b';ctx.fillRect(b.x+b.w/2-20,b.y+b.h,40,7);
- ctx.fillStyle='#fff8df';ctx.font='bold 13px Nunito';ctx.textAlign='center';ctx.fillText(b.name,b.x+b.w/2,b.y+b.h+25);
+ // Hindari label nama BPP di bawah fasad karena bertumpuk dengan papan petunjuk pintu.
+ if(b.type!=='bpp'){ctx.fillStyle='#fff8df';ctx.font='bold 13px Nunito';ctx.textAlign='center';ctx.fillText(b.name,b.x+b.w/2,b.y+b.h+25);}
 }
 function drawFarmer(x,y,palette,phase=0,moving=false,isPlayer=false){
  const gait=phase*.126;
@@ -701,7 +702,11 @@ function drawWorld(t=0){
  // Identitas kantor BPP pada fasad depan.
  ctx.fillStyle='#f5f3dc';roundedRect(ctx,1080,112,120,34,5,'#f5f3dc');
  ctx.fillStyle='#245b36';ctx.textAlign='center';ctx.font='bold 11px Nunito';ctx.fillText('BPP KECAMATAN',1140,126);ctx.fillText('SUKASENANG',1140,139);
- ctx.fillStyle='#f8e6a7';roundedRect(ctx,1102,250,76,22,7,'#f8e6a7');ctx.fillStyle='#315b39';ctx.font='bold 10px Nunito';ctx.fillText('MASUK  E',1140,265);
+ const isTouchScreen=(window.matchMedia&&window.matchMedia('(pointer: coarse)').matches)||('ontouchstart' in window)||((navigator.maxTouchPoints||0)>0);
+ const entryLabel=isTouchScreen?'MASUK: INTERAKSI':'MASUK  E';
+ const entryWidth=isTouchScreen?124:76;
+ ctx.fillStyle='#f8e6a7';roundedRect(ctx,1140-entryWidth/2,250,entryWidth,22,7,'#f8e6a7');
+ ctx.fillStyle='#315b39';ctx.font=isTouchScreen?'bold 9px Nunito':'bold 10px Nunito';ctx.textAlign='center';ctx.fillText(entryLabel,1140,265);
 
  // signboards and lamp posts
  ctx.fillStyle='#68482e';ctx.fillRect(908,132,5,25);roundedRect(ctx,842,105,138,34,5,'#f2dfad');ctx.strokeStyle='#d5bd86';ctx.lineWidth=1;ctx.strokeRect(842,105,138,34);ctx.fillStyle='#315b39';ctx.font='bold 9px Nunito';ctx.textAlign='center';ctx.fillText('BALAI KELOMPOK',911,119);ctx.fillText('TANI',911,131);
