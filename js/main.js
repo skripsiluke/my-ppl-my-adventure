@@ -10,7 +10,7 @@ const FIRST_LEVEL_XP=150, XP_PER_LEVEL=250;
 function xpThreshold(level){return level<=1?0:FIRST_LEVEL_XP+(level-2)*XP_PER_LEVEL;}
 function levelFromXP(xp){let level=1;while(xp>=xpThreshold(level+1))level++;return level;}
 function levelProgress(xp){const level=levelFromXP(xp);return {level,progress:xp-xpThreshold(level),needed:level===1?FIRST_LEVEL_XP:XP_PER_LEVEL};}
-const state = {name:'Penyuluh Muda',avatarIndex:0,xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},analog:{x:0,y:0},interact:false,catOwned:false,catQuestNpcId:null,catFollower:{x:120,y:410},scene:'village',mineGold:0,mineNodes:[],returnPosition:{x:145,y:390},ranchMissionDone:false,palmGhostCaught:0,farmPlots:[],farmSeeds:{padi:3,jagung:2,cabai:1},farmProduce:{},farmSelectedPlot:0,farmSelectedCrop:'padi',farmPlayer:{x:450,y:430},farmTarget:null,farmDay:1,farmLastWeather:'Cerah',farmUnlockedPlots:1,farmPesticides:0,farmPesticideStarterGranted:false};
+const state = {name:'Penyuluh Muda',avatarIndex:0,xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},analog:{x:0,y:0},interact:false,catOwned:false,catHintShown:false,catQuestNpcId:null,catFollower:{x:120,y:410},scene:'village',mineGold:0,mineNodes:[],returnPosition:{x:145,y:390},ranchMissionDone:false,palmGhostCaught:0,farmPlots:[],farmSeeds:{padi:3,jagung:2,cabai:1},farmProduce:{},farmSelectedPlot:0,farmSelectedCrop:'padi',farmPlayer:{x:450,y:430},farmTarget:null,farmDay:1,farmLastWeather:'Cerah',farmUnlockedPlots:1,farmPesticides:0,farmPesticideStarterGranted:false};
 const screens=['homeScreen','menuScreen','gameScreen'];
 function applyMineXpPenalty(amount){
   // XP utama adalah state.xp. Jika runtime tiba-tiba membaca 0 padahal
@@ -54,6 +54,7 @@ function save(){
     pmaas:state.pmaas,
     player:state.player,
     catOwned:!!state.catOwned,
+    catHintShown:!!state.catHintShown,
     catQuestNpcId:state.catQuestNpcId,
     catFollower:state.catFollower,
     scene:state.scene||'village',mineGold:Number(state.mineGold)||0,mineNodes:Array.isArray(state.mineNodes)?state.mineNodes:[],returnPosition:state.returnPosition||{x:145,y:390},ranchMissionDone:!!state.ranchMissionDone,palmGhostCaught:Number(state.palmGhostCaught)||0,
@@ -71,6 +72,7 @@ function load(){
     state.pakMissionRewarded=true;
   }
   // Ensure new mission flags exist for saves created by older game versions.
+  state.catHintShown=!!state.catHintShown;
   state.buMissionDone=!!state.buMissionDone || !!state.buMissionRewarded;
   state.buMissionRewarded=state.buMissionDone;
   state.ketuaMissionDone=!!state.ketuaMissionDone || !!state.ketuaMissionRewarded;
@@ -704,10 +706,10 @@ function drawWorld(t=0){
  roundedRect(ctx,1340,320,58,36,5,'#b68a4e');ctx.fillStyle='#e4c17b';ctx.fillRect(1345,325,48,25);ctx.font='bold 11px Nunito';ctx.fillStyle='#65472d';ctx.fillText('PAKAN',1369,340);
  // Mulut tambang emas dengan papan petunjuk dan jalur masuk.
  // Mulut tambang dipindahkan ke area kosong di sisi jalan, jauh dari lahan demonstrasi.
- ctx.fillStyle='#705039';ctx.beginPath();ctx.ellipse(650,470,48,32,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#241f1b';ctx.beginPath();ctx.ellipse(650,466,35,23,0,0,Math.PI*2);ctx.fill();
- ctx.strokeStyle='#9a7046';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(615,468);ctx.lineTo(615,448);ctx.lineTo(685,448);ctx.lineTo(685,468);ctx.stroke();
- ctx.fillStyle='#f1d38d';ctx.fillRect(602,406,96,24);ctx.fillStyle='#5b3d25';ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillText('TAMBANG EMAS',650,422);
- const mineUnlocked=levelProgress(state.xp).level>=2;const mineSign=mineUnlocked?'Masuk: E':'🔒 TERKUNCI • LEVEL 2';ctx.save();ctx.font='bold 12px Nunito';ctx.textAlign='center';const signW=mineUnlocked?82:154;roundedRect(ctx,650-signW/2,502,signW,25,9,mineUnlocked?'rgba(42,91,48,.94)':'rgba(255,246,218,.97)');ctx.fillStyle=mineUnlocked?'#fff4c7':'#422b18';ctx.fillText(mineSign,650,519);ctx.restore();
+ ctx.fillStyle='#705039';ctx.beginPath();ctx.ellipse(500,450,48,32,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#241f1b';ctx.beginPath();ctx.ellipse(500,446,35,23,0,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='#9a7046';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(465,448);ctx.lineTo(465,428);ctx.lineTo(535,428);ctx.lineTo(535,448);ctx.stroke();
+ ctx.fillStyle='#f1d38d';ctx.fillRect(452,386,96,24);ctx.fillStyle='#5b3d25';ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillText('TAMBANG EMAS',500,402);
+ const mineUnlocked=levelProgress(state.xp).level>=2;const mineSign=mineUnlocked?'Masuk: E':'🔒 TERKUNCI • LEVEL 2';ctx.save();ctx.font='bold 12px Nunito';ctx.textAlign='center';const signW=mineUnlocked?82:154;roundedRect(ctx,500-signW/2,482,signW,25,9,mineUnlocked?'rgba(42,91,48,.94)':'rgba(255,246,218,.97)');ctx.fillStyle=mineUnlocked?'#fff4c7':'#422b18';ctx.fillText(mineSign,500,499);ctx.restore();
  // decorative shrubs, flower beds and trees
  [[90,160],[450,130],[900,170],[1080,250],[1700,220],[850,850],[650,960],[1750,850],[920,1080],[1660,1120],[500,920],[1320,1110],[1770,390]].forEach(p=>drawTree(...p));
  for(let i=0;i<42;i++){const x=(i*149+60)%1760,y=(i*97+95)%1160;if((x>960&&x<1630&&y>690&&y<1060)||(x>110&&x<570&&y>780&&y<1050))continue;ctx.fillStyle=i%2?'#e9d778':'#f0e9bd';ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);ctx.fill();}
@@ -730,12 +732,12 @@ function drawWorld(t=0){
  ctx.textAlign='left';ctx.font='900 20px Nunito';ctx.fillStyle='rgba(255,255,235,.72)';ctx.fillText('DESA SUKAMAJU',43,54);ctx.fillStyle='#315c37';ctx.fillText('DESA SUKAMAJU',40,51);
  ctx.font='bold 16px Nunito';ctx.fillStyle='#315c37';ctx.fillText('AREA PERSAWAHAN',1190,690);ctx.textAlign='center';ctx.font='900 17px Nunito';ctx.lineWidth=4;ctx.strokeStyle='rgba(95,70,43,.48)';ctx.strokeText('JALAN DESA',900,575);ctx.fillStyle='#fff4d8';ctx.fillText('JALAN DESA',900,575);
  // Karakter NPC digambar solid dengan badan, tangan, kaki, dan pakaian.
- npcs.forEach((n,i)=>{const done=missionDone(n.id);ctx.font='bold 12px Nunito';drawFarmer(n.x,n.y,{shirt:['#3979b9','#bd6686','#3f8a57','#c58a38'][i%4],pants:'#394d43',hat:['#d6a34d','#d8b86d','#6b8e57'][i%3]},i*.8,false);const labelW=Math.max(76,Math.min(132,ctx.measureText(n.name).width+22));roundedRect(ctx,n.x-labelW/2,n.y+28,labelW,23,10,'rgba(255,255,245,.98)');ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillStyle='#23452c';ctx.fillText(n.name,n.x,n.y+44);if(n.kind==='mission'||n.kind==='special'){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(n.x,n.y-43,14,0,Math.PI*2);ctx.fill();ctx.strokeStyle=done?'#23834b':'#d88b1f';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=done?'#23834b':'#d88b1f';ctx.font='bold 17px Nunito';ctx.fillText(n.kind==='special'?(state.catOwned?'✓':'🐾'):(done?'✓':'!'),n.x,n.y-37);}});
+ npcs.forEach((n,i)=>{const done=missionDone(n.id);ctx.font='bold 12px Nunito';drawFarmer(n.x,n.y,{shirt:['#3979b9','#bd6686','#3f8a57','#c58a38'][i%4],pants:'#394d43',hat:['#d6a34d','#d8b86d','#6b8e57'][i%3]},i*.8,false);const labelW=Math.max(76,Math.min(132,ctx.measureText(n.name).width+22));roundedRect(ctx,n.x-labelW/2,n.y+28,labelW,23,10,'rgba(255,255,245,.98)');ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillStyle='#23452c';ctx.fillText(n.name,n.x,n.y+44);if(n.kind==='mission'||n.kind==='special'){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(n.x,n.y-43,14,0,Math.PI*2);ctx.fill();ctx.strokeStyle=done?'#23834b':'#d88b1f';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=done?'#23834b':'#d88b1f';ctx.font='bold 17px Nunito';ctx.fillText(n.kind==='special'?(state.catOwned?'✓':(state.catHintShown?'!':'🐾')):(done?'✓':'!'),n.x,n.y-37);if(n.id==='catcaretaker'&&state.catHintShown&&!state.catOwned){ctx.strokeStyle='rgba(255,211,76,.9)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(n.x,n.y-43,20,0,Math.PI*2);ctx.stroke();}}});
  if(state.catOwned)drawPetCat(state.catFollower.x,state.catFollower.y,t);
  // Pemain: badan penuh, dua kaki dan animasi langkah saat bergerak.
  const moving=!!(state.keys.ArrowRight||state.keys.ArrowLeft||state.keys.ArrowUp||state.keys.ArrowDown||state.keys.w||state.keys.a||state.keys.s||state.keys.d||Math.hypot(state.analog.x,state.analog.y)>.12);
  drawFarmer(state.player.x,state.player.y,{shirt:'#287b49',pants:'#344b3a',hat:'#d8ad4e'},t/105,moving,true);
- const near=nearestNpc();if(Math.hypot(650-state.player.x,470-state.player.y)<90){const mob=window.matchMedia('(max-width: 760px)').matches;const mineUnlocked=levelProgress(state.xp).level>=2;const label=mineUnlocked?(mob?'Tap INTERAKSI: Tambang':'Tekan E: Masuk Tambang'):'🔒 TAMBANG • LEVEL 2';ctx.save();ctx.font='bold 11px Nunito';ctx.textAlign='center';const labelW=Math.min(210,Math.max(154,ctx.measureText(label).width+24));roundedRect(ctx,state.player.x-labelW/2,state.player.y-91,labelW,28,12,'rgba(255,255,245,.98)');ctx.fillStyle='#174d32';ctx.fillText(label,state.player.x,state.player.y-73);ctx.restore();}else if(Math.hypot(1660-state.player.x,1030-state.player.y)<125){const mob=window.matchMedia('(max-width: 760px)').matches;const unlocked=levelProgress(state.xp).level>=5;const label=unlocked?(mob?'Tap INTERAKSI: Kebun Sawit':'Tekan E: Kebun Sawit'):(mob?'Terkunci: Butuh Level 5':'Terkunci: Butuh Level 5');ctx.font='bold 12px Nunito';roundedRect(ctx,state.player.x-94,state.player.y-91,188,28,12,'rgba(255,255,245,.98)');ctx.fillStyle='#174d32';ctx.textAlign='center';ctx.fillText(label,state.player.x,state.player.y-73);}else if(near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<88){const mobile=window.matchMedia('(max-width: 760px)').matches;const hint=mobile?'Tap tombol INTERAKSI':'Tekan E untuk bicara';ctx.font='bold 12px Nunito';const bw=Math.max(138,ctx.measureText(hint).width+24),bx=Math.max(8,Math.min(WORLD.w-bw-8,state.player.x-bw/2)),by=state.player.y-91;roundedRect(ctx,bx,by,bw,28,12,'rgba(255,255,245,.98)');ctx.strokeStyle='#d8e6ce';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='#174d32';ctx.textAlign='center';ctx.fillText(hint,bx+bw/2,by+18);}
+ const near=nearestNpc();if(Math.hypot(500-state.player.x,450-state.player.y)<90){const mob=window.matchMedia('(max-width: 760px)').matches;const mineUnlocked=levelProgress(state.xp).level>=2;const label=mineUnlocked?(mob?'Tap INTERAKSI: Tambang':'Tekan E: Masuk Tambang'):'🔒 TAMBANG • LEVEL 2';ctx.save();ctx.font='bold 11px Nunito';ctx.textAlign='center';const labelW=Math.min(210,Math.max(154,ctx.measureText(label).width+24));roundedRect(ctx,state.player.x-labelW/2,state.player.y-91,labelW,28,12,'rgba(255,255,245,.98)');ctx.fillStyle='#174d32';ctx.fillText(label,state.player.x,state.player.y-73);ctx.restore();}else if(Math.hypot(1660-state.player.x,1030-state.player.y)<125){const mob=window.matchMedia('(max-width: 760px)').matches;const unlocked=levelProgress(state.xp).level>=5;const label=unlocked?(mob?'Tap INTERAKSI: Kebun Sawit':'Tekan E: Kebun Sawit'):(mob?'Terkunci: Butuh Level 5':'Terkunci: Butuh Level 5');ctx.font='bold 12px Nunito';roundedRect(ctx,state.player.x-94,state.player.y-91,188,28,12,'rgba(255,255,245,.98)');ctx.fillStyle='#174d32';ctx.textAlign='center';ctx.fillText(label,state.player.x,state.player.y-73);}else if(near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<88){const mobile=window.matchMedia('(max-width: 760px)').matches;const hint=mobile?'Tap tombol INTERAKSI':'Tekan E untuk bicara';ctx.font='bold 12px Nunito';const bw=Math.max(138,ctx.measureText(hint).width+24),bx=Math.max(8,Math.min(WORLD.w-bw-8,state.player.x-bw/2)),by=state.player.y-91;roundedRect(ctx,bx,by,bw,28,12,'rgba(255,255,245,.98)');ctx.strokeStyle='#d8e6ce';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='#174d32';ctx.textAlign='center';ctx.fillText(hint,bx+bw/2,by+18);}
  ctx.restore();
  $('worldLocation').textContent=(near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<100?'📍 '+near.name:'📍 Desa Sukamaju')+(state.catOwned?' • 🐈 Kucing menemani':'');
  const hintEl=$('canvasHint');if(hintEl)hintEl.textContent=window.matchMedia('(max-width: 760px)').matches?'Gunakan tombol arah untuk bergerak • Dekati warga lalu tap INTERAKSI':'Gunakan WASD / tombol panah untuk bergerak • Dekati warga lalu tekan E atau Spasi untuk bicara';
@@ -988,7 +990,7 @@ function interact(){
   if(dialogOpen)return;
   if(state.scene==='mine'){mineInteract();return;}
   if(state.scene==='palm'){palmInteract();return;}
-  if(Math.hypot(650-state.player.x,470-state.player.y)<90){if(levelProgress(state.xp).level<2){$('missionDescription').textContent='🔒 Tambang Emas belum bisa dimasuki! Capai Level 2 — Penyuluh Pertanian Terampil terlebih dahulu.';return;}enterMine();return;}
+  if(Math.hypot(500-state.player.x,450-state.player.y)<90){if(levelProgress(state.xp).level<2){$('missionDescription').textContent='🔒 Tambang Emas belum bisa dimasuki! Capai Level 2 — Penyuluh Pertanian Terampil terlebih dahulu.';return;}enterMine();return;}
   if(Math.hypot(1660-state.player.x,1030-state.player.y)<125){enterPalm();return;}
   const n=nearestNpc();
   if(!n||Math.hypot(n.x-state.player.x,n.y-state.player.y)>88){
@@ -1055,6 +1057,11 @@ function completeMission(id,xp,coins){
   updateStats();checkAchievements();save();
   if(newLevel>oldLevel)showLevelUp(newLevel,bonus);
   $('missionDescription').textContent='Misi selesai! Kamu memperoleh '+xp+' XP dan '+coins+' koin.';
+  const regularMissionsDone=(state.missionDone?1:0)+(state.buMissionDone?1:0)+(state.ketuaMissionDone?1:0)+Object.values(state.missionFlags||{}).filter(Boolean).length+(state.ranchMissionDone?1:0);
+  if(regularMissionsDone>=2&&!state.catHintShown&&!state.catOwned){
+    state.catHintShown=true;save();
+    $('missionDescription').textContent='🐾 Misi spesial terbuka! Temui Penjaga Anak Kucing di desa untuk merawat dan mengadopsi anak kucing.';
+  }
 }
 function addChoice(label,correct,after){const b=document.createElement('button');b.className='answer-option';b.textContent=label;b.addEventListener('click',()=>{document.querySelectorAll('#dialogChoices button').forEach(x=>x.disabled=true);if(correct){b.classList.add('correct');$('dialogText').textContent='Tepat!';}else{b.classList.add('wrong');$('dialogText').textContent='Coba pikirkan kembali jawaban yang paling tepat.';}after();});$('dialogChoices').appendChild(b);}
 $('closeDialog').addEventListener('click',()=>{$('dialog').classList.add('hidden');dialogOpen=false;startWorld();});
