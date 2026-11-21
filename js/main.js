@@ -1412,7 +1412,7 @@ function drawBppPc(t=0){
   ctx.fillText('KLIK TOMBOL CONNECT',875,489);ctx.fillText('PADA PRINTER',875,502);
  }
  // Click targets and instructions.
- roundedRect(ctx,270,570,420,24,8,'rgba(255,248,220,.96)');ctx.fillStyle='#243c2b';ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillText('BUKA ERDKK.pdf → HUBUNGKAN PRINTER → PRINT • ESC UNTUK KELUAR',480,586);
+ roundedRect(ctx,180,558,600,36,8,'rgba(255,248,220,.97)');ctx.strokeStyle='rgba(91,119,76,.45)';ctx.lineWidth=1;ctx.strokeRect(180,558,600,36);ctx.fillStyle='#243c2b';ctx.font='bold 10px Nunito';ctx.textAlign='center';ctx.fillText('BUKA ERDKK.pdf  →  HUBUNGKAN PRINTER  →  PRINT',480,573);ctx.font='bold 9px Nunito';ctx.fillText('TEKAN ESC UNTUK KELUAR DARI MISI PC',480,586);
  $('worldLocation').textContent='💻 Komputer BPP • Desktop Windows 98';
  $('worldObjective').textContent='Buka ERDKK.pdf, klik tombol CONNECT pada printer di sebelah kanan monitor, lalu tekan PRINT.';
  const hint=$('canvasHint');if(hint)hint.textContent='Klik ERDKK.pdf. Pada printer di kanan monitor, tekan tombol CONNECT, lalu klik PRINT pada dokumen.';
@@ -1437,7 +1437,19 @@ function openBppPortal(url,title){
  actions.append(external,close);bar.append(name,actions);
  const frame=document.createElement('iframe');frame.src=url;frame.title=title;frame.loading='eager';frame.referrerPolicy='strict-origin-when-cross-origin';
  frame.setAttribute('allow','clipboard-read; clipboard-write');
- win.append(bar,frame);wrap.appendChild(win);bppPortalFrame=win;
+ win.append(bar,frame);
+ const placeOnMonitor=()=>{
+  const cr=canvas.getBoundingClientRect(),wr=wrap.getBoundingClientRect();
+  const sx=cr.width/960,sy=cr.height/600;
+  win.style.left=(cr.left-wr.left+176*sx)+'px';
+  win.style.top=(cr.top-wr.top+51*sy)+'px';
+  win.style.width=(608*sx)+'px';
+  win.style.height=(360*sy)+'px';
+ };
+ placeOnMonitor();
+ wrap.appendChild(win);
+ window.addEventListener('resize',placeOnMonitor);
+ bppPortalFrame=win;
  $('missionDescription').textContent=title+' dibuka di jendela monitor PC. Tutup jendela dengan tombol × untuk kembali ke desktop.';
 }
 function openBppPortal(url,title){
@@ -1454,7 +1466,19 @@ function openBppPortal(url,title){
  actions.append(external,close);bar.append(name,actions);
  const frame=document.createElement('iframe');frame.src=url;frame.title=title;frame.loading='eager';frame.referrerPolicy='strict-origin-when-cross-origin';
  frame.setAttribute('allow','clipboard-read; clipboard-write');
- win.append(bar,frame);wrap.appendChild(win);bppPortalFrame=win;
+ win.append(bar,frame);
+ const placeOnMonitor=()=>{
+  const cr=canvas.getBoundingClientRect(),wr=wrap.getBoundingClientRect();
+  const sx=cr.width/960,sy=cr.height/600;
+  win.style.left=(cr.left-wr.left+176*sx)+'px';
+  win.style.top=(cr.top-wr.top+51*sy)+'px';
+  win.style.width=(608*sx)+'px';
+  win.style.height=(360*sy)+'px';
+ };
+ placeOnMonitor();
+ wrap.appendChild(win);
+ window.addEventListener('resize',placeOnMonitor);
+ bppPortalFrame=win;
  $('missionDescription').textContent=title+' dibuka di jendela monitor PC. Tutup dengan tombol × untuk kembali ke desktop.';
 }
 function bppInteract(){

@@ -196,7 +196,7 @@
 
 /* Portal SIMLUHTAN/e-RDKK/e-Banper tampil sebagai jendela di area monitor PC. */
 .canvas-wrap{position:relative}
-#bppPortalWindow{position:absolute;z-index:15;left:18.2%;top:8.3%;width:63.6%;height:60.3%;display:flex;flex-direction:column;background:#c0c0c0;border:3px solid #333b3c;box-shadow:0 3px 12px rgba(0,0,0,.45);overflow:hidden}
+#bppPortalWindow{position:absolute;z-index:15;display:flex;flex-direction:column;box-sizing:border-box;background:#c0c0c0;border:3px solid #333b3c;box-shadow:0 3px 12px rgba(0,0,0,.45);overflow:hidden;max-width:none;max-height:none}
 .bpp-portal-titlebar{height:28px;min-height:28px;display:flex;align-items:center;justify-content:space-between;gap:5px;padding:2px 5px 2px 9px;background:linear-gradient(90deg,#082d83,#1684bd);color:#fff;font:700 11px Arial,sans-serif}
 .bpp-portal-titlebar>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bpp-portal-actions{display:flex;align-items:center;gap:5px;flex-shrink:0}
