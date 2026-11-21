@@ -542,8 +542,8 @@ const buildings=[
 ];
 const obstacles=[...buildings.map(b=>({x:b.x-5,y:b.y-15,w:b.w+10,h:b.h+20})),{x:990,y:720,w:600,h:280},
  // Pagar kandang, kandang ternak, kebun berpagar, dan pepohonan besar
- {x:1050,y:295,w:280,h:165},{x:1070,y:320,w:95,h:85},{x:1220,y:320,w:95,h:85},
- {x:45,y:200,w:120,h:75},{x:445,y:745,w:145,h:88},{x:1245,y:335,w:130,h:80},
+ {x:1078,y:311,w:224,h:132},{x:1094,y:337,w:76,h:68},{x:1230,y:337,w:76,h:68},
+ {x:45,y:200,w:120,h:75},{x:445,y:745,w:145,h:88},{x:1310,y:340,w:105,h:64},
  {x:1650,y:685,w:130,h:80},{x:590,y:1015,w:130,h:80},{x:320,y:165,w:45,h:45},{x:1490,y:1110,w:45,h:45},
  {x:82,y:142,w:38,h:38},{x:442,y:112,w:38,h:38},{x:892,y:152,w:38,h:38},{x:1072,y:232,w:38,h:38},{x:1692,y:202,w:38,h:38}];
 function roundedRect(c,x,y,w,h,r,fill){c.fillStyle=fill;c.beginPath();c.roundRect(x,y,w,h,r);c.fill();}
@@ -673,6 +673,9 @@ function drawWorld(t=0){
  const road=()=>{ctx.beginPath();ctx.moveTo(0,570);ctx.lineTo(520,570);ctx.lineTo(850,570);ctx.lineTo(1100,570);ctx.lineTo(1800,570);ctx.moveTo(700,80);ctx.lineTo(700,570);ctx.lineTo(700,1200);};
  ctx.strokeStyle='#b18b5d';ctx.lineWidth=94;road();ctx.stroke();ctx.strokeStyle='#d9bd8b';ctx.lineWidth=82;road();ctx.stroke();
  ctx.strokeStyle='rgba(255,244,207,.35)';ctx.lineWidth=3;ctx.setLineDash([18,22]);road();ctx.stroke();ctx.setLineDash([]);
+ // Jalan setapak menuju pintu BPP, tersambung dengan jalan desa.
+ ctx.save();ctx.lineCap='round';ctx.strokeStyle='#b18b5d';ctx.lineWidth=54;ctx.beginPath();ctx.moveTo(1140,258);ctx.quadraticCurveTo(1125,390,1140,525);ctx.stroke();
+ ctx.strokeStyle='#d9bd8b';ctx.lineWidth=44;ctx.beginPath();ctx.moveTo(1140,258);ctx.quadraticCurveTo(1125,390,1140,525);ctx.stroke();ctx.restore();
  // roadside stones and grass tufts
  for(let i=0;i<34;i++){let x=(i*83+35)%1770,y=(i%2?520:620);ctx.fillStyle=i%2?'#8b9b72':'#d1c39b';ctx.beginPath();ctx.ellipse(x,y,5,3,.2,0,Math.PI*2);ctx.fill();}
  // irrigation stream with banks and glints
@@ -701,7 +704,8 @@ function drawWorld(t=0){
  // signboards and lamp posts
  ctx.fillStyle='#68482e';ctx.fillRect(908,118,5,34);roundedRect(ctx,855,108,112,25,5,'#f2dfad');ctx.fillStyle='#315b39';ctx.font='bold 11px Nunito';ctx.textAlign='center';ctx.fillText('BALAI KELOMPOK TANI',911,125);
  ctx.fillStyle='#68482e';ctx.fillRect(1590,495,5,60);ctx.fillStyle='#f7e4a8';ctx.beginPath();ctx.arc(1592,490,10,0,Math.PI*2);ctx.fill();
- // Peternakan desa: kandang sapi/kambing, pagar, jerami dan tempat pakan.
+ // Peternakan desa: kandang diperkecil agar lebih proporsional.
+ ctx.save();ctx.translate(1190,375);ctx.scale(.80,.80);ctx.translate(-1190,-375);
  roundedRect(ctx,1042,286,296,176,12,'#d8c18d');
  ctx.strokeStyle='#8b6039';ctx.lineWidth=7;ctx.strokeRect(1050,295,280,165);
  for(let fx=1062;fx<1325;fx+=28){ctx.beginPath();ctx.moveTo(fx,295);ctx.lineTo(fx,460);ctx.stroke();}
@@ -711,6 +715,7 @@ function drawWorld(t=0){
  // Ilustrasi ternak sederhana di dalam kandang.
  [[1105,364,'#f4eee0'],[1257,364,'#f1eee4']].forEach(([ax,ay,col],i)=>{ctx.fillStyle=col;ctx.beginPath();ctx.ellipse(ax,ay,23,15,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(ax+17,ay-9,10,0,Math.PI*2);ctx.fill();ctx.fillStyle='#544337';ctx.fillRect(ax-12,ay+10,4,13);ctx.fillRect(ax+8,ay+10,4,13);ctx.fillStyle='#4a392d';ctx.beginPath();ctx.arc(ax+20,ay-11,1.5,0,Math.PI*2);ctx.fill();if(i===0){ctx.strokeStyle='#6b4d35';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(ax+13,ay-17);ctx.lineTo(ax+8,ay-25);ctx.moveTo(ax+22,ay-17);ctx.lineTo(ax+28,ay-25);ctx.stroke();}});
  roundedRect(ctx,1340,320,58,36,5,'#b68a4e');ctx.fillStyle='#e4c17b';ctx.fillRect(1345,325,48,25);ctx.font='bold 11px Nunito';ctx.fillStyle='#65472d';ctx.fillText('PAKAN',1369,340);
+ ctx.restore();
  // Mulut tambang emas dengan papan petunjuk dan jalur masuk.
  // Mulut tambang dipindahkan ke area kosong di sisi jalan, jauh dari lahan demonstrasi.
  ctx.fillStyle='#705039';ctx.beginPath();ctx.ellipse(500,450,48,32,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#241f1b';ctx.beginPath();ctx.ellipse(500,446,35,23,0,0,Math.PI*2);ctx.fill();
@@ -718,7 +723,7 @@ function drawWorld(t=0){
  ctx.fillStyle='#f1d38d';ctx.fillRect(452,386,96,24);ctx.fillStyle='#5b3d25';ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillText('TAMBANG EMAS',500,402);
  const mineUnlocked=levelProgress(state.xp).level>=2;const mineSign=mineUnlocked?'Masuk: E':'🔒 TERKUNCI • LEVEL 2';ctx.save();ctx.font='bold 12px Nunito';ctx.textAlign='center';const signW=mineUnlocked?82:154;roundedRect(ctx,500-signW/2,482,signW,25,9,mineUnlocked?'rgba(42,91,48,.94)':'rgba(255,246,218,.97)');ctx.fillStyle=mineUnlocked?'#fff4c7':'#422b18';ctx.fillText(mineSign,500,499);ctx.restore();
  // decorative shrubs, flower beds and trees
- [[90,160],[450,130],[900,170],[1080,250],[1700,220],[850,850],[650,960],[1750,850],[920,1080],[1660,1120],[500,920],[1320,1110],[1770,390]].forEach(p=>drawTree(...p));
+ [[90,160],[450,130],[900,170],[990,250],[1700,220],[850,850],[650,960],[1750,850],[920,1080],[1660,1120],[500,920],[1320,1110],[1770,390]].forEach(p=>drawTree(...p));
  for(let i=0;i<42;i++){const x=(i*149+60)%1760,y=(i*97+95)%1160;if((x>960&&x<1630&&y>690&&y<1060)||(x>110&&x<570&&y>780&&y<1050))continue;ctx.fillStyle=i%2?'#e9d778':'#f0e9bd';ctx.beginPath();ctx.arc(x,y,2.5,0,Math.PI*2);ctx.fill();}
 
  // More village life: crop beds, orchard trees, benches, crates and flower borders.
@@ -1012,8 +1017,9 @@ function drawBpp(t=0){
  // Meja kopi.
  roundedRect(ctx,w*.08,h*.49,w*.27,55,8,'#95613d');ctx.fillStyle='#d4a16a';ctx.fillRect(w*.09,h*.49+8,w*.25,8);
  roundedRect(ctx,w*.15,h*.49-24,45,23,4,'#f4f0df');ctx.fillStyle='#634936';ctx.fillRect(w*.17,h*.49-20,36,4);ctx.fillStyle='#e9e1c8';ctx.beginPath();ctx.arc(w*.23,h*.49-17,8,0,Math.PI*2);ctx.fill();
- ctx.fillStyle='#fff1d0';ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillText('MEJA KOPI',w*.215,h*.49+78);
- ctx.fillText('MEJA KERJA • KOMPUTER',w*.60,h*.34+94);
+ ctx.save();ctx.font='bold 13px Nunito';ctx.textAlign='center';
+ roundedRect(ctx,w*.215-66,h*.49+62,132,24,7,'#fff8df');ctx.fillStyle='#244c2d';ctx.fillText('MEJA KOPI',w*.215,h*.49+79);
+ roundedRect(ctx,w*.60-112,h*.34+79,224,25,7,'#fff8df');ctx.fillStyle='#244c2d';ctx.fillText('MEJA KERJA • KOMPUTER',w*.60,h*.34+96);ctx.restore();
  // Lemari arsip, kursi, pot tanaman.
  roundedRect(ctx,w*.83, h*.25,70,105,5,'#8d603e');for(let y=0;y<3;y++){ctx.strokeStyle='#e2c18b';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(w*.84,h*.28+y*31);ctx.lineTo(w*.89,h*.28+y*31);ctx.stroke();}
  ctx.fillStyle='#397c47';ctx.beginPath();ctx.arc(w*.92,h*.51,18,0,Math.PI*2);ctx.fill();ctx.fillStyle='#8a603d';ctx.fillRect(w*.91,h*.51,12,27);
