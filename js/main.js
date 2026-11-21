@@ -744,7 +744,8 @@ function drawWorld(t=0){
  // Pemain: badan penuh, dua kaki dan animasi langkah saat bergerak.
  const moving=!!(state.keys.ArrowRight||state.keys.ArrowLeft||state.keys.ArrowUp||state.keys.ArrowDown||state.keys.w||state.keys.a||state.keys.s||state.keys.d||Math.hypot(state.analog.x,state.analog.y)>.12);
  drawFarmer(state.player.x,state.player.y,{shirt:'#287b49',pants:'#344b3a',hat:'#d8ad4e'},t/105,moving,true);
- const near=nearestNpc();if(Math.hypot(1140-state.player.x,260-state.player.y)<105){enterBpp();return;}
+ const near=nearestNpc();
+  if(Math.hypot(1140-state.player.x,260-state.player.y)<105){const mob=window.matchMedia('(max-width: 760px)').matches;const label=mob?'Tap INTERAKSI: Masuk BPP':'Tekan E: Masuk BPP';ctx.save();ctx.font='bold 11px Nunito';ctx.textAlign='center';const labelW=Math.max(154,ctx.measureText(label).width+24);roundedRect(ctx,state.player.x-labelW/2,state.player.y-88,labelW,27,10,'rgba(255,255,245,.98)');ctx.fillStyle='#174d32';ctx.fillText(label,state.player.x,state.player.y-70);ctx.restore();}
   if(Math.hypot(500-state.player.x,450-state.player.y)<90){const mob=window.matchMedia('(max-width: 760px)').matches;const mineUnlocked=levelProgress(state.xp).level>=2;const label=mineUnlocked?(mob?'Tap INTERAKSI: Tambang':'Tekan E: Masuk Tambang'):'🔒 TAMBANG • LEVEL 2';ctx.save();ctx.font='bold 11px Nunito';ctx.textAlign='center';const labelW=Math.min(210,Math.max(154,ctx.measureText(label).width+24));roundedRect(ctx,state.player.x-labelW/2,state.player.y-91,labelW,28,12,'rgba(255,255,245,.98)');ctx.fillStyle='#174d32';ctx.fillText(label,state.player.x,state.player.y-73);ctx.restore();}else if(Math.hypot(1660-state.player.x,1030-state.player.y)<125){const mob=window.matchMedia('(max-width: 760px)').matches;const unlocked=levelProgress(state.xp).level>=5;const label=unlocked?(mob?'Tap INTERAKSI: Kebun Sawit':'Tekan E: Kebun Sawit'):(mob?'Terkunci: Butuh Level 5':'Terkunci: Butuh Level 5');ctx.font='bold 12px Nunito';roundedRect(ctx,state.player.x-94,state.player.y-91,188,28,12,'rgba(255,255,245,.98)');ctx.fillStyle='#174d32';ctx.textAlign='center';ctx.fillText(label,state.player.x,state.player.y-73);}else if(near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<88){const mobile=window.matchMedia('(max-width: 760px)').matches;const hint=mobile?'Tap tombol INTERAKSI':'Tekan E untuk bicara';ctx.font='bold 12px Nunito';const bw=Math.max(138,ctx.measureText(hint).width+24),bx=Math.max(8,Math.min(WORLD.w-bw-8,state.player.x-bw/2)),by=state.player.y-91;roundedRect(ctx,bx,by,bw,28,12,'rgba(255,255,245,.98)');ctx.strokeStyle='#d8e6ce';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='#174d32';ctx.textAlign='center';ctx.fillText(hint,bx+bw/2,by+18);}
  ctx.restore();
  $('worldLocation').textContent=(near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<100?'📍 '+near.name:'📍 Desa Sukamaju')+(state.catOwned?' • 🐈 Kucing menemani':'');
@@ -1019,7 +1020,7 @@ function drawBpp(t=0){
  // Pintu keluar.
  roundedRect(ctx,w*.43,h-75,w*.14,50,5,'#f0d8a5');ctx.fillStyle='#356c43';ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillText('PINTU KELUAR',w*.5,h-19);
  drawFarmer(state.player.x,state.player.y,{shirt:'#287b49',pants:'#344b3a'},t/105,false,true);
- const coffee={x:w*.215,y:h*.49+30},pc={x:w*.60,y:h*.34+35},exit={x:w*.5,y:h-55};
+ const coffee={x:w*.215,y:h*.49+30},pc={x:w*.60,y:h*.34+35},exit={x:w*.5,y:h-48};
  const dCoffee=Math.hypot(state.player.x-coffee.x,state.player.y-coffee.y),dPc=Math.hypot(state.player.x-pc.x,state.player.y-pc.y),dExit=Math.hypot(state.player.x-exit.x,state.player.y-exit.y);
  const label=dCoffee<100?'E / INTERAKSI • BUAT KOPI':dPc<110?'E / INTERAKSI • AKSES KOMPUTER':dExit<100?'E / INTERAKSI • KELUAR BPP':'Jelajahi kantor dan dekati meja';
  roundedRect(ctx,Math.max(8,w/2-145),h-34,290,25,10,'rgba(255,250,225,.94)');ctx.fillStyle='#254d32';ctx.font='bold 11px Nunito';ctx.fillText(label,w/2,h-17);
@@ -1159,10 +1160,10 @@ function openBppPortal(url){
 }
 function bppInteract(){
  const w=canvas.width,h=canvas.height;
- const coffee={x:w*.215,y:h*.49+30},pc={x:w*.60,y:h*.34+35},exit={x:w*.5,y:h-55};
+ const coffee={x:w*.215,y:h*.49+30},pc={x:w*.60,y:h*.34+35},exit={x:w*.5,y:h-48};
  if(Math.hypot(state.player.x-coffee.x,state.player.y-coffee.y)<105){bppCoffee();return;}
  if(Math.hypot(state.player.x-pc.x,state.player.y-pc.y)<115){bppComputer();return;}
- if(Math.hypot(state.player.x-exit.x,state.player.y-exit.y)<105){state.scene='village';state.player={...state.returnPosition};save();return;}
+ if(Math.hypot(state.player.x-exit.x,state.player.y-exit.y)<125){state.scene='village';state.player={...state.returnPosition};save();return;}
  $('missionDescription').textContent='Dekati meja kopi, meja komputer, atau pintu keluar untuk berinteraksi.';
 }
 
@@ -1174,7 +1175,7 @@ function movePlayer(dx,dy){
  const len=Math.hypot(dx,dy)||1;dx/=len;dy/=len;
  const speed=3.4;
  const maxX=(state.scene==='mine'||state.scene==='palm'||state.scene==='bpp')?canvas.width-35:WORLD.w-25;
- const maxY=(state.scene==='mine'||state.scene==='palm'||state.scene==='bpp')?canvas.height-90:WORLD.h-30;
+ const maxY=state.scene==='bpp'?canvas.height-30:((state.scene==='mine'||state.scene==='palm')?canvas.height-90:WORLD.h-30);
  const startX=state.player.x,startY=state.player.y;
  const startBlocked=blocked(startX,startY);
  const nx=Math.max(25,Math.min(maxX,startX+dx*speed));
@@ -1204,6 +1205,7 @@ function interact(){
   if(dialogOpen)return;
   if(state.scene==='mine'){mineInteract();return;}
   if(state.scene==='palm'){palmInteract();return;}if(state.scene==='bpp'){bppInteract();return;}
+  if(state.scene==='village'&&Math.hypot(1140-state.player.x,260-state.player.y)<110){enterBpp();return;}
   if(Math.hypot(500-state.player.x,450-state.player.y)<90){if(levelProgress(state.xp).level<2){$('missionDescription').textContent='🔒 Tambang Emas belum bisa dimasuki! Capai Level 2 — Penyuluh Pertanian Terampil terlebih dahulu.';return;}enterMine();return;}
   if(Math.hypot(1660-state.player.x,1030-state.player.y)<125){enterPalm();return;}
   const n=nearestNpc();
