@@ -659,7 +659,7 @@ function drawPetCat(x,y,t=0){
 }
 
 function drawWorld(t=0){
- if(state.scene==='mine'){drawMine(t);return;}if(state.scene==='palm'){drawPalm(t);return;}if(state.scene==='bpp'){drawBpp(t);return;}if(state.scene==='pc'){drawBppPc(t);return;}
+ if(state.scene==='mine'){drawMine(t);return;}if(state.scene==='palm'){drawPalm(t);return;}if(state.scene==='bpp'){drawBpp(t);updateBppBackButton();return;}if(state.scene==='pc'){drawBppPc(t);updateBppBackButton();return;}if(state.scene==='coffee'){drawBppCoffee(t);updateBppBackButton();return;}
  const camX=Math.max(0,Math.min(WORLD.w-canvas.width,state.player.x-canvas.width/2));
  const camY=Math.max(0,Math.min(WORLD.h-canvas.height,state.player.y-canvas.height/2));
  ctx.clearRect(0,0,canvas.width,canvas.height);ctx.save();ctx.translate(-camX,-camY);
@@ -961,6 +961,24 @@ function mineInteract(){
  if(idx>=0&&best<75){state.mineNodes[idx]=null;mineRespawnQueue=mineRespawnQueue.filter(item=>item.index!==idx);mineRespawnQueue.push({index:idx,at:performance.now()+12000});state.mineGold++;state.xp+=3;updateStats();checkAchievements();save();$('worldLocation').textContent='⛏️ Emas terkumpul: '+state.mineGold+' • +3 XP langsung';const hud=document.querySelector('.game-heading .game-coin');if(hud)hud.textContent='⭐ '+state.xp+' XP';}
 }
 
+let bppPcWindow=null;
+let bppCoffeeStepRun=0,bppCoffeeAnimUntil=0;
+function updateBppBackButton(){
+ let btn=document.getElementById('bppSceneBack');
+ if(!btn){
+  btn=document.createElement('button');btn.id='bppSceneBack';btn.type='button';btn.textContent='← Kembali';
+  btn.setAttribute('aria-label','Kembali ke kantor BPP');
+  const wrap=canvas.closest('.canvas-wrap');if(wrap)wrap.appendChild(btn);
+  btn.addEventListener('click',()=>{
+   if(state.scene==='pc'||state.scene==='coffee'){state.scene='bpp';state.keys={};state.analog={x:0,y:0};bppPcWindow=null;save();drawWorld();}
+  });
+ }
+ btn.classList.toggle('active',state.scene==='pc'||state.scene==='coffee');
+}
+function enterBppCoffee(){
+ state.scene='coffee';bppCoffeeStepRun=state.bppCoffeeDone?5:0;bppCoffeeAnimUntil=0;
+ state.keys={};state.analog={x:0,y:0};save();drawWorld();
+}
 function enterBpp(){
  // Reset drawing surface when entering the office. This clears any stale
  // transform/clip state left by the outdoor map so the interior fills the
@@ -1011,14 +1029,80 @@ function drawBpp(t=0){
  const hint=$('canvasHint');if(hint)hint.textContent='Gerakkan penyuluh. Dekati meja kopi atau meja komputer, lalu tekan E / INTERAKSI. Pintu bawah untuk keluar.';
 }
 function bppCoffee(){
- stopWorld();dialogOpen=true;$('dialog').classList.remove('hidden');$('dialogEmoji').textContent='☕';$('dialogEyebrow').textContent='MISI KANTOR BPP';$('dialogChoices').innerHTML='';$('closeDialog').classList.add('hidden');
- $('dialogTitle').textContent='Misi: Membuat Kopi untuk Pegawai BPP';
- const steps=['Ambil cangkir bersih','Masukkan kopi dan gula secukupnya','Tuangkan air panas dan aduk hingga rata'];
- if(state.bppCoffeeDone){$('dialogText').textContent='Kopi sudah disajikan. Terima kasih, suasana kantor jadi lebih hangat!';addChoice('Siap membantu pekerjaan berikutnya.',true,()=>{$('dialogText').textContent='Terima kasih, Penyuluh!';});}
- else{$('dialogText').textContent='Pegawai BPP sedang memulai aktivitas pagi. Bantu siapkan secangkir kopi.';addChoice(steps[state.bppCoffeeStep]||'Sajikan kopi kepada pegawai',true,()=>{state.bppCoffeeStep++;if(state.bppCoffeeStep>=3){state.bppCoffeeDone=true;state.bppCoffeeStep=3;reward(25,10);save();$('dialogText').textContent='☕ Kopi berhasil dibuat dan disajikan! Kamu mendapat +25 XP dan +10 koin.';}else{$('dialogText').textContent='Bagus! '+steps[state.bppCoffeeStep]+' kemudian lanjutkan.';}});addChoice('Nanti saja',false,()=>{$('dialogText').textContent='Tidak apa-apa. Meja kopi bisa dikunjungi lagi kapan saja.';});}
+ enterBppCoffee();
+}
+function drawBppCoffee(t=0){
+ const w=canvas.width,h=canvas.height;
+ ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+ ctx.clearRect(0,0,w,h);
+ const wall=ctx.createLinearGradient(0,0,0,h);wall.addColorStop(0,'#dcebd2');wall.addColorStop(.66,'#b5d3a5');wall.addColorStop(1,'#8b6548');ctx.fillStyle=wall;ctx.fillRect(0,0,w,h);
+ // First-person counter and backsplash.
+ ctx.fillStyle='#e9e2cf';ctx.fillRect(0,300,w,155);
+ for(let x=0;x<w;x+=48){ctx.strokeStyle='rgba(120,105,80,.13)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,300);ctx.lineTo(x,455);ctx.stroke();}
+ ctx.fillStyle='#795238';ctx.fillRect(0,455,w,145);ctx.fillStyle='#b68150';ctx.fillRect(0,455,w,15);
+ // Wall shelf, coffee station sign and kettle.
+ roundedRect(ctx,70,42,820,68,10,'#f5f0dc');ctx.fillStyle='#2d6840';ctx.textAlign='center';ctx.font='bold 20px Nunito';ctx.fillText('SUDUT KOPI • BPP KECAMATAN SUKASENANG',480,82);
+ roundedRect(ctx,75,145,180,110,8,'#8d603e');ctx.fillStyle='#c99a61';ctx.fillRect(86,158,158,8);
+ // Hot water kettle
+ ctx.fillStyle='#303c3d';roundedRect(ctx,115,177,68,72,12,'#303c3d');ctx.fillStyle='#c9d7d1';roundedRect(ctx,124,185,50,54,9,'#c9d7d1');ctx.fillStyle='#333';ctx.fillRect(132,172,34,8);
+ ctx.fillStyle='#fff';ctx.font='bold 12px Nunito';ctx.fillText('AIR PANAS',149,270);
+ // Large wooden worktop
+ ctx.fillStyle='#805335';ctx.beginPath();ctx.moveTo(35,320);ctx.lineTo(925,320);ctx.lineTo(960,470);ctx.lineTo(0,470);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#bd8956';ctx.beginPath();ctx.moveTo(35,320);ctx.lineTo(925,320);ctx.lineTo(925,339);ctx.lineTo(35,339);ctx.closePath();ctx.fill();
+ // ingredient containers and labels
+ const jar=(x,y,color,label)=>{roundedRect(ctx,x,y,86,100,9,'#e7e2d0');ctx.fillStyle=color;roundedRect(ctx,x+8,y+25,70,65,6,color);ctx.fillStyle='#f7f0d8';roundedRect(ctx,x+12,y+53,62,25,4,'#f7f0d8');ctx.fillStyle='#493a2b';ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillText(label,x+43,y+70);ctx.fillStyle='#aaa';ctx.fillRect(x+7,y+17,72,9);};
+ jar(95,350,'#4a3022','KOPI');jar(220,350,'#e4c16b','GULA');jar(345,350,'#719b65','TEH');
+ // Spoon
+ ctx.strokeStyle='#c9cdd0';ctx.lineWidth=8;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(490,378);ctx.lineTo(545,431);ctx.stroke();ctx.fillStyle='#d9dfe0';ctx.beginPath();ctx.ellipse(486,374,14,9,-.6,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#fff';ctx.font='bold 12px Nunito';ctx.fillText('SENDOK',518,455);
+ // Cup and saucer, liquid changes as steps progress
+ ctx.fillStyle='#e8e1d1';ctx.beginPath();ctx.ellipse(710,435,66,18,0,0,Math.PI*2);ctx.fill();
+ roundedRect(ctx,661,350,98,83,12,'#f5f2e9');ctx.strokeStyle='#e2d9c7';ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(760,390,22,25,-.1,-1.3,1.3);ctx.stroke();
+ const filled=bppCoffeeStepRun>=3;ctx.fillStyle=filled?'#513426':'#b6b5a7';ctx.beginPath();ctx.ellipse(710,357,42,10,0,0,Math.PI*2);ctx.fill();
+ if(bppCoffeeStepRun>=4){ctx.strokeStyle='#c9b9a1';ctx.lineWidth=4;ctx.beginPath();ctx.arc(710,357,24,(t/280)%6.28,(t/280)%6.28+4.7);ctx.stroke();}
+ ctx.fillStyle='#fff';ctx.font='bold 12px Nunito';ctx.fillText('CANGKIR',710,470);
+ // Animation cues: pouring stream and stirring motion.
+ if(bppCoffeeAnimUntil>performance.now()){
+  if(bppCoffeeStepRun===4){ctx.strokeStyle='rgba(255,235,170,.9)';ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(149,250);ctx.quadraticCurveTo(330,285,710,348);ctx.stroke();}
+  if(bppCoffeeStepRun===5){ctx.strokeStyle='#d9e0e0';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(520,385);ctx.lineTo(700+Math.sin(t/55)*22,356+Math.cos(t/55)*5);ctx.stroke();}
+ }
+ // Progress and clear task instruction.
+ const tasks=['1. Ambil cangkir bersih','2. Tambahkan satu sendok kopi','3. Tambahkan gula secukupnya','4. Tuangkan air panas','5. Aduk kopi hingga rata'];
+ const completed=state.bppCoffeeDone||bppCoffeeStepRun>=5;
+ roundedRect(ctx,35,125,890,48,9,'rgba(255,250,229,.96)');ctx.fillStyle='#315b39';ctx.font='bold 15px Nunito';ctx.textAlign='center';
+ ctx.fillText(completed?'☕ Kopi siap disajikan! Terima kasih, Penyuluh.':(tasks[Math.min(bppCoffeeStepRun,4)]+' — klik peralatan yang sesuai di atas meja'),480,155);
+ ctx.fillStyle='#315b39';ctx.font='bold 11px Nunito';ctx.fillText('KLIK: CANGKIR • KOPI • GULA • AIR PANAS • SENDOK  |  ESC / TOMBOL KEMBALI',480,205);
+ // First-person hands/forearms at bottom edge.
+ ctx.fillStyle='#d5a06e';ctx.beginPath();ctx.moveTo(310,600);ctx.lineTo(360,520);ctx.lineTo(400,520);ctx.lineTo(430,600);ctx.fill();ctx.beginPath();ctx.moveTo(650,600);ctx.lineTo(690,520);ctx.lineTo(730,520);ctx.lineTo(770,600);ctx.fill();
+ ctx.restore();
+ $('worldLocation').textContent='☕ Sudut Kopi • BPP Kecamatan Sukasenang';
+ $('worldObjective').textContent=completed?'⭐ Misi membuat kopi selesai • +25 XP dan +10 koin':'☕ '+tasks[Math.min(bppCoffeeStepRun,4)];
+ const hint=$('canvasHint');if(hint)hint.textContent='Klik peralatan sesuai urutan: cangkir → kopi → gula → air panas → sendok untuk mengaduk. ESC atau tombol Kembali untuk keluar.';
+}
+function bppCoffeeClick(x,y){
+ if(state.bppCoffeeDone){return;}
+ const step=bppCoffeeStepRun;
+ const hit=(x1,y1,x2,y2)=>x>=x1&&x<=x2&&y>=y1&&y<=y2;
+ let ok=false,msg='';
+ if(step===0&&hit(650,340,770,445)){ok=true;msg='Cangkir bersih sudah diambil.';}
+ else if(step===1&&hit(90,340,190,455)){ok=true;msg='Kopi bubuk dimasukkan ke cangkir.';}
+ else if(step===2&&hit(215,340,315,455)){ok=true;msg='Gula ditambahkan secukupnya.';}
+ else if(step===3&&hit(100,165,195,265)){ok=true;msg='Air panas dituangkan perlahan ke dalam cangkir.';}
+ else if(step===4&&hit(460,355,560,445)){ok=true;msg='Kopi diaduk hingga larut dan merata.';}
+ else if(hit(340,340,445,455)){msg='Itu teh. Untuk misi ini, pilih kopi bubuk agar menjadi kopi.';}
+ else {msg='Belum tepat. Ikuti urutan langkah yang tertulis di bagian atas.';}
+ if(ok){
+  bppCoffeeStepRun++;bppCoffeeAnimUntil=performance.now()+1100;
+  if(bppCoffeeStepRun>=5){
+   state.bppCoffeeDone=true;state.bppCoffeeStep=3;reward(25,10);save();
+   $('missionDescription').textContent='☕ Kopi berhasil dibuat di kantor BPP! Hadiah +25 XP dan +10 koin.';
+  }
+ }
+ showPalmToast(msg);
+ drawWorld();
 }
 function bppComputer(){
- state.scene='pc';state.keys={};state.analog={x:0,y:0};save();
+ state.scene='pc';bppPcWindow=null;state.keys={};state.analog={x:0,y:0};save();
  $('worldLocation').textContent='💻 Komputer BPP • Desktop Windows 98';
  $('worldObjective').textContent='Klik ikon SIMLUHTAN, e-RDKK, atau e-Banper. Tekan ESC untuk keluar.';
  drawWorld();
@@ -1041,6 +1125,21 @@ function drawBppPc(t=0){
  // Desktop wallpaper details and taskbar.
  ctx.fillStyle='#0b4c85';ctx.fillRect(176,378,608,33);ctx.fillStyle='#c0c0c0';ctx.fillRect(181,382,72,25);ctx.fillStyle='#111';ctx.font='bold 12px Arial';ctx.textAlign='center';ctx.fillText('Start',217,399);
  ctx.fillStyle='#e5e5e5';ctx.fillRect(260,383,515,23);ctx.fillStyle='#333';ctx.textAlign='left';ctx.font='11px Arial';ctx.fillText('BPP Kecamatan Sukasenang  •  Sistem Informasi Penyuluh',270,398);
+ // Explorer windows for My Computer and Documents, rendered inside the CRT screen.
+ if(bppPcWindow){
+  roundedRect(ctx,250,70,510,285,5,'#c0c0c0');ctx.fillStyle='#082d83';ctx.fillRect(255,75,500,25);
+  ctx.fillStyle='#fff';ctx.font='bold 13px Arial';ctx.textAlign='left';ctx.fillText(bppPcWindow==='computer'?'My Computer':'My Documents',266,92);
+  ctx.fillStyle='#c0c0c0';ctx.fillRect(730,78,18,18);ctx.fillStyle='#111';ctx.textAlign='center';ctx.font='bold 14px Arial';ctx.fillText('X',739,92);
+  ctx.fillStyle='#fff';ctx.fillRect(258,104,494,244);ctx.fillStyle='#111';ctx.font='12px Arial';ctx.textAlign='left';
+  if(bppPcWindow==='computer'){
+   ctx.fillText('Address: My Computer',270,124);
+   [['💾','Local Disk (C:)','Hard Disk'],['💽','CD-ROM (D:)','CD Drive'],['📁','Shared Documents','Folder'],['🖨️','Printers','System Folder']].forEach((a,i)=>{const x=285+(i%2)*220,y=160+Math.floor(i/2)*82;ctx.font='25px Arial';ctx.fillText(a[0],x,y);ctx.font='bold 12px Arial';ctx.fillText(a[1],x+38,y-5);ctx.font='10px Arial';ctx.fillStyle='#555';ctx.fillText(a[2],x+38,y+12);ctx.fillStyle='#111';});
+  }else{
+   ctx.fillText('Address: C:\\My Documents',270,124);
+   [['📄','Laporan Penyuluhan.doc'],['📊','Data Kelompok Tani.xls'],['📁','Materi Penyuluhan'],['📝','Catatan Lapangan.txt']].forEach((a,i)=>{const y=158+i*43;ctx.font='22px Arial';ctx.fillText(a[0],285,y);ctx.font='12px Arial';ctx.fillText(a[1],322,y-4);});
+  }
+  ctx.fillStyle='#333';ctx.font='10px Arial';ctx.fillText('Double-click an item to open • Klik X untuk menutup jendela',270,339);
+ }
  // Monitor bezel, logo and stand.
  ctx.fillStyle='#555e5e';roundedRect(ctx,440,425,80,26,5,'#555e5e');ctx.fillStyle='#3b4141';ctx.fillRect(410,448,140,12);
  ctx.fillStyle='#d8d6c9';ctx.font='bold 12px Arial';ctx.textAlign='center';ctx.fillText('BPP • WORKSTATION',480,18);
@@ -1180,10 +1279,17 @@ function completeMission(id,xp,coins){
 }
 function addChoice(label,correct,after){const b=document.createElement('button');b.className='answer-option';b.textContent=label;b.addEventListener('click',()=>{document.querySelectorAll('#dialogChoices button').forEach(x=>x.disabled=true);if(correct){b.classList.add('correct');$('dialogText').textContent='Tepat!';}else{b.classList.add('wrong');$('dialogText').textContent='Coba pikirkan kembali jawaban yang paling tepat.';}after();});$('dialogChoices').appendChild(b);}
 $('closeDialog').addEventListener('click',()=>{$('dialog').classList.add('hidden');dialogOpen=false;startWorld();});
-window.addEventListener('keydown',e=>{if(state.scene==='pc'&&e.key==='Escape'){e.preventDefault();state.scene='bpp';state.keys={};state.analog={x:0,y:0};save();drawWorld();return;}if(state.scene==='pc')return;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();state.keys[e.key]=true;if(e.key==='e'||e.key==='E'||e.key===' '){if(!$('dialog').classList.contains('hidden'))return;interact();}});
+window.addEventListener('keydown',e=>{if((state.scene==='pc'||state.scene==='coffee')&&e.key==='Escape'){e.preventDefault();state.scene='bpp';state.keys={};state.analog={x:0,y:0};bppPcWindow=null;save();drawWorld();return;}if(state.scene==='pc'||state.scene==='coffee')return;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();state.keys[e.key]=true;if(e.key==='e'||e.key==='E'||e.key===' '){if(!$('dialog').classList.contains('hidden'))return;interact();}});
 canvas.addEventListener('click',e=>{
- if(state.scene!=='pc')return;
  const r=canvas.getBoundingClientRect(),x=(e.clientX-r.left)*canvas.width/r.width,y=(e.clientY-r.top)*canvas.height/r.height;
+ if(state.scene==='coffee'){bppCoffeeClick(x,y);return;}
+ if(state.scene!=='pc')return;
+ if(bppPcWindow){
+  if(x>=725&&x<=755&&y>=75&&y<=103){bppPcWindow=null;drawWorld();return;}
+  return;
+ }
+ if(x>=185&&x<=245&&y>=65&&y<=125){bppPcWindow='computer';drawWorld();return;}
+ if(x>=185&&x<=245&&y>=137&&y<=197){bppPcWindow='documents';drawWorld();return;}
  if(x>=260&&x<=330&&y>=65&&y<=125)openBppPortal('https://simluh.pertanian.go.id/');
  else if(x>=260&&x<=330&&y>=137&&y<=197)openBppPortal('https://erdkk.pertanian.go.id/');
  else if(x>=260&&x<=330&&y>=209&&y<=269)openBppPortal('https://ebanper.pertanian.go.id/login');

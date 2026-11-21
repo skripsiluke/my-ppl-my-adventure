@@ -183,3 +183,8 @@
 
 /* v0.17.3: remove overlapping canvas helper label */
 .farm-world-tip{display:none!important}
+
+/* BPP first-person scene mobile return control */
+#bppSceneBack{display:none;position:absolute;z-index:20;top:10px;left:10px;border:2px solid rgba(255,255,255,.9);border-radius:12px;padding:9px 14px;background:rgba(35,83,48,.94);color:#fff;font:800 13px Nunito,sans-serif;box-shadow:0 3px 10px rgba(0,0,0,.2);cursor:pointer}
+#bppSceneBack.active{display:none}
+@media(max-width:760px){#bppSceneBack.active{display:block}}
