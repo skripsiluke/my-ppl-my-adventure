@@ -801,11 +801,10 @@ function drawWorld(t=0){
   const progress=segment.len?(distance-segment.start)/segment.len:0;
   const truckX=segment.a[0]+segment.dx*progress;
   const truckY=segment.a[1]+segment.dy*progress;
-  // Sprite dijaga tegak: gambar sumber menghadap ke kiri. Balik horizontal hanya saat bergerak ke kanan.
-  // Pada ruas vertikal truk tetap tegak agar roda selalu berada di bawah (tidak terbalik).
+  // Sprite truk sumber menghadap ke kanan. Putar mengikuti arah ruas jalan,
+  // sehingga bagian depan selalu searah laju pada ruas horizontal maupun vertikal.
   const truckW=164,truckH=truckW*kopdesTruckImage.naturalHeight/kopdesTruckImage.naturalWidth;
-  ctx.save();ctx.translate(truckX,truckY);
-  if(segment.dx>0)ctx.scale(-1,1);
+  ctx.save();ctx.translate(truckX,truckY);ctx.rotate(segment.angle);
   ctx.drawImage(kopdesTruckImage,-truckW/2,-truckH/2,truckW,truckH);
   ctx.restore();
 
@@ -818,9 +817,8 @@ function drawWorld(t=0){
   const ojolProgress=ojolSegment.len?(ojolDistance-ojolSegment.start)/ojolSegment.len:0;
   const ojolX=ojolSegment.a[0]+ojolSegment.dx*ojolProgress;
   const ojolY=ojolSegment.a[1]+ojolSegment.dy*ojolProgress;
-  const faceRight=ojolSegment.dx>0;
-  ctx.save();ctx.translate(ojolX,ojolY);
-  if(faceRight)ctx.scale(-1,1);
+  // Bagian depan motor berada pada sumbu +X; rotasi mengikuti arah jalan.
+  ctx.save();ctx.translate(ojolX,ojolY);ctx.rotate(ojolSegment.angle);
   // Bayangan dan roda
   ctx.fillStyle='rgba(43,55,39,.22)';ctx.beginPath();ctx.ellipse(0,11,22,5,0,0,Math.PI*2);ctx.fill();
   ctx.fillStyle='#20272a';
@@ -836,6 +834,28 @@ function drawWorld(t=0){
   ctx.fillStyle='#f0bd8f';ctx.beginPath();ctx.arc(0,-22,5,0,Math.PI*2);ctx.fill();
   ctx.fillStyle='#f2c83d';ctx.beginPath();ctx.arc(0,-24,5,Math.PI,Math.PI*2);ctx.lineTo(5,-22);ctx.lineTo(-5,-22);ctx.closePath();ctx.fill();
   ctx.fillStyle='#fff';ctx.font='bold 5px Arial';ctx.textAlign='center';ctx.fillText('OJOL',0,-11);
+  ctx.restore();
+
+  // Mobil penumpang bergaya kartun, mengikuti rute jalan desa yang sama.
+  const carDistance=(distance+routeLength*.70)%routeLength;
+  let carSegment=segments[segments.length-1];
+  for(const s of segments){if(carDistance<=s.start+s.len){carSegment=s;break;}}
+  const carProgress=carSegment.len?(carDistance-carSegment.start)/carSegment.len:0;
+  const carX=carSegment.a[0]+carSegment.dx*carProgress;
+  const carY=carSegment.a[1]+carSegment.dy*carProgress;
+  ctx.save();ctx.translate(carX,carY);ctx.rotate(carSegment.angle);
+  ctx.fillStyle='rgba(43,55,39,.22)';ctx.beginPath();ctx.ellipse(0,10,27,6,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#f2f0e7';ctx.beginPath();
+  ctx.moveTo(-25,-5);ctx.lineTo(-17,-13);ctx.lineTo(8,-13);ctx.lineTo(20,-5);
+  ctx.lineTo(25,-3);ctx.lineTo(25,7);ctx.lineTo(-25,7);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#697b78';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.fillStyle='#8fc5c7';ctx.beginPath();
+  ctx.moveTo(-13,-11);ctx.lineTo(6,-11);ctx.lineTo(15,-5);ctx.lineTo(-13,-5);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#a7d6d5';ctx.fillRect(-10,-10,9,4);
+  ctx.fillStyle='#42494a';ctx.fillRect(19,3,7,3);ctx.fillRect(-24,3,6,3);
+  ctx.fillStyle='#f8d76a';ctx.fillRect(22,-2,3,3);
+  ctx.fillStyle='#20272a';ctx.beginPath();ctx.arc(-15,7,5,0,Math.PI*2);ctx.arc(15,7,5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#aeb9b8';ctx.beginPath();ctx.arc(-15,7,2,0,Math.PI*2);ctx.arc(15,7,2,0,Math.PI*2);ctx.fill();
   ctx.restore();
  }
  // Karakter NPC digambar solid dengan badan, tangan, kaki, dan pakaian.
