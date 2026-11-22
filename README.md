@@ -453,11 +453,11 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Urutan desktop dipertahankan seperti sebelumnya.
 
 
-## v0.20.88
+## v0.20.89
 - BGM otomatis dijeda saat halaman game masuk latar belakang, tab berpindah, jendela kehilangan fokus, atau perangkat menyembunyikan halaman.
 - BGM dilanjutkan saat pengguna kembali hanya jika sebelumnya sedang diputar dan pengaturan BGM masih aktif.
 - Jika pengguna mematikan BGM, game tidak menyalakannya kembali secara otomatis.
 
 
-## v0.20.88
+## v0.20.89
 - Perbaikan lifecycle audio: BGM dipause secara paksa saat halaman tersembunyi, kehilangan fokus, pagehide, atau Android membekukan tab; BGM hanya dilanjutkan ketika halaman kembali terlihat dan sebelumnya memang sedang aktif.

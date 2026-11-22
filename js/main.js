@@ -468,10 +468,8 @@ function handlePageVisibility(){
 // versi Android/browser. Capture=true memastikan handler tetap menerima event.
 document.addEventListener('visibilitychange',handlePageVisibility,true);
 window.addEventListener('pagehide',pauseBgmForBackground,true);
-window.addEventListener('blur',pauseBgmForBackground,true);
 document.addEventListener('freeze',pauseBgmForBackground,true);
 window.addEventListener('pageshow',handlePageVisibility,true);
-window.addEventListener('focus',handlePageVisibility,true);
 document.addEventListener('resume',handlePageVisibility,true);
 function saveAudioSettings(){
   try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(audioSettings));}catch(e){}
@@ -517,7 +515,10 @@ function loadAudioSettings(){
 }
 function startBgm(){
   gameStarted=true;
-  if(!bgm||!audioSettings.bgmEnabled||audioSettings.bgmVolume===0||pageIsHidden()||bgmPausedForBackground)return;
+  // Abaikan flag pause yang mungkin tertinggal dari transisi browser selama
+  // dokumen masih terlihat; pemutaran awal dipicu langsung oleh klik pengguna.
+  if(document.visibilityState==='visible'){pageIsInBackground=false;bgmPausedForBackground=false;}
+  if(!bgm||!audioSettings.bgmEnabled||audioSettings.bgmVolume===0||pageIsHidden())return;
   bgm.volume=audioSettings.bgmVolume;
   bgm.muted=false;
   const result=bgm.play();
