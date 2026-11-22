@@ -436,19 +436,23 @@ const SETTINGS_KEY='myPplMyAdventure.settings.v1';
 const bgm=$('bgmAudio');
 const audioSettings={bgmEnabled:true,bgmVolume:0.7,mobileControl:'arrows'};
 let gameStarted=false;
-// Simpan status pemutaran sebelum halaman masuk latar belakang agar BGM hanya
-// dilanjutkan jika memang sedang diputar sebelumnya dan pengguna belum mematikannya.
+// Android Chrome tidak selalu melaporkan document.hasFocus() secara konsisten.
+// Gunakan lifecycle halaman sebagai sumber utama dan blokir pemutaran selama
+// halaman tersembunyi/di-background.
+let pageIsInBackground=document.visibilityState!=='visible';
 let bgmPausedForBackground=false;
+function pageIsHidden(){return pageIsInBackground || document.visibilityState==='hidden';}
 function pauseBgmForBackground(){
-  if(!bgm || document.visibilityState==='visible' && document.hasFocus())return;
-  if(!bgm.paused){
-    bgmPausedForBackground=true;
-    bgm.pause();
-  }
+  pageIsInBackground=true;
+  if(!bgm)return;
+  if(!bgm.paused || !bgmPausedForBackground)bgmPausedForBackground=true;
+  // Pause selalu dipanggil, termasuk jika play() sebelumnya masih pending.
+  bgm.pause();
 }
 function resumeBgmAfterBackground(){
+  if(document.visibilityState!=='visible')return;
+  pageIsInBackground=false;
   if(!bgm || !bgmPausedForBackground)return;
-  if(document.visibilityState==='hidden' || !document.hasFocus())return;
   bgmPausedForBackground=false;
   if(!gameStarted || !audioSettings.bgmEnabled || audioSettings.bgmVolume===0)return;
   bgm.volume=audioSettings.bgmVolume;
@@ -456,14 +460,19 @@ function resumeBgmAfterBackground(){
   const result=bgm.play();
   if(result&&typeof result.catch==='function')result.catch(()=>{});
 }
-document.addEventListener('visibilitychange',()=>{
+function handlePageVisibility(){
   if(document.visibilityState==='hidden')pauseBgmForBackground();
   else resumeBgmAfterBackground();
-});
-window.addEventListener('pagehide',pauseBgmForBackground);
-window.addEventListener('pageshow',resumeBgmAfterBackground);
-window.addEventListener('blur',pauseBgmForBackground);
-window.addEventListener('focus',resumeBgmAfterBackground);
+}
+// Tangani beberapa lifecycle event karena perilaku tombol Home berbeda antar
+// versi Android/browser. Capture=true memastikan handler tetap menerima event.
+document.addEventListener('visibilitychange',handlePageVisibility,true);
+window.addEventListener('pagehide',pauseBgmForBackground,true);
+window.addEventListener('blur',pauseBgmForBackground,true);
+document.addEventListener('freeze',pauseBgmForBackground,true);
+window.addEventListener('pageshow',handlePageVisibility,true);
+window.addEventListener('focus',handlePageVisibility,true);
+document.addEventListener('resume',handlePageVisibility,true);
 function saveAudioSettings(){
   try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(audioSettings));}catch(e){}
 }
@@ -489,7 +498,7 @@ function applyBgmSettings(){
   bgm.muted=!audioSettings.bgmEnabled || audioSettings.bgmVolume===0;
   if(!audioSettings.bgmEnabled || audioSettings.bgmVolume===0){
     bgm.pause();
-  }else if(gameStarted && document.visibilityState!=='hidden' && document.hasFocus() && !bgmPausedForBackground){
+  }else if(gameStarted && !pageIsHidden() && !bgmPausedForBackground){
     const result=bgm.play();
     if(result&&typeof result.catch==='function')result.catch(()=>{});
   }
@@ -508,7 +517,7 @@ function loadAudioSettings(){
 }
 function startBgm(){
   gameStarted=true;
-  if(!bgm||!audioSettings.bgmEnabled||audioSettings.bgmVolume===0||document.visibilityState==='hidden'||!document.hasFocus())return;
+  if(!bgm||!audioSettings.bgmEnabled||audioSettings.bgmVolume===0||pageIsHidden()||bgmPausedForBackground)return;
   bgm.volume=audioSettings.bgmVolume;
   bgm.muted=false;
   const result=bgm.play();
