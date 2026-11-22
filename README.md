@@ -1,3 +1,8 @@
+## Update v0.20.76
+- NPC desa kini berjalan berkeliling secara mandiri, baik misi belum maupun sudah selesai; interaksi NPC tetap menggunakan E / tombol INTERAKSI.
+- Lahan Demonstrasi dapat dimasuki melalui E / INTERAKSI dan membuka Farm Simulator.
+- Ditambahkan tombol kembali ke Adventure Map dari Farm Simulator. Mekanik dan kontrol inti Farm Simulator tidak diubah.
+
 ## Update v0.20.18
 - Farm Simulator: pembelian benih dan pestisida langsung menyegarkan seluruh indikator koin setelah transaksi tersimpan.
 - Sinkronisasi saldo juga diterapkan pada pembelian pupuk dan pembukaan lahan.

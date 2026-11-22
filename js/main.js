@@ -527,6 +527,8 @@ $('startButton').addEventListener('click',()=>{startBgm();const n=$('playerName'
 
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>openMode(b.dataset.mode)));
 $('backButton').addEventListener('click',()=>{stopWorld();stopFarm();showScreen('menuScreen');});
+ let enteredFarmFromDemo=false;
+ $('farmReturnAdventure')?.addEventListener('click',()=>{enteredFarmFromDemo=false;openMode('adventure');});
 function openMode(mode){stopWorld();stopFarm();showScreen('gameScreen');['adventurePanel','farmPanel','quizPanel'].forEach(id=>$(id).classList.add('hidden'));if(mode==='adventure'){$('gameEyebrow').textContent='MODE ADVENTURE';$('gameTitle').textContent='Desa Sukamaju';$('adventurePanel').classList.remove('hidden');startWorld();}if(mode==='farm'){$('gameEyebrow').textContent='MODE FARM SIMULATOR';$('gameTitle').textContent='Kebun Belajar';$('farmPanel').classList.remove('hidden');startFarm();}if(mode==='quiz'){$('gameEyebrow').textContent='MODE QUIZ CHALLENGE';$('gameTitle').textContent='Uji Pengetahuanmu';$('quizPanel').classList.remove('hidden');state.questionIndex=0;state.quizScore=0;pickQuizQuestions();renderQuestion();}}
 /* Top-down world: world coordinates are larger than the viewport; camera follows player. */
 const canvas=$('worldCanvas'),ctx=canvas.getContext('2d');
@@ -539,6 +541,8 @@ const npcs=[
 ...extraMissions.map(m=>({...m,kind:'mission'})),
 {id:'catcaretaker',name:'Penjaga Anak Kucing',x:930,y:600,emoji:'🐱',role:'Misi spesial • Adopsi kucing',kind:'special'}
 ];
+// Setiap NPC memiliki tujuan jelajah sendiri dan tetap dapat diajak berinteraksi saat bergerak.
+npcs.forEach((n,i)=>{n.homeX=n.x;n.homeY=n.y;n.wanderTarget=null;n.walkPhase=i*.9;n.facing=1;});
 // Misi adopsi kucing memiliki NPC dan lokasi tersendiri, tidak lagi menempel
 // pada NPC misi reguler. catQuestNpcId lama dipertahankan hanya untuk kompatibilitas save.
 if(state.catQuestNpcId!=='catcaretaker'){state.catQuestNpcId='catcaretaker';save();}
@@ -1016,7 +1020,7 @@ function drawWorld(t=0){
   }
  }
  // Karakter NPC digambar solid dengan badan, tangan, kaki, dan pakaian.
- npcs.forEach((n,i)=>{const done=missionDone(n.id);ctx.font='bold 12px Nunito';drawFarmer(n.x,n.y,{shirt:['#3979b9','#bd6686','#3f8a57','#c58a38'][i%4],pants:'#394d43',hat:['#d6a34d','#d8b86d','#6b8e57'][i%3]},i*.8,false);const labelW=Math.max(76,Math.min(132,ctx.measureText(n.name).width+22));roundedRect(ctx,n.x-labelW/2,n.y+28,labelW,23,10,'rgba(255,255,245,.98)');ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillStyle='#23452c';ctx.fillText(n.name,n.x,n.y+44);if(n.kind==='mission'||n.kind==='special'){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(n.x,n.y-43,14,0,Math.PI*2);ctx.fill();ctx.strokeStyle=done?'#23834b':'#d88b1f';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=done?'#23834b':'#d88b1f';ctx.font='bold 17px Nunito';ctx.fillText(n.kind==='special'?(state.catOwned?'✓':(state.catHintShown?'!':'🐾')):(done?'✓':'!'),n.x,n.y-37);if(n.id==='catcaretaker'&&state.catHintShown&&!state.catOwned){ctx.strokeStyle='rgba(255,211,76,.9)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(n.x,n.y-43,20,0,Math.PI*2);ctx.stroke();}}});
+ npcs.forEach((n,i)=>{const done=missionDone(n.id);ctx.font='bold 12px Nunito';drawFarmer(n.x,n.y,{shirt:['#3979b9','#bd6686','#3f8a57','#c58a38'][i%4],pants:'#394d43',hat:['#d6a34d','#d8b86d','#6b8e57'][i%3]},n.walkPhase||0,!!n.wanderTarget);const labelW=Math.max(76,Math.min(132,ctx.measureText(n.name).width+22));roundedRect(ctx,n.x-labelW/2,n.y+28,labelW,23,10,'rgba(255,255,245,.98)');ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillStyle='#23452c';ctx.fillText(n.name,n.x,n.y+44);if(n.kind==='mission'||n.kind==='special'){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(n.x,n.y-43,14,0,Math.PI*2);ctx.fill();ctx.strokeStyle=done?'#23834b':'#d88b1f';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=done?'#23834b':'#d88b1f';ctx.font='bold 17px Nunito';ctx.fillText(n.kind==='special'?(state.catOwned?'✓':(state.catHintShown?'!':'🐾')):(done?'✓':'!'),n.x,n.y-37);if(n.id==='catcaretaker'&&state.catHintShown&&!state.catOwned){ctx.strokeStyle='rgba(255,211,76,.9)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(n.x,n.y-43,20,0,Math.PI*2);ctx.stroke();}}});
  if(state.catOwned)drawPetCat(state.catFollower.x,state.catFollower.y,t);
  // Pemain: badan penuh, dua kaki dan animasi langkah saat bergerak.
  const moving=!!(state.keys.ArrowRight||state.keys.ArrowLeft||state.keys.ArrowUp||state.keys.ArrowDown||state.keys.w||state.keys.a||state.keys.s||state.keys.d||Math.hypot(state.analog.x,state.analog.y)>.12);
@@ -1026,6 +1030,7 @@ function drawWorld(t=0){
  }else{drawFarmer(state.player.x,state.player.y,{shirt:'#287b49',pants:'#344b3a',hat:'#d8ad4e'},t/105,moving,true);}
  const near=nearestNpc();
   if(Math.hypot(1140-state.player.x,260-state.player.y)<105){const mob=window.matchMedia('(max-width: 760px)').matches;const label=mob?'Tap INTERAKSI: Masuk BPP':'Tekan E: Masuk BPP';ctx.save();ctx.font='bold 11px Nunito';ctx.textAlign='center';const labelW=Math.max(154,ctx.measureText(label).width+24);roundedRect(ctx,state.player.x-labelW/2,state.player.y-88,labelW,27,10,'rgba(255,255,245,.98)');ctx.fillStyle='#174d32';ctx.fillText(label,state.player.x,state.player.y-70);ctx.restore();}
+  if(Math.hypot(335-state.player.x,780-state.player.y)<155){const mob=window.matchMedia('(max-width: 760px)').matches;const label=mob?'INTERAKSI • Masuk Lahan Demonstrasi':'Tekan E • Masuk Lahan Demonstrasi';ctx.save();ctx.font='bold 11px Nunito';ctx.textAlign='center';const w=Math.max(190,ctx.measureText(label).width+24);roundedRect(ctx,state.player.x-w/2,state.player.y-92,w,28,11,'rgba(255,255,245,.98)');ctx.fillStyle='#174d32';ctx.fillText(label,state.player.x,state.player.y-73);ctx.restore();}
   if(Math.hypot(500-state.player.x,450-state.player.y)<90){const mob=window.matchMedia('(max-width: 760px)').matches;const mineUnlocked=levelProgress(state.xp).level>=2;const label=mineUnlocked?(mob?'Tap INTERAKSI: Tambang':'Tekan E: Masuk Tambang'):'🔒 TAMBANG • LEVEL 2';ctx.save();ctx.font='bold 11px Nunito';ctx.textAlign='center';const labelW=Math.min(210,Math.max(154,ctx.measureText(label).width+24));roundedRect(ctx,state.player.x-labelW/2,state.player.y-91,labelW,28,12,'rgba(255,255,245,.98)');ctx.fillStyle='#174d32';ctx.fillText(label,state.player.x,state.player.y-73);ctx.restore();}else if(Math.hypot(1660-state.player.x,1030-state.player.y)<125){const mob=window.matchMedia('(max-width: 760px)').matches;const unlocked=levelProgress(state.xp).level>=5;const label=unlocked?(mob?'Tap INTERAKSI: Kebun Sawit':'Tekan E: Kebun Sawit'):(mob?'Terkunci: Butuh Level 5':'Terkunci: Butuh Level 5');ctx.font='bold 12px Nunito';roundedRect(ctx,state.player.x-94,state.player.y-91,188,28,12,'rgba(255,255,245,.98)');ctx.fillStyle='#174d32';ctx.textAlign='center';ctx.fillText(label,state.player.x,state.player.y-73);}else if(near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<88){const mobile=window.matchMedia('(max-width: 760px)').matches;const hint=mobile?'Tap tombol INTERAKSI':'Tekan E untuk bicara';ctx.font='bold 12px Nunito';const bw=Math.max(138,ctx.measureText(hint).width+24),bx=Math.max(8,Math.min(WORLD.w-bw-8,state.player.x-bw/2)),by=state.player.y-91;roundedRect(ctx,bx,by,bw,28,12,'rgba(255,255,245,.98)');ctx.strokeStyle='#d8e6ce';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='#174d32';ctx.textAlign='center';ctx.fillText(hint,bx+bw/2,by+18);}
  ctx.restore();
  $('worldLocation').textContent=(near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<100?'📍 '+near.name:'📍 Desa Sukamaju')+(state.catOwned?' • 🐈 Kucing menemani':'');
@@ -1826,12 +1831,30 @@ function movePlayer(dx,dy){
  // allow movement out of the overlap instead of trapping the player permanently.
  if(state.motorPpl.riding){state.player.x=nx;state.player.y=ny;}else{if(startBlocked || !blocked(nx,startY))state.player.x=nx;if(startBlocked || !blocked(state.player.x,ny))state.player.y=ny;}
 }
+function moveNpcs(dt,ts){
+ if(state.scene!=='village'||dialogOpen)return;
+ const step=Math.min(2,dt||1);
+ npcs.forEach(n=>{
+  n.walkPhase=(n.walkPhase||0)+step*.12;
+  if(!n.wanderTarget||Math.hypot(n.wanderTarget.x-n.x,n.wanderTarget.y-n.y)<12){
+   const a=Math.random()*Math.PI*2,d=75+Math.random()*115;
+   n.wanderTarget={x:Math.max(55,Math.min(WORLD.w-55,n.homeX+Math.cos(a)*d)),y:Math.max(65,Math.min(WORLD.h-55,n.homeY+Math.sin(a)*d))};
+  }
+  const dx=n.wanderTarget.x-n.x,dy=n.wanderTarget.y-n.y,len=Math.hypot(dx,dy)||1;
+  const nx=n.x+dx/len*.48*step,ny=n.y+dy/len*.48*step;
+  const hit=obstacles.some(o=>nx>o.x-22&&nx<o.x+o.w+22&&ny>o.y-16&&ny<o.y+o.h+18);
+  const other=npcs.some(o=>o!==n&&Math.hypot(nx-o.x,ny-o.y)<29);
+  if(hit||other){n.wanderTarget=null;return;}
+  n.x=nx;n.y=ny;n.facing=dx>=0?1:-1;
+ });
+}
 function loop(ts){
  // Jadwalkan frame berikutnya sebelum memproses dunia. Jika satu frame mengalami
  // error saat animasi/efek tabrakan, loop kontrol tidak ikut berhenti permanen.
  raf=requestAnimationFrame(loop);
  try{
   const dt=Math.min((ts-last)/16||1,2);last=ts;
+  moveNpcs(dt,ts);
   let dx=(state.keys.ArrowRight||state.keys.d?1:0)-(state.keys.ArrowLeft||state.keys.a?1:0);
   let dy=(state.keys.ArrowDown||state.keys.s?1:0)-(state.keys.ArrowUp||state.keys.w?1:0);
   dx+=state.analog.x;dy+=state.analog.y;
@@ -1863,6 +1886,7 @@ function interact(){
   if(state.scene==='mine'){mineInteract();return;}
   if(state.scene==='palm'){palmInteract();return;}if(state.scene==='bpp'){bppInteract();return;}
   if(state.scene==='village'&&Math.hypot(1140-state.player.x,260-state.player.y)<110){enterBpp();return;}
+   if(state.scene==='village'&&Math.hypot(335-state.player.x,780-state.player.y)<155){enteredFarmFromDemo=true;openMode('farm');showPalmToast('🌱 Selamat datang di Lahan Demonstrasi!');return;}
   if(Math.hypot(500-state.player.x,450-state.player.y)<90){if(levelProgress(state.xp).level<2){$('missionDescription').textContent='🔒 Tambang Emas belum bisa dimasuki! Capai Level 2 — Penyuluh Pertanian Terampil terlebih dahulu.';return;}enterMine();return;}
   if(Math.hypot(1660-state.player.x,1030-state.player.y)<125){enterPalm();return;}
   const n=nearestNpc();
