@@ -779,16 +779,31 @@ function drawWorld(t=0){
  // area labels with subtle backing
  ctx.textAlign='left';ctx.font='900 20px Nunito';ctx.fillStyle='rgba(255,255,235,.72)';ctx.fillText('DESA SUKAMAJU',43,54);ctx.fillStyle='#315c37';ctx.fillText('DESA SUKAMAJU',40,51);
  ctx.font='bold 16px Nunito';ctx.fillStyle='#315c37';ctx.fillText('AREA PERSAWAHAN',1190,690);ctx.textAlign='center';ctx.font='900 17px Nunito';ctx.lineWidth=4;ctx.strokeStyle='rgba(95,70,43,.48)';ctx.strokeText('JALAN DESA',900,575);ctx.fillStyle='#fff4d8';ctx.fillText('JALAN DESA',900,575);
- // Truk Koperasi Desa Merah Putih berkeliling di jalan desa secara bolak-balik.
- // Diletakkan pada lapisan jalan, di belakang NPC dan pemain; dekoratif tanpa mengubah collision.
+ // Truk Kopdes mengikuti jaringan jalan desa, termasuk jalan vertikal dan akses BPP.
+ // Sprite selalu menghadap arah lajunya (depan truk tidak berjalan mundur).
+ // Rute berupa lintasan tersambung yang menyusuri setiap ruas jalan lalu kembali mengulang.
  if(kopdesTruckImage.complete&&kopdesTruckImage.naturalWidth>0){
-  const roadLeft=105,roadRight=1695,truckSpeed=58,travel=roadRight-roadLeft;
-  const phase=((Math.max(0,t)/1000*truckSpeed)%(travel*2));
-  const movingLeft=phase>travel;
-  const truckX=movingLeft?roadRight-(phase-travel):roadLeft+phase;
-  const truckW=158,truckH=truckW*kopdesTruckImage.naturalHeight/kopdesTruckImage.naturalWidth;
-  ctx.save();ctx.translate(truckX,570);
-  if(movingLeft)ctx.scale(-1,1);
+  const route=[
+   [70,570],[700,570],[700,80],[700,570],
+   [1140,570],[1140,258],[1140,570],
+   [1730,570],[700,570],[700,1160],[700,570],[70,570]
+  ];
+  const segments=[];let routeLength=0;
+  for(let i=0;i<route.length-1;i++){
+   const a=route[i],b=route[i+1],dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy);
+   segments.push({a,b,dx,dy,len,start:routeLength,angle:Math.atan2(dy,dx)});
+   routeLength+=len;
+  }
+  const truckSpeed=72;
+  let distance=((Math.max(0,t)/1000*truckSpeed)%routeLength);
+  let segment=segments[segments.length-1];
+  for(const s of segments){if(distance<=s.start+s.len){segment=s;break;}}
+  const progress=segment.len?(distance-segment.start)/segment.len:0;
+  const truckX=segment.a[0]+segment.dx*progress;
+  const truckY=segment.a[1]+segment.dy*progress;
+  // Lebar sprite disesuaikan dengan lebar jalan; saat di ruas vertikal ikut berputar.
+  const truckW=132,truckH=truckW*kopdesTruckImage.naturalHeight/kopdesTruckImage.naturalWidth;
+  ctx.save();ctx.translate(truckX,truckY);ctx.rotate(segment.angle);
   ctx.drawImage(kopdesTruckImage,-truckW/2,-truckH/2,truckW,truckH);
   ctx.restore();
  }
