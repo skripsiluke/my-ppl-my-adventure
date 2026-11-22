@@ -1874,12 +1874,15 @@ function drawBppPhone(t=0){
   ctx.fillStyle='#276044';ctx.font='bold 11px Nunito';ctx.fillText('Pilih aplikasi • LTT untuk laporan harian',480,535);
  }else if(bppPhoneStep==='ltt'){
   const done=state.lttReport.date===localGameDate();
-  ctx.fillStyle='#155b43';ctx.textAlign='center';ctx.font='bold 20px Nunito';ctx.fillText('LAPORAN LUAS TAMBAH TANAM',480,125);
-  ctx.fillStyle='#214b36';ctx.font='bold 13px Nunito';ctx.fillText('Desa: '+(state.lttReport.desa||'Desa Sukamaju'),480,157);
-  ctx.font='12px Nunito';ctx.fillText(done?'✓ Laporan hari ini sudah dikirim':'Isi data luas (hektare) untuk hari ini',480,183);
-  ctx.fillStyle='#fff';roundedRect(ctx,350,205,260,220,14,'#fff');ctx.fillStyle='#315b40';ctx.font='bold 12px Nunito';ctx.fillText('BERA  •  OLAH LAHAN  •  TANAM  •  PANEN',480,232);
-  ctx.fillText(done?'Laporan tersimpan':'Lengkapi empat kolom angka di bawah',480,400);
-  roundedRect(ctx,390,448,180,48,12,done?'#9aa99c':'#23834c');ctx.fillStyle='#fff';ctx.font='bold 14px Nunito';ctx.fillText(done?'SUDAH TERKIRIM':'KIRIM LAPORAN',480,477);
+  ctx.fillStyle='#155b43';ctx.textAlign='center';ctx.font='bold 19px Nunito';ctx.fillText('LAPORAN LTT',480,119);
+  ctx.fillStyle='#37664a';ctx.font='bold 11px Nunito';ctx.fillText('LUAS TAMBAH TANAM',480,139);
+  ctx.fillStyle='#214b36';ctx.font='bold 13px Nunito';ctx.fillText(state.lttReport.desa||'Desa Sukamaju',480,166);
+  ctx.font='11px Nunito';ctx.fillText(done?'✓ Laporan hari ini sudah terkirim':'Isi luas kegiatan hari ini (hektare)',480,185);
+  roundedRect(ctx,342,198,276,254,16,'#fff');
+  ctx.fillStyle='#315b40';ctx.font='bold 11px Nunito';ctx.fillText('DATA LUAS LAHAN (HA)',480,222);
+  ctx.fillStyle='#66806b';ctx.font='10px Nunito';ctx.fillText('Isi keempat kolom, gunakan 0 jika nihil',480,240);
+  ctx.fillStyle='#e8f2e5';roundedRect(ctx,356,252,248,1,1,'#e8f2e5');
+  ctx.fillStyle='#315b40';ctx.font='10px Nunito';ctx.fillText(done?'Data laporan tersimpan':'Periksa kembali angka sebelum mengirim',480,433);
  }else if(bppPhoneStep==='contacts'){
   ctx.fillStyle='#155b43';ctx.textAlign='center';ctx.font='bold 20px Nunito';ctx.fillText('KONTAK',480,125);
   const contacts=[['Pak Ketua','Ketua Kelompok Tani'],['Bu Rina','Anggota Kelompok Tani'],['Pak Asep','Peternak']];
@@ -1918,18 +1921,24 @@ function syncLttOverlay(){
  if(state.scene!=='phone'||bppPhoneStep!=='ltt'){closeLttOverlay();return;}
  const wrap=canvas.closest('.canvas-wrap');if(!wrap)return;
  if(!lttOverlay){
-  const panel=document.createElement('div');panel.id='lttPhoneForm';panel.style.cssText='position:absolute;z-index:30;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px;box-sizing:border-box;font-family:Nunito,Arial,sans-serif;';
-  const fields=[['bera','Bera (ha)'],['olahLahan','Olah Lahan (ha)'],['tanam','Tanam (ha)'],['panen','Panen (ha)']];
-  fields.forEach(([key,label])=>{const box=document.createElement('label');box.style.cssText='display:flex;flex-direction:column;gap:4px;color:#244b35;font-size:11px;font-weight:700;';box.textContent=label;const input=document.createElement('input');input.type='number';input.inputMode='decimal';input.min='0';input.step='0.01';input.placeholder='0';input.dataset.ltt=key;input.style.cssText='width:100%;height:36px;box-sizing:border-box;border:1px solid #b8cfb8;border-radius:8px;padding:5px 7px;font:700 15px Nunito,Arial;background:#fff;color:#183b27;';input.addEventListener('input',()=>{state.lttReport[key]=input.value;save();});box.appendChild(input);panel.appendChild(box);});
-  const desa=document.createElement('div');desa.textContent='Desa Sukamaju';desa.style.cssText='grid-column:1/-1;text-align:center;color:#1e5738;font-weight:800;font-size:12px;padding:2px;';panel.appendChild(desa);
+  const panel=document.createElement('div');panel.id='lttPhoneForm';
+  panel.style.cssText='position:absolute;z-index:30;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px 10px;padding:10px 12px;box-sizing:border-box;font-family:Nunito,Arial,sans-serif;background:transparent;';
+  const fields=[['bera','Bera (ha)'],['olahLahan','Olah lahan (ha)'],['tanam','Tanam (ha)'],['panen','Panen (ha)']];
+  fields.forEach(([key,label])=>{
+   const box=document.createElement('label');box.style.cssText='display:flex;min-width:0;flex-direction:column;gap:4px;color:#244b35;font-size:11px;line-height:1.2;font-weight:800;';box.textContent=label;
+   const input=document.createElement('input');input.type='number';input.inputMode='decimal';input.min='0';input.step='0.01';input.placeholder='0';input.dataset.ltt=key;
+   input.style.cssText='display:block;width:100%;min-width:0;height:38px;box-sizing:border-box;border:1px solid #b8cfb8;border-radius:9px;padding:6px 9px;font:700 15px Nunito,Arial,sans-serif;background:#fff;color:#183b27;outline-color:#23834c;';
+   input.addEventListener('input',()=>{state.lttReport[key]=input.value;save();});box.appendChild(input);panel.appendChild(box);
+  });
+  const desa=document.createElement('div');desa.textContent='Desa Sukamaju';desa.style.cssText='grid-column:1/-1;text-align:center;color:#1e5738;font-weight:800;font-size:11px;padding:1px 0 0;';panel.appendChild(desa);
+  const btn=document.createElement('button');btn.type='button';btn.dataset.lttSend='1';btn.style.cssText='grid-column:1/-1;width:100%;min-height:38px;border:0;border-radius:10px;background:#23834c;color:white;font:800 12px Nunito,Arial,sans-serif;padding:8px 10px;cursor:pointer;box-shadow:0 2px 5px rgba(20,70,40,.14);';panel.appendChild(btn);
   wrap.appendChild(panel);lttOverlay=panel;
  }
  const cr=canvas.getBoundingClientRect(),wr=wrap.getBoundingClientRect(),sx=cr.width/960,sy=cr.height/600;
- lttOverlay.style.left=(cr.left-wr.left+340*sx)+'px';lttOverlay.style.top=(cr.top-wr.top+238*sy)+'px';lttOverlay.style.width=(280*sx)+'px';lttOverlay.style.height=(195*sy)+'px';
+ lttOverlay.style.left=(cr.left-wr.left+344*sx)+'px';lttOverlay.style.top=(cr.top-wr.top+246*sy)+'px';lttOverlay.style.width=(272*sx)+'px';lttOverlay.style.height=(190*sy)+'px';
  lttOverlay.querySelectorAll('input[data-ltt]').forEach(input=>{if(document.activeElement!==input)input.value=state.lttReport[input.dataset.ltt]||'';input.disabled=state.lttReport.date===localGameDate();});
- const btn=document.createElement('button');btn.type='button';btn.textContent=state.lttReport.date===localGameDate()?'Laporan terkirim ✓':'Kirim Laporan • +5 XP';btn.style.cssText='grid-column:1/-1;border:0;border-radius:9px;background:#23834c;color:white;font-weight:800;font-size:13px;padding:8px;cursor:pointer;';
- if(!lttOverlay.querySelector('button'))lttOverlay.appendChild(btn);else lttOverlay.querySelector('button').textContent=btn.textContent;
- const send=lttOverlay.querySelector('button');send.disabled=state.lttReport.date===localGameDate();send.onclick=()=>{
+ const send=lttOverlay.querySelector('button[data-ltt-send]');send.textContent=state.lttReport.date===localGameDate()?'Laporan Terkirim ✓':'Kirim Laporan  •  +5 XP';send.disabled=state.lttReport.date===localGameDate();send.style.opacity=send.disabled?'.7':'1';
+ send.onclick=()=>{
   if(state.lttReport.date===localGameDate())return;
   const keys=['bera','olahLahan','tanam','panen'];
   if(keys.some(k=>String(state.lttReport[k]??'').trim()===''||!Number.isFinite(Number(state.lttReport[k]))||Number(state.lttReport[k])<0)){showPalmToast('Lengkapi semua kolom dengan angka 0 atau lebih.');return;}
@@ -1939,7 +1948,6 @@ function syncLttOverlay(){
 function handleBppPhoneClick(x,y){
  if(bppPhoneStep==='home'&&x>=335&&x<=450&&y>=150&&y<=270){bppPhoneStep='contacts';drawWorld();return;}
  if(bppPhoneStep==='home'&&x>=335&&x<=445&&y>=410&&y<=500){bppPhoneStep='ltt';drawWorld();return;}
- if(bppPhoneStep==='ltt'&&x>=385&&x<=575&&y>=440&&y<=505){syncLttOverlay();const send=lttOverlay&&lttOverlay.querySelector('button');if(send)send.click();return;}
  if(bppPhoneStep==='contacts'&&x>=340&&x<=620&&y>=165&&y<=265){bppPhoneStep='contact';drawWorld();return;}
  if(bppPhoneStep==='contact'&&x>=400&&x<=560&&y>=375&&y<=450){bppPhoneStep='calling';drawWorld();return;}
  if(bppPhoneStep==='calling'&&x>=350&&x<=610&&y>=375&&y<=460){bppPhoneStep='message';drawWorld();return;}
