@@ -433,3 +433,8 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Menambahkan NPC khusus PPL Monitoring di sekitar Kios Pertanian dengan area patroli terbatas.
 - Menambahkan misi Monitoring Harga Pupuk Bersubsidi dengan lima tahapan, total 50 XP, tanpa hadiah koin.
 - Progres misi disimpan dan dapat dilanjutkan setelah permainan dimuat ulang.
+
+
+## v0.20.83
+- Perbaikan formulir LTT pada HP: seluruh kontrol HTML diskalakan bersama canvas agar tetap berada di dalam layar ponsel.
+- Menghapus tombol kirim duplikat yang sebelumnya digambar pada canvas; hanya satu tombol Kirim Laporan pada formulir.
