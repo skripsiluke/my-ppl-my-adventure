@@ -446,3 +446,8 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 ## v0.20.83
 - Perbaikan formulir LTT pada HP: seluruh kontrol HTML diskalakan bersama canvas agar tetap berada di dalam layar ponsel.
 - Menghapus tombol kirim duplikat yang sebelumnya digambar pada canvas; hanya satu tombol Kirim Laporan pada formulir.
+
+
+## v0.20.86
+- Memperbaiki urutan kontrol Adventure pada Android secara struktural: joystick dan tombol INTERAKSI ditempatkan tepat setelah scene gameplay dan sebelum kartu misi.
+- Urutan desktop dipertahankan seperti sebelumnya.
