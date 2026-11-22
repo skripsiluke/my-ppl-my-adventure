@@ -541,7 +541,7 @@ const npcs=[
 if(state.catQuestNpcId!=='catcaretaker'){state.catQuestNpcId='catcaretaker';save();}
 const buildings=[
 {x:180,y:235,w:150,h:110,name:'Rumah Bu Rina',roof:'#a65f3e',wall:'#f1dfb7',door:'#6b986b'},
-{x:500,y:1000,w:170,h:125,name:'Balai Kelompok Tani',roof:'#9b5638',wall:'#f4e5bd',door:'#5d8c63'},
+{x:380,y:1000,w:170,h:125,name:'Balai Kelompok Tani',roof:'#9b5638',wall:'#f4e5bd',door:'#5d8c63'},
 {x:1420,y:180,w:150,h:110,name:'Kios Pertanian',roof:'#b36c3e',wall:'#f5e6c7',door:'#638e68'},
 {x:1450,y:420,w:190,h:105,name:'Koperasi Desa Merah Putih Sukamaju',type:'kopdes',roof:'#b9c4c8',wall:'#f0f1ed',door:'#a8322c'},
 {x:2000,y:800,w:230,h:150,name:'Satuan Pelayanan Pemenuhan Gizi (SPPG)',type:'sppg',roof:'#0879c9',wall:'#f2f4f1',door:'#277db2'},
@@ -772,7 +772,7 @@ function drawWorld(t=0){
  ctx.fillStyle='#315b39';ctx.font=isTouchScreen?'bold 9px Nunito':'bold 10px Nunito';ctx.textAlign='center';ctx.fillText(entryLabel,1140,265);
 
  // signboards and lamp posts
- ctx.fillStyle='#68482e';ctx.fillRect(578,962,5,25);roundedRect(ctx,512,935,138,34,5,'#f2dfad');ctx.strokeStyle='#d5bd86';ctx.lineWidth=1;ctx.strokeRect(512,935,138,34);ctx.fillStyle='#315b39';ctx.font='bold 9px Nunito';ctx.textAlign='center';ctx.fillText('BALAI KELOMPOK',581,949);ctx.fillText('TANI',581,961);
+ ctx.fillStyle='#68482e';ctx.fillRect(458,962,5,25);roundedRect(ctx,392,935,138,34,5,'#f2dfad');ctx.strokeStyle='#d5bd86';ctx.lineWidth=1;ctx.strokeRect(392,935,138,34);ctx.fillStyle='#315b39';ctx.font='bold 9px Nunito';ctx.textAlign='center';ctx.fillText('BALAI KELOMPOK',461,949);ctx.fillText('TANI',461,961);
  ctx.fillStyle='#68482e';ctx.fillRect(1590,495,5,60);ctx.fillStyle='#f7e4a8';ctx.beginPath();ctx.arc(1592,490,10,0,Math.PI*2);ctx.fill();
  // Peternakan desa: kandang kecil di pojok tenggara persimpangan jalan desa dan jalan setapak BPP.
  // Diletakkan di area kosong, terpisah dari jalur pejalan kaki dan lahan tanaman.
