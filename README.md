@@ -387,6 +387,14 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Penyesuaian tetap mempertahankan bangunan SPPG, kendaraan, sungai, dan progres penyimpanan permainan.
 
 
-## Update v0.20.68
+## Update v0.20.70
 - Balai Kelompok Tani digeser ke kiri dari X=600 menjadi X=500 (Y tetap 1000) agar tidak bertumpuk dengan jalan.
 - Papan nama dan tiang penyangga ikut disesuaikan dengan posisi bangunan.
+
+
+## Update v0.20.71
+- Menambahkan Motor PPL bergaya Honda CRF sebagai kendaraan yang dapat dinaiki di tepi jalan utama desa.
+- Tekan E / INTERAKSI saat dekat motor untuk naik; gunakan WASD, tombol panah, atau analog untuk berkendara.
+- XP: +1 saat motor pertama kali mulai berjalan, lalu +3 XP setiap 30 detik selama berkendara.
+- Tekan E / INTERAKSI untuk memarkir motor dan turun. Motor dapat digunakan berulang kali dan tidak menambah jumlah 12 misi reguler Adventure.
+- Posisi motor terakhir disimpan; status sedang mengendarai tidak dipertahankan saat halaman dimuat ulang.
