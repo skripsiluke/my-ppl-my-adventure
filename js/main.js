@@ -804,7 +804,14 @@ function drawWorld(t=0){
   // Sprite truk sumber menghadap ke kanan. Putar mengikuti arah ruas jalan,
   // sehingga bagian depan selalu searah laju pada ruas horizontal maupun vertikal.
   const truckW=164,truckH=truckW*kopdesTruckImage.naturalHeight/kopdesTruckImage.naturalWidth;
-  ctx.save();ctx.translate(truckX,truckY);ctx.rotate(segment.angle);
+  ctx.save();ctx.translate(truckX,truckY);
+  if(Math.abs(segment.dx)>=Math.abs(segment.dy)){
+   // Jalan horizontal: cukup cerminkan kiri-kanan, jangan putar 180 derajat.
+   if(segment.dx<0)ctx.scale(-1,1);
+  }else{
+   // Jalan vertikal: pertahankan orientasi tegak/rotasi yang sudah benar.
+   ctx.rotate(segment.angle);
+  }
   ctx.drawImage(kopdesTruckImage,-truckW/2,-truckH/2,truckW,truckH);
   ctx.restore();
 
@@ -818,7 +825,12 @@ function drawWorld(t=0){
   const ojolX=ojolSegment.a[0]+ojolSegment.dx*ojolProgress;
   const ojolY=ojolSegment.a[1]+ojolSegment.dy*ojolProgress;
   // Bagian depan motor berada pada sumbu +X; rotasi mengikuti arah jalan.
-  ctx.save();ctx.translate(ojolX,ojolY);ctx.rotate(ojolSegment.angle);
+  ctx.save();ctx.translate(ojolX,ojolY);
+  if(Math.abs(ojolSegment.dx)>=Math.abs(ojolSegment.dy)){
+   if(ojolSegment.dx<0)ctx.scale(-1,1);
+  }else{
+   ctx.rotate(ojolSegment.angle);
+  }
   // Bayangan dan roda
   ctx.fillStyle='rgba(43,55,39,.22)';ctx.beginPath();ctx.ellipse(0,11,22,5,0,0,Math.PI*2);ctx.fill();
   ctx.fillStyle='#20272a';
@@ -843,7 +855,12 @@ function drawWorld(t=0){
   const carProgress=carSegment.len?(carDistance-carSegment.start)/carSegment.len:0;
   const carX=carSegment.a[0]+carSegment.dx*carProgress;
   const carY=carSegment.a[1]+carSegment.dy*carProgress;
-  ctx.save();ctx.translate(carX,carY);ctx.rotate(carSegment.angle);
+  ctx.save();ctx.translate(carX,carY);
+  if(Math.abs(carSegment.dx)>=Math.abs(carSegment.dy)){
+   if(carSegment.dx<0)ctx.scale(-1,1);
+  }else{
+   ctx.rotate(carSegment.angle);
+  }
   ctx.fillStyle='rgba(43,55,39,.22)';ctx.beginPath();ctx.ellipse(0,10,27,6,0,0,Math.PI*2);ctx.fill();
   ctx.fillStyle='#f2f0e7';ctx.beginPath();
   ctx.moveTo(-25,-5);ctx.lineTo(-17,-13);ctx.lineTo(8,-13);ctx.lineTo(20,-5);
