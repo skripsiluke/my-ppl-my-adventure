@@ -436,6 +436,34 @@ const SETTINGS_KEY='myPplMyAdventure.settings.v1';
 const bgm=$('bgmAudio');
 const audioSettings={bgmEnabled:true,bgmVolume:0.7,mobileControl:'arrows'};
 let gameStarted=false;
+// Simpan status pemutaran sebelum halaman masuk latar belakang agar BGM hanya
+// dilanjutkan jika memang sedang diputar sebelumnya dan pengguna belum mematikannya.
+let bgmPausedForBackground=false;
+function pauseBgmForBackground(){
+  if(!bgm || document.visibilityState==='visible' && document.hasFocus())return;
+  if(!bgm.paused){
+    bgmPausedForBackground=true;
+    bgm.pause();
+  }
+}
+function resumeBgmAfterBackground(){
+  if(!bgm || !bgmPausedForBackground)return;
+  if(document.visibilityState==='hidden' || !document.hasFocus())return;
+  bgmPausedForBackground=false;
+  if(!gameStarted || !audioSettings.bgmEnabled || audioSettings.bgmVolume===0)return;
+  bgm.volume=audioSettings.bgmVolume;
+  bgm.muted=false;
+  const result=bgm.play();
+  if(result&&typeof result.catch==='function')result.catch(()=>{});
+}
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden')pauseBgmForBackground();
+  else resumeBgmAfterBackground();
+});
+window.addEventListener('pagehide',pauseBgmForBackground);
+window.addEventListener('pageshow',resumeBgmAfterBackground);
+window.addEventListener('blur',pauseBgmForBackground);
+window.addEventListener('focus',resumeBgmAfterBackground);
 function saveAudioSettings(){
   try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(audioSettings));}catch(e){}
 }
@@ -461,7 +489,7 @@ function applyBgmSettings(){
   bgm.muted=!audioSettings.bgmEnabled || audioSettings.bgmVolume===0;
   if(!audioSettings.bgmEnabled || audioSettings.bgmVolume===0){
     bgm.pause();
-  }else if(gameStarted){
+  }else if(gameStarted && document.visibilityState!=='hidden' && document.hasFocus() && !bgmPausedForBackground){
     const result=bgm.play();
     if(result&&typeof result.catch==='function')result.catch(()=>{});
   }
@@ -480,7 +508,7 @@ function loadAudioSettings(){
 }
 function startBgm(){
   gameStarted=true;
-  if(!bgm||!audioSettings.bgmEnabled||audioSettings.bgmVolume===0)return;
+  if(!bgm||!audioSettings.bgmEnabled||audioSettings.bgmVolume===0||document.visibilityState==='hidden'||!document.hasFocus())return;
   bgm.volume=audioSettings.bgmVolume;
   bgm.muted=false;
   const result=bgm.play();

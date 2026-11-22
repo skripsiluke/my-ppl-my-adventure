@@ -451,3 +451,9 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 ## v0.20.86
 - Memperbaiki urutan kontrol Adventure pada Android secara struktural: joystick dan tombol INTERAKSI ditempatkan tepat setelah scene gameplay dan sebelum kartu misi.
 - Urutan desktop dipertahankan seperti sebelumnya.
+
+
+## v0.20.87
+- BGM otomatis dijeda saat halaman game masuk latar belakang, tab berpindah, jendela kehilangan fokus, atau perangkat menyembunyikan halaman.
+- BGM dilanjutkan saat pengguna kembali hanya jika sebelumnya sedang diputar dan pengaturan BGM masih aktif.
+- Jika pengguna mematikan BGM, game tidak menyalakannya kembali secara otomatis.
