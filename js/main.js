@@ -987,6 +987,8 @@ function drawWorld(t=0){
   ctx.save();ctx.translate(bx,by);
   // Sama seperti NPC kendaraan: horizontal dicerminkan, vertikal diputar mengikuti ruas jalan.
   if(orientation==='left')ctx.scale(-1,1);else if(orientation==='up')ctx.rotate(-Math.PI/2);else if(orientation==='down')ctx.rotate(Math.PI/2);
+  // Perkecil keseluruhan motor beserta pengendara agar proporsional dengan karakter dan kendaraan NPC.
+  ctx.scale(.60,.60);
   ctx.fillStyle='rgba(40,48,34,.22)';ctx.beginPath();ctx.ellipse(0,18,64,9,0,0,Math.PI*2);ctx.fill();
   ctx.drawImage(motorPplImage,-67,-52,134,88);
   if(bike.riding){

@@ -398,3 +398,13 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - XP: +1 saat motor pertama kali mulai berjalan, lalu +3 XP setiap 30 detik selama berkendara.
 - Tekan E / INTERAKSI untuk memarkir motor dan turun. Motor dapat digunakan berulang kali dan tidak menambah jumlah 12 misi reguler Adventure.
 - Posisi motor terakhir disimpan; status sedang mengendarai tidak dipertahankan saat halaman dimuat ulang.
+
+
+## Update v0.20.73
+- Ukuran visual Motor PPL beserta pengendara diperkecil sekitar 18% agar lebih proporsional dengan karakter dan kendaraan NPC.
+- Tidak mengubah posisi motor, kecepatan, kontrol, atau sistem hadiah XP.
+
+
+## Update v0.20.74
+- Ukuran tampilan motor PPL beserta pengendara diperkecil menjadi 60% dari ukuran dasar agar lebih proporsional dengan karakter dan kendaraan NPC.
+- Kontrol, kecepatan, orientasi, serta sistem hadiah XP motor tidak diubah.
