@@ -1874,9 +1874,11 @@ function drawBppPhone(t=0){
   ctx.fillStyle='#276044';ctx.font='bold 11px Nunito';ctx.fillText('Pilih aplikasi • LTT untuk laporan harian',480,535);
  }else if(bppPhoneStep==='ltt'){
   const done=state.lttReport.date===localGameDate();
-  ctx.fillStyle='#155b43';ctx.textAlign='center';ctx.font='bold 20px Nunito';ctx.fillText('LAPORAN LUAS TAMBAH TANAM',480,125);
-  ctx.fillStyle='#214b36';ctx.font='bold 13px Nunito';ctx.fillText('Desa: '+(state.lttReport.desa||'Desa Sukamaju'),480,157);
-  ctx.font='12px Nunito';ctx.fillText(done?'✓ Laporan hari ini sudah dikirim':'Isi data luas (hektare) untuk hari ini',480,183);
+  ctx.fillStyle='#155b43';ctx.textAlign='center';ctx.font='bold 18px Nunito';
+  ctx.fillText('LAPORAN LUAS',480,116);
+  ctx.fillText('TAMBAH TANAM',480,139);
+  ctx.fillStyle='#214b36';ctx.font='bold 13px Nunito';ctx.fillText('Desa: '+(state.lttReport.desa||'Desa Sukamaju'),480,169);
+  ctx.font='12px Nunito';ctx.fillText(done?'✓ Laporan hari ini sudah dikirim':'Isi data luas (hektare) untuk hari ini',480,190);
   ctx.fillStyle='#fff';roundedRect(ctx,350,205,260,220,14,'#fff');ctx.fillStyle='#315b40';ctx.font='bold 12px Nunito';ctx.fillText('BERA  •  OLAH LAHAN  •  TANAM  •  PANEN',480,232);
   ctx.fillStyle='#315b40';ctx.font='11px Nunito';ctx.fillText(done?'Laporan tersimpan':'Lengkapi data pada formulir',480,400);
  }else if(bppPhoneStep==='camera'){

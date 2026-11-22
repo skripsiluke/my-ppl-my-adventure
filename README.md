@@ -1,3 +1,6 @@
+## Update v0.20.84
+- Judul LTT pada layar HP penyuluh dipecah menjadi dua baris: “LAPORAN LUAS” dan “TAMBAH TANAM”, dengan ukuran dan jarak yang disesuaikan agar tidak melebar keluar layar.
+
 ## Update v0.20.80
 - Menghapus tombol overlay “Keluar Kios” yang menumpuk/tersangkut. Keluar dari interior kios sekarang menggunakan tombol E saat pemain berada di dekat pintu.
 - Misi Monitoring Harga Pupuk Bersubsidi dapat diulang satu kali per hari kalender lokal. Setelah laporan diserahkan, misi baru tersedia pada hari berikutnya.
