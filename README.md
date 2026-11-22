@@ -1,3 +1,8 @@
+## Update v0.20.85
+- Pada tampilan HP/Android, kontrol gerak (joystick/arah) dan tombol INTERAKSI dipindahkan tepat di bawah scene gameplay.
+- Kartu Misi Adventure dipindahkan ke bawah kontrol agar kontrol lebih dekat dengan area permainan.
+- Tata letak desktop tidak diubah.
+
 ## Update v0.20.84
 - Judul LTT pada layar HP penyuluh dipecah menjadi dua baris: “LAPORAN LUAS” dan “TAMBAH TANAM”, dengan ukuran dan jarak yang disesuaikan agar tidak melebar keluar layar.
 
