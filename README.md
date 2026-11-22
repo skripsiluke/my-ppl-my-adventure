@@ -1,3 +1,8 @@
+## Update v0.20.79
+- Menghapus tombol overlay “Keluar Kios” yang menumpuk/tersangkut. Keluar dari interior kios sekarang menggunakan tombol E saat pemain berada di dekat pintu.
+- Misi Monitoring Harga Pupuk Bersubsidi dapat diulang satu kali per hari kalender lokal. Setelah laporan diserahkan, misi baru tersedia pada hari berikutnya.
+- Hadiah setiap penyelesaian tetap 50 XP (5 tahap × 10 XP), tanpa hadiah koin tambahan.
+
 ## Update v0.20.78
 - Misi Monitoring Harga Pupuk Bersubsidi: setelah menerima tugas dari PPL Monitoring, pemain langsung berpindah ke interior Kios Pertanian bersama NPC PPL.
 - Interior kios dilengkapi rak dan karung pupuk Urea/NPK, papan harga, meja pelayanan, Pak Hasan, serta pintu keluar.

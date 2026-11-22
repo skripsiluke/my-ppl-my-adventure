@@ -40,6 +40,18 @@ function applyMineXpPenalty(amount){
   if(hud)hud.textContent='⭐ '+state.xp+' XP';
   return state.xp;
 }
+function localGameDate(){
+  const d=new Date();const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return y+'-'+m+'-'+day;
+}
+function refreshKiosDailyMission(){
+  const q=state.kiosMonitoring;const today=localGameDate();
+  if(q.completedDate===today){q.done=true;q.stage=6;return;}
+  if(q.lastResetDate!==today){
+    // Misi monitoring dapat dimulai kembali pada tanggal kalender berikutnya.
+    q.stage=0;q.done=false;q.lastResetDate=today;
+    save();
+  }
+}
 function save(){
   localStorage.setItem(KEY, JSON.stringify({
     name:state.name,
@@ -102,6 +114,10 @@ function load(){
   state.bppCoffeeStep=Math.max(0,Math.min(3,Number(state.bppCoffeeStep)||0));state.bppCoffeeDone=!!state.bppCoffeeDone;
   state.kiosMonitoring=state.kiosMonitoring&&typeof state.kiosMonitoring==='object'?state.kiosMonitoring:{stage:0,done:false};
   state.kiosMonitoring.stage=Math.max(0,Math.min(6,Number(state.kiosMonitoring.stage)||0));state.kiosMonitoring.done=!!state.kiosMonitoring.done||state.kiosMonitoring.stage>=6;
+  // Simpan tanggal selesai lama agar pembaruan versi tidak langsung mengulang misi pada hari yang sama.
+  if(state.kiosMonitoring.done&&!state.kiosMonitoring.completedDate)state.kiosMonitoring.completedDate=localGameDate();
+  state.kiosMonitoring.lastResetDate=state.kiosMonitoring.lastResetDate||localGameDate();
+  refreshKiosDailyMission();
   state.farmPlots=Array.isArray(state.farmPlots)?state.farmPlots:Array.from({length:6},()=>({crop:null,stage:0,watered:false,fertilized:false,plantedAt:0}));
   while(state.farmPlots.length<6)state.farmPlots.push({crop:null,stage:0,watered:false,fertilized:false,plantedAt:0});
   state.farmSeeds=state.farmSeeds&&typeof state.farmSeeds==='object'?state.farmSeeds:{padi:3,jagung:2,cabai:1};state.farmPesticides=Math.max(0,Number(state.farmPesticides)||0);if(!state.farmPesticideStarterGranted){state.farmPesticides+=2;state.farmPesticideStarterGranted=true;}
@@ -763,12 +779,12 @@ function drawKios(t=0){
  const q=state.kiosMonitoring;let hint='';
  if(Math.hypot(state.player.x-330,state.player.y-330)<105&&(q.stage===1||q.stage===2))hint='E • Bicara dengan Pak Hasan';
  else if(Math.hypot(state.player.x-710,state.player.y-330)<105&&(q.stage>=4||q.stage===5))hint='E • Bicara dengan PPL Monitoring';
- else if(state.player.y>480)hint='E • Keluar ke Desa Sukamaju';
+ else if(Math.hypot(state.player.x-480,state.player.y-550)<125)hint='E • Keluar ke Desa Sukamaju';
  if(hint){ctx.save();ctx.font='bold 12px Nunito';ctx.textAlign='center';const bw=Math.max(170,ctx.measureText(hint).width+24);roundedRect(ctx,Math.max(8,Math.min(w-bw-8,state.player.x-bw/2)),state.player.y-90,bw,28,10,'rgba(255,255,245,.97)');ctx.fillStyle='#174d32';ctx.fillText(hint,state.player.x,state.player.y-72);ctx.restore();}
 }
 function kiosInteract(){
  const q=state.kiosMonitoring;
- if(state.player.y>475){exitKiosScene();return;}
+ if(Math.hypot(state.player.x-480,state.player.y-550)<95){exitKiosScene();return;}
  if((q.stage===1||q.stage===2)&&Math.hypot(state.player.x-330,state.player.y-330)<112){
   openNpcDialog({id:'kios',name:'Pak Hasan',emoji:'🧑‍🌾',role:'Pemilik Kios Pertanian'});return;
  }
@@ -778,6 +794,7 @@ function kiosInteract(){
  showPalmToast('Dekati Pak Hasan atau PPL Monitoring untuk berinteraksi.');
 }
 function drawWorld(t=0){
+ if(state.scene==='village')refreshKiosDailyMission();
  if(state.scene==='mine'){drawMine(t);return;}if(state.scene==='palm'){drawPalm(t);return;}if(state.scene==='bpp'){drawBpp(t);updateBppBackButton();return;}if(state.scene==='pc'){drawBppPc(t);updateBppBackButton();return;}if(state.scene==='coffee'){drawBppCoffee(t);updateBppBackButton();return;}if(state.scene==='phone'){drawBppPhone(t);updateBppBackButton();return;}if(state.scene==='kios'){drawKios(t);updateBppBackButton();return;}
  const camX=Math.max(0,Math.min(WORLD.w-canvas.width,state.player.x-canvas.width/2));
  const camY=Math.max(0,Math.min(WORLD.h-canvas.height,state.player.y-canvas.height/2));
@@ -1338,14 +1355,14 @@ function updateBppBackButton(){
   btn.setAttribute('aria-label','Kembali ke kantor BPP');
   const wrap=canvas.closest('.canvas-wrap');if(wrap)wrap.appendChild(btn);
   btn.addEventListener('click',()=>{
-   if(state.scene==='kios'){exitKiosScene();return;}
    if(state.scene==='pc'||state.scene==='coffee'||state.scene==='phone'){closeBppPortal();state.scene='bpp';state.keys={};state.analog={x:0,y:0};bppPcWindow=null;save();drawWorld();}
   });
  }
- btn.textContent=state.scene==='kios'?'← Keluar Kios':'← Kembali';
- btn.classList.toggle('active',state.scene==='pc'||state.scene==='coffee'||state.scene==='phone'||state.scene==='kios');
+ btn.textContent='← Kembali';
+ // Tombol overlay tidak ditampilkan di interior kios; keluar dilakukan dengan tombol E di pintu.
+ btn.classList.toggle('active',state.scene==='pc'||state.scene==='coffee'||state.scene==='phone');
  btn.classList.toggle('coffee-scene',state.scene==='coffee'||state.scene==='phone');
- btn.classList.toggle('kios-scene',state.scene==='kios');
+ btn.classList.remove('kios-scene');
 }
 function enterBppCoffee(){
  state.scene='coffee';bppCoffeeStepRun=0;bppCoffeeAnimUntil=0;bppCoffeeDrag=null;bppCoffeeCupX=835;
@@ -1893,7 +1910,7 @@ function handleBppPhoneClick(x,y){
  if(bppPhoneStep==='done'&&x>=380&&x<=580&&y>=350&&y<=435){state.scene='bpp';state.keys={};state.analog={x:0,y:0};save();drawWorld();return;}
 }
 function enterMine(){state.returnPosition={x:state.player.x,y:state.player.y};state.scene='mine';mineMonster=null;mineBoss=null;mineTreasureChest=null;mineBossWarningAt=0;mineCommonSpawnCount=0;minePickaxeOwned=false;minePickaxeHitAt=0;mineLastFrame=0;mineNextMonsterAt=performance.now()+6500;mineHitCooldown=0;mineRespawnQueue=[];state.player={x:canvas.width*.5,y:canvas.height-180};if(!state.mineNodes.length)state.mineNodes=[[canvas.width*.28,canvas.height*.38],[canvas.width*.72,canvas.height*.34],[canvas.width*.5,canvas.height*.68],[canvas.width*.82,canvas.height*.7],[canvas.width*.18,canvas.height*.72]];else state.mineNodes=state.mineNodes.map((pt,i)=>pt||[[canvas.width*.28,canvas.height*.38],[canvas.width*.72,canvas.height*.34],[canvas.width*.5,canvas.height*.68],[canvas.width*.82,canvas.height*.7],[canvas.width*.18,canvas.height*.72]][i%5]);save();const md=$('missionDescription');if(md)md.textContent='⛏️ PERLENGKAPAN TAMBANG: Dekati Kapak Tambang di dekat jalur masuk lalu tekan E / INTERAKSI untuk mengambilnya sebelum melawan Boss Kelabang!';}
-function nearestNpc(){let best=null,dist=Infinity;for(const n of npcs){if(n.id==='pplmonitor'&&state.kiosMonitoring.stage>0)continue;const d=Math.hypot(n.x-state.player.x,n.y-state.player.y);if(d<dist){dist=d;best=n;}}return best;}
+function nearestNpc(){refreshKiosDailyMission();let best=null,dist=Infinity;for(const n of npcs){if(n.id==='pplmonitor'&&state.kiosMonitoring.stage>0)continue;const d=Math.hypot(n.x-state.player.x,n.y-state.player.y);if(d<dist){dist=d;best=n;}}return best;}
 function blocked(x,y){
  if(state.scene==='mine'||state.scene==='palm'||state.scene==='bpp')return false;
  // Jembatan kayu di pertemuan jalan desa dan sungai: bebaskan area dek
@@ -1991,6 +2008,7 @@ function awardMonitoringXP(){
  else playSound('success');
 }
 function openNpcDialog(n){
+  refreshKiosDailyMission();
   stopWorld();dialogOpen=true;$('dialog').classList.remove('hidden');$('dialogEmoji').textContent=n.emoji;$('dialogEyebrow').textContent=n.role.toUpperCase();$('dialogChoices').innerHTML='';$('closeDialog').classList.add('hidden');
  if(n.id==='pplmonitor'){
    const q=state.kiosMonitoring;
@@ -2016,7 +2034,7 @@ function openNpcDialog(n){
      addChoice('Isi dan kirim formulir monitoring.',true,()=>{q.stage=5;awardMonitoringXP();save();$('dialogText').textContent='Formulir monitoring berhasil diisi. Sekarang serahkan laporan akhir kepada saya untuk menyelesaikan tugas.';});
    }else{
      $('dialogText').textContent='Formulir sudah terkirim. Silakan serahkan laporan akhir monitoring kepada saya.';
-     addChoice('Serahkan laporan monitoring.',true,()=>{if(!q.done){q.done=true;q.stage=6;awardMonitoringXP();save();$('dialogText').textContent='Laporan monitoring diterima. Terima kasih sudah memeriksa harga, stok, dan melakukan konfirmasi kepada petani. Total hadiah misi: 50 XP.';updateStats();}});
+     addChoice('Serahkan laporan monitoring.',true,()=>{if(!q.done){q.done=true;q.stage=6;q.completedDate=localGameDate();awardMonitoringXP();save();$('dialogText').textContent='Laporan monitoring diterima. Terima kasih sudah memeriksa harga, stok, dan melakukan konfirmasi kepada petani. Total hadiah misi: 50 XP.';updateStats();}});
    }
  }
  else if(n.id==='kios'&&state.kiosMonitoring.stage===1){
