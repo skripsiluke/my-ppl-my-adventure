@@ -10,6 +10,8 @@ const bppWallPortraits=new Image();
 bppWallPortraits.src='assets/images/bpp-wall-portraits.png';
 const kopdesTruckImage=new Image();
 kopdesTruckImage.src='assets/images/kopdes-truck.png';
+const sppgTruckImage=new Image();
+sppgTruckImage.src='assets/images/sppg-truck.png';
 const FIRST_LEVEL_XP=150, XP_PER_LEVEL=250;
 function xpThreshold(level){return level<=1?0:FIRST_LEVEL_XP+(level-2)*XP_PER_LEVEL;}
 function levelFromXP(xp){let level=1;while(xp>=xpThreshold(level+1))level++;return level;}
@@ -542,6 +544,7 @@ const buildings=[
 {x:800,y:1200,w:170,h:125,name:'Balai Kelompok Tani',roof:'#9b5638',wall:'#f4e5bd',door:'#5d8c63'},
 {x:1420,y:180,w:150,h:110,name:'Kios Pertanian',roof:'#b36c3e',wall:'#f5e6c7',door:'#638e68'},
 {x:1450,y:420,w:190,h:105,name:'Koperasi Desa Merah Putih Sukamaju',type:'kopdes',roof:'#b9c4c8',wall:'#f0f1ed',door:'#a8322c'},
+{x:2000,y:800,w:230,h:150,name:'Satuan Pelayanan Pemenuhan Gizi (SPPG)',type:'sppg',roof:'#0879c9',wall:'#f2f4f1',door:'#277db2'},
 {x:1030,y:95,w:220,h:145,name:'BPP Kecamatan Sukasenang',type:'bpp',roof:'#4d8051',wall:'#e8efcf',door:'#477e50'}
 ];
 const obstacles=[...buildings.map(b=>({x:b.x-5,y:b.y-15,w:b.w+10,h:b.h+20})),{x:990,y:720,w:600,h:280},
@@ -559,6 +562,30 @@ function drawTree(x,y){
  ctx.fillStyle='rgba(220,244,150,.42)';ctx.beginPath();ctx.arc(x-9,y-20,6,0,Math.PI*2);ctx.fill();
 }
 function drawHouse(b){
+ if(b.type==='sppg'){
+   // Gedung SPPG: fasad putih-biru dan atap genteng biru mengikuti foto referensi.
+   ctx.fillStyle='rgba(48,69,42,.22)';ctx.beginPath();ctx.ellipse(b.x+b.w/2,b.y+b.h+11,b.w*.64,14,0,0,Math.PI*2);ctx.fill();
+   roundedRect(ctx,b.x-5,b.y+28,b.w+10,b.h-18,5,'#c9d4d7');
+   ctx.fillStyle='#f4f5f2';ctx.fillRect(b.x,b.y+30,b.w,b.h-23);
+   ctx.fillStyle='#0879c9';ctx.fillRect(b.x,b.y+88,b.w,b.h-81);
+   ctx.fillStyle='#075da9';ctx.fillRect(b.x,b.y+111,b.w,b.h-104);
+   // Atap limasan biru dengan garis genteng.
+   ctx.fillStyle='#07518e';ctx.beginPath();ctx.moveTo(b.x-20,b.y+35);ctx.lineTo(b.x+22,b.y-15);ctx.lineTo(b.x+b.w*.53,b.y-49);ctx.lineTo(b.x+b.w-18,b.y-12);ctx.lineTo(b.x+b.w+20,b.y+35);ctx.closePath();ctx.fill();
+   ctx.fillStyle='#1688d0';ctx.beginPath();ctx.moveTo(b.x-13,b.y+30);ctx.lineTo(b.x+27,b.y-12);ctx.lineTo(b.x+b.w*.53,b.y-43);ctx.lineTo(b.x+b.w-22,b.y-9);ctx.lineTo(b.x+b.w+13,b.y+30);ctx.closePath();ctx.fill();
+   ctx.strokeStyle='rgba(210,239,255,.55)';ctx.lineWidth=2;
+   for(let k=0;k<12;k++){const xx=b.x+12+k*18;ctx.beginPath();ctx.moveTo(xx,b.y+24);ctx.lineTo(b.x+b.w*.53+(xx-(b.x+b.w*.53))*.22,b.y-39);ctx.stroke();}
+   // Papan nama di bagian depan.
+   ctx.fillStyle='#f5f5ef';ctx.fillRect(b.x-22,b.y+27,b.w+44,22);
+   ctx.fillStyle='#173d70';ctx.font='bold 11px Nunito';ctx.textAlign='center';ctx.fillText('SATUAN PELAYANAN PEMENUHAN GIZI',b.x+b.w/2,b.y+42);
+   // Pintu kaca tengah dan jendela kiri-kanan.
+   ctx.fillStyle='#202f3b';ctx.fillRect(b.x+12,b.y+64,64,40);ctx.fillRect(b.x+b.w-76,b.y+64,64,40);
+   ctx.fillStyle='#9ccbdc';ctx.fillRect(b.x+15,b.y+67,58,34);ctx.fillRect(b.x+b.w-73,b.y+67,58,34);
+   ctx.strokeStyle='#263a48';ctx.lineWidth=2;for(let k=1;k<4;k++){ctx.beginPath();ctx.moveTo(b.x+15+k*14,b.y+67);ctx.lineTo(b.x+15+k*14,b.y+101);ctx.moveTo(b.x+b.w-73+k*14,b.y+67);ctx.lineTo(b.x+b.w-73+k*14,b.y+101);ctx.stroke();}
+   ctx.fillStyle='#e8f0f2';ctx.fillRect(b.x+91,b.y+61,48,65);ctx.fillStyle='#1e3445';ctx.fillRect(b.x+95,b.y+65,40,57);
+   ctx.fillStyle='#8ec8dc';ctx.fillRect(b.x+98,b.y+68,34,51);ctx.strokeStyle='#e9f5f8';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(b.x+115,b.y+68);ctx.lineTo(b.x+115,b.y+119);ctx.stroke();
+   ctx.fillStyle='#fff';ctx.font='bold 11px Nunito';ctx.textAlign='center';ctx.fillText('SPPG DESA SUKAMAJU',b.x+b.w/2,b.y+b.h+24);
+   return;
+ }
  if(b.type==='kopdes'){
    // Koperasi Desa Merah Putih: long white facade, silver sheet roof and red rolling doors
    ctx.fillStyle='rgba(48,69,42,.22)';ctx.beginPath();ctx.ellipse(b.x+b.w/2,b.y+b.h+10,b.w*.62,13,0,0,Math.PI*2);ctx.fill();
@@ -683,8 +710,9 @@ function drawWorld(t=0){
  const extraRoad=()=>{
   ctx.beginPath();
   ctx.moveTo(1800,570);ctx.lineTo(2360,570);
-  ctx.moveTo(2100,180);ctx.lineTo(2100,570);ctx.lineTo(2100,1120);ctx.lineTo(2100,1430);
+  ctx.moveTo(2100,180);ctx.lineTo(2100,570);ctx.lineTo(2350,570);ctx.lineTo(2350,1120);ctx.lineTo(2100,1120);ctx.lineTo(2100,1430);
   ctx.moveTo(1800,300);ctx.lineTo(2100,300);
+  ctx.moveTo(2350,875);ctx.lineTo(2235,875);
   ctx.moveTo(700,1120);ctx.lineTo(1450,1120);ctx.lineTo(2100,1120);
   ctx.moveTo(700,1200);ctx.lineTo(700,1430);ctx.lineTo(1200,1430);ctx.lineTo(1700,1430);ctx.lineTo(2100,1430);ctx.lineTo(2360,1430);
   ctx.moveTo(2100,300);ctx.lineTo(2360,300);
@@ -820,7 +848,7 @@ function drawWorld(t=0){
    [70,570],[700,570],[700,80],[700,570],
    [1140,570],[1140,258],[1140,570],
    [1730,570],[2360,570],[2100,570],[2100,300],[2360,300],
-   [2100,300],[2100,1120],[1450,1120],[700,1120],[700,1430],
+   [2100,300],[2100,570],[2350,570],[2350,1120],[2100,1120],[1450,1120],[700,1120],[700,1430],
    [1200,1430],[2100,1430],[2360,1430],[2100,1430],[2100,1120],
    [700,1120],[700,570],[70,570]
   ];
@@ -910,6 +938,23 @@ function drawWorld(t=0){
   ctx.fillStyle='#20272a';ctx.beginPath();ctx.arc(-15,7,5,0,Math.PI*2);ctx.arc(15,7,5,0,Math.PI*2);ctx.fill();
   ctx.fillStyle='#aeb9b8';ctx.beginPath();ctx.arc(-15,7,2,0,Math.PI*2);ctx.arc(15,7,2,0,Math.PI*2);ctx.fill();
   ctx.restore();
+
+  // Truk SPPG sebagai NPC kendaraan yang berkeliling di jaringan jalan desa.
+  if(sppgTruckImage.complete&&sppgTruckImage.naturalWidth>0){
+   const sppgDistance=(distance+routeLength*.19)%routeLength;
+   let sppgSegment=segments[segments.length-1];
+   for(const s of segments){if(sppgDistance<=s.start+s.len){sppgSegment=s;break;}}
+   const sppgProgress=sppgSegment.len?(sppgDistance-sppgSegment.start)/sppgSegment.len:0;
+   const sppgX=sppgSegment.a[0]+sppgSegment.dx*sppgProgress;
+   const sppgY=sppgSegment.a[1]+sppgSegment.dy*sppgProgress;
+   const sppgW=150,sppgH=sppgW*sppgTruckImage.naturalHeight/sppgTruckImage.naturalWidth;
+   ctx.save();ctx.translate(sppgX,sppgY);
+   if(Math.abs(sppgSegment.dx)>=Math.abs(sppgSegment.dy)){
+    if(sppgSegment.dx<0)ctx.scale(-1,1);
+   }else{ctx.rotate(sppgSegment.angle);}
+   ctx.drawImage(sppgTruckImage,-sppgW/2,-sppgH/2,sppgW,sppgH);
+   ctx.restore();
+  }
  }
  // Karakter NPC digambar solid dengan badan, tangan, kaki, dan pakaian.
  npcs.forEach((n,i)=>{const done=missionDone(n.id);ctx.font='bold 12px Nunito';drawFarmer(n.x,n.y,{shirt:['#3979b9','#bd6686','#3f8a57','#c58a38'][i%4],pants:'#394d43',hat:['#d6a34d','#d8b86d','#6b8e57'][i%3]},i*.8,false);const labelW=Math.max(76,Math.min(132,ctx.measureText(n.name).width+22));roundedRect(ctx,n.x-labelW/2,n.y+28,labelW,23,10,'rgba(255,255,245,.98)');ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillStyle='#23452c';ctx.fillText(n.name,n.x,n.y+44);if(n.kind==='mission'||n.kind==='special'){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(n.x,n.y-43,14,0,Math.PI*2);ctx.fill();ctx.strokeStyle=done?'#23834b':'#d88b1f';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=done?'#23834b':'#d88b1f';ctx.font='bold 17px Nunito';ctx.fillText(n.kind==='special'?(state.catOwned?'✓':(state.catHintShown?'!':'🐾')):(done?'✓':'!'),n.x,n.y-37);if(n.id==='catcaretaker'&&state.catHintShown&&!state.catOwned){ctx.strokeStyle='rgba(255,211,76,.9)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(n.x,n.y-43,20,0,Math.PI*2);ctx.stroke();}}});
