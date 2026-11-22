@@ -18,7 +18,7 @@ const FIRST_LEVEL_XP=150, XP_PER_LEVEL=250;
 function xpThreshold(level){return level<=1?0:FIRST_LEVEL_XP+(level-2)*XP_PER_LEVEL;}
 function levelFromXP(xp){let level=1;while(xp>=xpThreshold(level+1))level++;return level;}
 function levelProgress(xp){const level=levelFromXP(xp);return {level,progress:xp-xpThreshold(level),needed:level===1?FIRST_LEVEL_XP:XP_PER_LEVEL};}
-const state = {name:'Penyuluh Muda',avatarIndex:0,xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},analog:{x:0,y:0},interact:false,motorPpl:{x:330,y:570,riding:false,started:false,lastRewardAt:0,face:1,orientation:'left'},catOwned:false,catHintShown:false,catQuestNpcId:null,catFollower:{x:120,y:410},scene:'village',mineGold:0,mineNodes:[],returnPosition:{x:145,y:390},ranchMissionDone:false,palmGhostCaught:0,farmPlots:[],farmSeeds:{padi:3,jagung:2,cabai:1},farmProduce:{},farmSelectedPlot:0,farmSelectedCrop:'padi',farmPlayer:{x:450,y:430},farmTarget:null,farmDay:1,farmLastWeather:'Cerah',farmUnlockedPlots:1,farmPesticides:0,farmPesticideStarterGranted:false,bppCoffeeStep:0,bppCoffeeDone:false,kiosMonitoring:{stage:0,done:false}};
+const state = {name:'Penyuluh Muda',avatarIndex:0,xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},analog:{x:0,y:0},interact:false,motorPpl:{x:330,y:570,riding:false,started:false,lastRewardAt:0,face:1,orientation:'left'},catOwned:false,catHintShown:false,catQuestNpcId:null,catFollower:{x:120,y:410},scene:'village',mineGold:0,mineNodes:[],returnPosition:{x:145,y:390},ranchMissionDone:false,palmGhostCaught:0,farmPlots:[],farmSeeds:{padi:3,jagung:2,cabai:1},farmProduce:{},farmSelectedPlot:0,farmSelectedCrop:'padi',farmPlayer:{x:450,y:430},farmTarget:null,farmDay:1,farmLastWeather:'Cerah',farmUnlockedPlots:1,farmPesticides:0,farmPesticideStarterGranted:false,bppCoffeeStep:0,bppCoffeeDone:false,kiosMonitoring:{stage:0,done:false},lttReport:{date:'',desa:'Desa Sukamaju',bera:'',olahLahan:'',tanam:'',panen:''}};
 const screens=['homeScreen','menuScreen','gameScreen'];
 function applyMineXpPenalty(amount){
   // XP utama adalah state.xp. Jika runtime tiba-tiba membaca 0 padahal
@@ -80,7 +80,8 @@ function save(){
     catFollower:state.catFollower,
     scene:state.scene||'village',mineGold:Number(state.mineGold)||0,mineNodes:Array.isArray(state.mineNodes)?state.mineNodes:[],returnPosition:state.returnPosition||{x:145,y:390},ranchMissionDone:!!state.ranchMissionDone,palmGhostCaught:Number(state.palmGhostCaught)||0,
     farmPlots:state.farmPlots,farmSeeds:state.farmSeeds,farmProduce:state.farmProduce,farmSelectedPlot:state.farmSelectedPlot,farmSelectedCrop:state.farmSelectedCrop,farmPlayer:state.farmPlayer,farmDay:state.farmDay,farmLastWeather:state.farmLastWeather,farmUnlockedPlots:state.farmUnlockedPlots,farmPesticides:state.farmPesticides,farmPesticideStarterGranted:state.farmPesticideStarterGranted,
-    kiosMonitoring:state.kiosMonitoring
+    kiosMonitoring:state.kiosMonitoring,
+    lttReport:state.lttReport
   }));
 }
 function load(){
@@ -94,6 +95,7 @@ function load(){
     state.pakMissionRewarded=true;
   }
   // Ensure new mission flags exist for saves created by older game versions.
+  state.lttReport=state.lttReport&&typeof state.lttReport==='object'?state.lttReport:{date:'',desa:'Desa Sukamaju',bera:'',olahLahan:'',tanam:'',panen:''};
   state.catHintShown=!!state.catHintShown;
   state.buMissionDone=!!state.buMissionDone || !!state.buMissionRewarded;
   state.buMissionRewarded=state.buMissionDone;
@@ -1346,6 +1348,7 @@ function mineInteract(){
 
 let bppPcWindow=null,bppPrintStep=0,bppPrintStartedAt=0;
 let bppPhoneStep='home',bppPhoneMissionDone=false;
+let lttOverlay=null;
 let bppCoffeeDrag=null,bppCoffeeCupX=835;
 let bppCoffeeStepRun=0,bppCoffeeAnimUntil=0;
 function updateBppBackButton(){
@@ -1355,7 +1358,7 @@ function updateBppBackButton(){
   btn.setAttribute('aria-label','Kembali ke kantor BPP');
   const wrap=canvas.closest('.canvas-wrap');if(wrap)wrap.appendChild(btn);
   btn.addEventListener('click',()=>{
-   if(state.scene==='pc'||state.scene==='coffee'||state.scene==='phone'){closeBppPortal();state.scene='bpp';state.keys={};state.analog={x:0,y:0};bppPcWindow=null;save();drawWorld();}
+   if(state.scene==='pc'||state.scene==='coffee'||state.scene==='phone'){closeLttOverlay();closeBppPortal();state.scene='bpp';state.keys={};state.analog={x:0,y:0};bppPcWindow=null;save();drawWorld();}
   });
  }
  btn.textContent='← Kembali';
@@ -1843,7 +1846,7 @@ function bppInteract(){
 }
 
 function enterBppPhone(){
- state.scene='phone';bppPhoneStep='home';bppPhoneMissionDone=false;
+ state.scene='phone';bppPhoneStep='home';bppPhoneMissionDone=false;closeLttOverlay();if(state.lttReport.date!==localGameDate()){state.lttReport.bera='';state.lttReport.olahLahan='';state.lttReport.tanam='';state.lttReport.panen='';}
  state.keys={};state.analog={x:0,y:0};save();drawWorld();
 }
 function drawBppPhone(t=0){
@@ -1866,9 +1869,17 @@ function drawBppPhone(t=0){
  ctx.textAlign='right';ctx.fillText('▮▮▮  92%',615,82);
  if(bppPhoneStep==='home'){
   ctx.fillStyle='#1c5b42';ctx.textAlign='center';ctx.font='bold 19px Nunito';ctx.fillText('HP PENYULUH',480,125);
-  const apps=[{x:390,y:205,c:'#2589df',ico:'●',label:'KONTAK'},{x:535,y:205,c:'#e8b83d',ico:'✉',label:'PESAN'},{x:390,y:345,c:'#8268bd',ico:'▣',label:'KAMERA'},{x:535,y:345,c:'#35a85b',ico:'☎',label:'TELEPON'}];
+  const apps=[{x:390,y:205,c:'#2589df',ico:'●',label:'KONTAK'},{x:535,y:205,c:'#e8b83d',ico:'✉',label:'PESAN'},{x:390,y:345,c:'#8268bd',ico:'▣',label:'KAMERA'},{x:535,y:345,c:'#35a85b',ico:'☎',label:'TELEPON'},{x:390,y:455,c:'#16834b',ico:'🌾',label:'LTT'}];
   apps.forEach(a=>{roundedRect(ctx,a.x-48,a.y-45,96,90,18,a.c);ctx.fillStyle='#fff';ctx.font='bold 38px Arial';ctx.textAlign='center';ctx.fillText(a.ico,a.x,a.y+7);ctx.font='bold 12px Nunito';ctx.fillText(a.label,a.x,a.y+65);});
-  ctx.fillStyle='#276044';ctx.font='bold 11px Nunito';ctx.fillText('Pilih aplikasi Kontak untuk mencari ketua kelompok tani',480,485);
+  ctx.fillStyle='#276044';ctx.font='bold 11px Nunito';ctx.fillText('Pilih aplikasi • LTT untuk laporan harian',480,535);
+ }else if(bppPhoneStep==='ltt'){
+  const done=state.lttReport.date===localGameDate();
+  ctx.fillStyle='#155b43';ctx.textAlign='center';ctx.font='bold 20px Nunito';ctx.fillText('LAPORAN LUAS TAMBAH TANAM',480,125);
+  ctx.fillStyle='#214b36';ctx.font='bold 13px Nunito';ctx.fillText('Desa: '+(state.lttReport.desa||'Desa Sukamaju'),480,157);
+  ctx.font='12px Nunito';ctx.fillText(done?'✓ Laporan hari ini sudah dikirim':'Isi data luas (hektare) untuk hari ini',480,183);
+  ctx.fillStyle='#fff';roundedRect(ctx,350,205,260,220,14,'#fff');ctx.fillStyle='#315b40';ctx.font='bold 12px Nunito';ctx.fillText('BERA  •  OLAH LAHAN  •  TANAM  •  PANEN',480,232);
+  ctx.fillText(done?'Laporan tersimpan':'Lengkapi empat kolom angka di bawah',480,400);
+  roundedRect(ctx,390,448,180,48,12,done?'#9aa99c':'#23834c');ctx.fillStyle='#fff';ctx.font='bold 14px Nunito';ctx.fillText(done?'SUDAH TERKIRIM':'KIRIM LAPORAN',480,477);
  }else if(bppPhoneStep==='contacts'){
   ctx.fillStyle='#155b43';ctx.textAlign='center';ctx.font='bold 20px Nunito';ctx.fillText('KONTAK',480,125);
   const contacts=[['Pak Ketua','Ketua Kelompok Tani'],['Bu Rina','Anggota Kelompok Tani'],['Pak Asep','Peternak']];
@@ -1898,11 +1909,37 @@ function drawBppPhone(t=0){
  ctx.fillStyle='#f3f4ed';ctx.beginPath();ctx.arc(480,558,7,0,Math.PI*2);ctx.fill();
  ctx.fillStyle='#315a42';ctx.font='bold 11px Nunito';ctx.textAlign='center';ctx.fillText('HP PENYULUH • BPP SUKASENANG',480,596);
  $('worldLocation').textContent='📱 HP Penyuluh • BPP Kecamatan Sukasenang';
- $('worldObjective').textContent=bppPhoneStep==='home'?'Misi telepon: buka aplikasi Kontak.':bppPhoneStep==='contacts'?'Cari kontak Pak Ketua.':bppPhoneStep==='contact'?'Pilih Telepon untuk menghubungi Pak Ketua.':bppPhoneStep==='calling'?'Kabari Pak Ketua bahwa bantuan benih sudah datang.':bppPhoneStep==='message'?'Tutup telepon untuk menyelesaikan misi.':'Misi selesai • +5 XP';
- const hint=$('canvasHint');if(hint)hint.textContent='Klik / tap ikon dan tombol pada layar HP. Tekan ESC atau tombol Kembali untuk kembali ke kantor.';
+ $('worldObjective').textContent=bppPhoneStep==='home'?'Buka aplikasi LTT untuk mengirim laporan harian atau Kontak untuk misi telepon.':bppPhoneStep==='ltt'?'Laporan LTT: isi Bera, Olah Lahan, Tanam, dan Panen, lalu kirim untuk memperoleh +5 XP.':bppPhoneStep==='contacts'?'Cari kontak Pak Ketua.':bppPhoneStep==='contact'?'Pilih Telepon untuk menghubungi Pak Ketua.':bppPhoneStep==='calling'?'Kabari Pak Ketua bahwa bantuan benih sudah datang.':bppPhoneStep==='message'?'Tutup telepon untuk menyelesaikan misi.':'Misi selesai • +5 XP';
+ const hint=$('canvasHint');if(hint)hint.textContent='Klik / tap ikon dan tombol pada layar HP. Pada LTT, isi empat angka lalu kirim laporan. Tekan ESC atau tombol Kembali untuk kembali ke kantor.';
+ syncLttOverlay();
+}
+function closeLttOverlay(){if(lttOverlay){lttOverlay.remove();lttOverlay=null;}}
+function syncLttOverlay(){
+ if(state.scene!=='phone'||bppPhoneStep!=='ltt'){closeLttOverlay();return;}
+ const wrap=canvas.closest('.canvas-wrap');if(!wrap)return;
+ if(!lttOverlay){
+  const panel=document.createElement('div');panel.id='lttPhoneForm';panel.style.cssText='position:absolute;z-index:30;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px;box-sizing:border-box;font-family:Nunito,Arial,sans-serif;';
+  const fields=[['bera','Bera (ha)'],['olahLahan','Olah Lahan (ha)'],['tanam','Tanam (ha)'],['panen','Panen (ha)']];
+  fields.forEach(([key,label])=>{const box=document.createElement('label');box.style.cssText='display:flex;flex-direction:column;gap:4px;color:#244b35;font-size:11px;font-weight:700;';box.textContent=label;const input=document.createElement('input');input.type='number';input.inputMode='decimal';input.min='0';input.step='0.01';input.placeholder='0';input.dataset.ltt=key;input.style.cssText='width:100%;height:36px;box-sizing:border-box;border:1px solid #b8cfb8;border-radius:8px;padding:5px 7px;font:700 15px Nunito,Arial;background:#fff;color:#183b27;';input.addEventListener('input',()=>{state.lttReport[key]=input.value;save();});box.appendChild(input);panel.appendChild(box);});
+  const desa=document.createElement('div');desa.textContent='Desa Sukamaju';desa.style.cssText='grid-column:1/-1;text-align:center;color:#1e5738;font-weight:800;font-size:12px;padding:2px;';panel.appendChild(desa);
+  wrap.appendChild(panel);lttOverlay=panel;
+ }
+ const cr=canvas.getBoundingClientRect(),wr=wrap.getBoundingClientRect(),sx=cr.width/960,sy=cr.height/600;
+ lttOverlay.style.left=(cr.left-wr.left+340*sx)+'px';lttOverlay.style.top=(cr.top-wr.top+238*sy)+'px';lttOverlay.style.width=(280*sx)+'px';lttOverlay.style.height=(195*sy)+'px';
+ lttOverlay.querySelectorAll('input[data-ltt]').forEach(input=>{if(document.activeElement!==input)input.value=state.lttReport[input.dataset.ltt]||'';input.disabled=state.lttReport.date===localGameDate();});
+ const btn=document.createElement('button');btn.type='button';btn.textContent=state.lttReport.date===localGameDate()?'Laporan terkirim ✓':'Kirim Laporan • +5 XP';btn.style.cssText='grid-column:1/-1;border:0;border-radius:9px;background:#23834c;color:white;font-weight:800;font-size:13px;padding:8px;cursor:pointer;';
+ if(!lttOverlay.querySelector('button'))lttOverlay.appendChild(btn);else lttOverlay.querySelector('button').textContent=btn.textContent;
+ const send=lttOverlay.querySelector('button');send.disabled=state.lttReport.date===localGameDate();send.onclick=()=>{
+  if(state.lttReport.date===localGameDate())return;
+  const keys=['bera','olahLahan','tanam','panen'];
+  if(keys.some(k=>String(state.lttReport[k]??'').trim()===''||!Number.isFinite(Number(state.lttReport[k]))||Number(state.lttReport[k])<0)){showPalmToast('Lengkapi semua kolom dengan angka 0 atau lebih.');return;}
+  state.lttReport.date=localGameDate();state.lttReport.desa='Desa Sukamaju';reward(5,0);save();showPalmToast('🌾 Laporan LTT berhasil dikirim! +5 XP');drawWorld();
+ };
 }
 function handleBppPhoneClick(x,y){
  if(bppPhoneStep==='home'&&x>=335&&x<=450&&y>=150&&y<=270){bppPhoneStep='contacts';drawWorld();return;}
+ if(bppPhoneStep==='home'&&x>=335&&x<=445&&y>=410&&y<=500){bppPhoneStep='ltt';drawWorld();return;}
+ if(bppPhoneStep==='ltt'&&x>=385&&x<=575&&y>=440&&y<=505){syncLttOverlay();const send=lttOverlay&&lttOverlay.querySelector('button');if(send)send.click();return;}
  if(bppPhoneStep==='contacts'&&x>=340&&x<=620&&y>=165&&y<=265){bppPhoneStep='contact';drawWorld();return;}
  if(bppPhoneStep==='contact'&&x>=400&&x<=560&&y>=375&&y<=450){bppPhoneStep='calling';drawWorld();return;}
  if(bppPhoneStep==='calling'&&x>=350&&x<=610&&y>=375&&y<=460){bppPhoneStep='message';drawWorld();return;}
@@ -2116,7 +2153,7 @@ function completeMission(id,xp,coins){
 }
 function addChoice(label,correct,after){const b=document.createElement('button');b.className='answer-option';b.textContent=label;b.addEventListener('click',()=>{document.querySelectorAll('#dialogChoices button').forEach(x=>x.disabled=true);if(correct){b.classList.add('correct');$('dialogText').textContent='Tepat!';}else{b.classList.add('wrong');$('dialogText').textContent='Coba pikirkan kembali jawaban yang paling tepat.';}after();});$('dialogChoices').appendChild(b);}
 $('closeDialog').addEventListener('click',()=>{$('dialog').classList.add('hidden');dialogOpen=false;startWorld();});
-window.addEventListener('keydown',e=>{if(state.scene==='pc'&&e.key==='Escape'&&document.getElementById('bppPortalWindow')){e.preventDefault();closeBppPortal();return;}if((state.scene==='pc'||state.scene==='coffee'||state.scene==='phone')&&e.key==='Escape'){e.preventDefault();closeBppPortal();state.scene='bpp';state.keys={};state.analog={x:0,y:0};bppPcWindow=null;save();drawWorld();return;}if(state.scene==='pc'||state.scene==='coffee'||state.scene==='phone')return;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();state.keys[e.key]=true;if((e.key==='e'||e.key==='E'||e.key===' ')&&!e.repeat){if(!$('dialog').classList.contains('hidden'))return;interact();}});
+window.addEventListener('keydown',e=>{if(state.scene==='pc'&&e.key==='Escape'&&document.getElementById('bppPortalWindow')){e.preventDefault();closeBppPortal();return;}if((state.scene==='pc'||state.scene==='coffee'||state.scene==='phone')&&e.key==='Escape'){e.preventDefault();closeLttOverlay();closeBppPortal();state.scene='bpp';state.keys={};state.analog={x:0,y:0};bppPcWindow=null;save();drawWorld();return;}if(state.scene==='pc'||state.scene==='coffee'||state.scene==='phone')return;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();state.keys[e.key]=true;if((e.key==='e'||e.key==='E'||e.key===' ')&&!e.repeat){if(!$('dialog').classList.contains('hidden'))return;interact();}});
 let bppCoffeePointerId=null;
 canvas.addEventListener('pointerdown',e=>{
  if(state.scene!=='coffee')return;
