@@ -714,9 +714,12 @@ function drawWorld(t=0){
  // roadside stones and grass tufts
  for(let i=0;i<34;i++){let x=(i*83+35)%1770,y=(i%2?520:620);ctx.fillStyle=i%2?'#8b9b72':'#d1c39b';ctx.beginPath();ctx.ellipse(x,y,5,3,.2,0,Math.PI*2);ctx.fill();}
  // irrigation stream with banks and glints
- ctx.strokeStyle='#8baf68';ctx.lineWidth=56;ctx.beginPath();ctx.moveTo(0,1080);ctx.quadraticCurveTo(420,990,780,1100);ctx.quadraticCurveTo(1150,1190,1800,1060);ctx.stroke();
- ctx.strokeStyle='#6bb7c8';ctx.lineWidth=42;ctx.beginPath();ctx.moveTo(0,1080);ctx.quadraticCurveTo(420,990,780,1100);ctx.quadraticCurveTo(1150,1190,1800,1060);ctx.stroke();
- ctx.strokeStyle='rgba(222,250,244,.65)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(80,1070);ctx.quadraticCurveTo(430,1010,760,1092);ctx.quadraticCurveTo(1180,1170,1700,1067);ctx.stroke();
+ // Sungai dialihkan ke koridor hijau di selatan jalan utama agar tidak
+ // menimpa jalan horizontal y=1120 maupun jalan selatan y=1430.
+ // Sungai hanya memotong jalan vertikal x=700 pada jembatan kayu.
+ ctx.strokeStyle='#8baf68';ctx.lineWidth=56;ctx.beginPath();ctx.moveTo(0,1320);ctx.quadraticCurveTo(420,1240,780,1300);ctx.quadraticCurveTo(1150,1360,1800,1290);ctx.stroke();
+ ctx.strokeStyle='#6bb7c8';ctx.lineWidth=42;ctx.beginPath();ctx.moveTo(0,1320);ctx.quadraticCurveTo(420,1240,780,1300);ctx.quadraticCurveTo(1150,1360,1800,1290);ctx.stroke();
+ ctx.strokeStyle='rgba(222,250,244,.65)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(80,1310);ctx.quadraticCurveTo(430,1260,760,1292);ctx.quadraticCurveTo(1180,1340,1700,1297);ctx.stroke();
  // paddy bunds, shallow water and rice rows
  roundedRect(ctx,970,700,650,350,18,'#92764c');roundedRect(ctx,982,712,626,326,13,'#6fae68');
  ctx.fillStyle='#83c9c4';roundedRect(ctx,994,724,602,302,9,'#83c9c4');
@@ -782,24 +785,24 @@ function drawWorld(t=0){
  ctx.lineCap='round';ctx.lineJoin='round';
  // Bayangan dan sisi jembatan
  ctx.fillStyle='rgba(49,66,43,.22)';
- roundedRect(ctx,650,1037,100,105,8,'rgba(49,66,43,.22)');
+ roundedRect(ctx,650,1247,100,105,8,'rgba(49,66,43,.22)');
  // Balok sisi jembatan
- roundedRect(ctx,654,1035,92,106,6,'#795332');
- roundedRect(ctx,660,1035,80,106,4,'#b88750');
+ roundedRect(ctx,654,1245,92,106,6,'#795332');
+ roundedRect(ctx,660,1245,80,106,4,'#b88750');
  // Papan lantai melintang, mengikuti lebar jalan
- for(let by=1041;by<1138;by+=13){
-  ctx.fillStyle=(Math.floor((by-1041)/13)%2===0)?'#d9b77b':'#c99e62';
+ for(let by=1251;by<1348;by+=13){
+  ctx.fillStyle=(Math.floor((by-1251)/13)%2===0)?'#d9b77b':'#c99e62';
   ctx.fillRect(662,by,76,10);
   ctx.strokeStyle='rgba(105,72,42,.55)';ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(662,by+10);ctx.lineTo(738,by+10);ctx.stroke();
  }
  // Pegangan rendah di kedua sisi, tetap terbuka dan mudah dilalui karakter
  ctx.strokeStyle='#704a2d';ctx.lineWidth=5;
- ctx.beginPath();ctx.moveTo(657,1040);ctx.lineTo(657,1137);ctx.moveTo(743,1040);ctx.lineTo(743,1137);ctx.stroke();
+ ctx.beginPath();ctx.moveTo(657,1250);ctx.lineTo(657,1347);ctx.moveTo(743,1250);ctx.lineTo(743,1347);ctx.stroke();
  ctx.strokeStyle='#d4ad72';ctx.lineWidth=3;
- ctx.beginPath();ctx.moveTo(657,1044);ctx.lineTo(657,1133);ctx.moveTo(743,1044);ctx.lineTo(743,1133);ctx.stroke();
+ ctx.beginPath();ctx.moveTo(657,1254);ctx.lineTo(657,1343);ctx.moveTo(743,1254);ctx.lineTo(743,1343);ctx.stroke();
  // Sambungan pendek ke tepi jalan di kedua ujung
- ctx.fillStyle='#b98c59';ctx.fillRect(660,1034,80,7);ctx.fillRect(660,1137,80,7);
+ ctx.fillStyle='#b98c59';ctx.fillRect(660,1244,80,7);ctx.fillRect(660,1347,80,7);
  ctx.restore();
 
  // Gerbang menuju Kebun Sawit di pojok tenggara desa

@@ -324,3 +324,58 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 ## Update v0.20.52
 - Jendela portal SIMLUHTAN/e-RDKK/e-Banper kini diposisikan berdasarkan batas layar monitor CRT pada canvas, bukan persentase wrapper, sehingga konten terpotong rapi di dalam monitor.
 - Pita petunjuk misi PC diperlebar dan teks dipisah menjadi dua baris agar tetap berada di dalam border.
+
+
+## Patch BPP berbasis v0.20.52
+- Pada perangkat sentuh, papan pintu BPP menampilkan petunjuk `MASUK: INTERAKSI`; pada desktop tetap `MASUK E`.
+- Label nama BPP di bawah fasad disembunyikan agar tidak bertumpuk dengan petunjuk pintu.
+- Patch dibuat langsung dari baseline v0.20.52 untuk mempertahankan fitur dan tata letak versi tersebut.
+
+
+## Update v0.20.57 (berbasis v0.20.52 BPP Fix)
+- Menambahkan truk Koperasi Desa Merah Putih Sukamaju yang bergerak bolak-balik di jalan utama Desa Sukamaju.
+- Ukuran sprite disesuaikan dengan skala karakter dan lebar jalan; truk digambar di lapisan jalan di belakang NPC/pemain.
+- Truk bersifat dekoratif dan tidak mengubah collision, misi, maupun data save.
+
+
+## Update v0.20.58
+- Model truk Kopdes diperbarui mengikuti referensi foto: truk bak terbuka/berpagar putih dengan aksen merah dan identitas Koperasi Desa Merah Putih.
+- Truk mengikuti rute berulang yang menyusuri jalan horizontal, jalan vertikal, dan akses jalan menuju BPP.
+- Orientasi sprite mengikuti arah perjalanan, termasuk saat berbelok ke ruas jalan vertikal, sehingga bagian depan selalu menghadap arah maju.
+- Ukuran sprite disesuaikan dengan lebar jalan.
+
+
+## Update v0.20.59
+- Truk Kopdes diperbesar dari 132 menjadi 164 unit game dan orientasi sprite diperbaiki: tetap tegak, tidak terbalik saat berbelok atau bergerak ke arah berlawanan. Sprite dibalik horizontal hanya saat menuju kanan.
+- Menambahkan pengendara ojek online bermotor yang bergerak mengikuti rute jalan yang sama dengan jeda posisi terhadap truk.
+
+
+## Update v0.20.60
+- Memperbaiki arah hadap truk Kopdes: sprite sumber menghadap ke kanan, sehingga hanya dibalik horizontal saat bergerak ke kiri. Truk tidak lagi tampak mundur saat bergerak ke kanan.
+
+
+## Update v0.20.61
+- Truk Kopdes dan motor ojol diputar mengikuti arah jalan pada ruas vertikal maupun horizontal.
+- Menambahkan mobil penumpang yang bergerak mengikuti rute jalan desa.
+
+
+## Update v0.20.62
+- Pada jalan horizontal ke kiri, kendaraan dicerminkan kiri-kanan tanpa rotasi 180 derajat agar tidak terbalik.
+- Orientasi kendaraan pada jalan vertikal dipertahankan seperti v0.20.61.
+
+
+## Update v0.20.63
+- Memperluas area map dari 1800×1200 menjadi 2400×1600 tanpa memindahkan objek, bangunan, NPC, dan lahan lama.
+- Menambahkan ruas jalan tersambung di sisi timur dan selatan, kebun, rumah warga, dan gudang tani.
+- Rute kendaraan diperluas agar ikut menyusuri jaringan jalan tambahan.
+
+
+## Update v0.20.64
+- Memindahkan Balai Kelompok Tani ke koordinat dunia X=800, Y=1200 (sudut kiri atas bangunan).
+- Memindahkan papan nama Balai mengikuti bangunan. Collision bangunan mengikuti koordinat baru melalui data buildings.
+- Objek dan fitur lain tidak diubah.
+
+## Update v0.20.65
+- Mengalihkan aliran sungai irigasi ke koridor hijau di selatan jalan utama agar tidak bertumpuk dengan jalan.
+- Memindahkan jembatan kayu ke titik perpotongan sungai dengan jalan vertikal desa.
+- Mempertahankan jalur jalan, bangunan, dan data penyimpanan permainan.
