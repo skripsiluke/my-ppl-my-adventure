@@ -1,3 +1,9 @@
+## Update v0.20.78
+- Misi Monitoring Harga Pupuk Bersubsidi: setelah menerima tugas dari PPL Monitoring, pemain langsung berpindah ke interior Kios Pertanian bersama NPC PPL.
+- Interior kios dilengkapi rak dan karung pupuk Urea/NPK, papan harga, meja pelayanan, Pak Hasan, serta pintu keluar.
+- Pemeriksaan harga dan stok dilakukan di dalam kios; setelah wawancara petani, pemain kembali ke kios untuk mengisi dan menyerahkan laporan kepada PPL.
+- Scene lain, termasuk BPP dan Farm Simulator, tidak diubah.
+
 ## Update v0.20.76
 - NPC desa kini berjalan berkeliling secara mandiri, baik misi belum maupun sudah selesai; interaksi NPC tetap menggunakan E / tombol INTERAKSI.
 - Lahan Demonstrasi dapat dimasuki melalui E / INTERAKSI dan membuka Farm Simulator.
@@ -416,3 +422,9 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 ## Update v0.20.74
 - Ukuran tampilan motor PPL beserta pengendara diperkecil menjadi 60% dari ukuran dasar agar lebih proporsional dengan karakter dan kendaraan NPC.
 - Kontrol, kecepatan, orientasi, serta sistem hadiah XP motor tidak diubah.
+
+
+## Update v0.20.77
+- Menambahkan NPC khusus PPL Monitoring di sekitar Kios Pertanian dengan area patroli terbatas.
+- Menambahkan misi Monitoring Harga Pupuk Bersubsidi dengan lima tahapan, total 50 XP, tanpa hadiah koin.
+- Progres misi disimpan dan dapat dilanjutkan setelah permainan dimuat ulang.
