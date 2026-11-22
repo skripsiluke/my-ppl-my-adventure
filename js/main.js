@@ -525,7 +525,7 @@ $('backButton').addEventListener('click',()=>{stopWorld();stopFarm();showScreen(
 function openMode(mode){stopWorld();stopFarm();showScreen('gameScreen');['adventurePanel','farmPanel','quizPanel'].forEach(id=>$(id).classList.add('hidden'));if(mode==='adventure'){$('gameEyebrow').textContent='MODE ADVENTURE';$('gameTitle').textContent='Desa Sukamaju';$('adventurePanel').classList.remove('hidden');startWorld();}if(mode==='farm'){$('gameEyebrow').textContent='MODE FARM SIMULATOR';$('gameTitle').textContent='Kebun Belajar';$('farmPanel').classList.remove('hidden');startFarm();}if(mode==='quiz'){$('gameEyebrow').textContent='MODE QUIZ CHALLENGE';$('gameTitle').textContent='Uji Pengetahuanmu';$('quizPanel').classList.remove('hidden');state.questionIndex=0;state.quizScore=0;pickQuizQuestions();renderQuestion();}}
 /* Top-down world: world coordinates are larger than the viewport; camera follows player. */
 const canvas=$('worldCanvas'),ctx=canvas.getContext('2d');
-const WORLD={w:1800,h:1200};let raf=0,last=0,dialogOpen=false;
+const WORLD={w:2400,h:1600};let raf=0,last=0,dialogOpen=false;
 const npcs=[
 {id:'pak',name:'Pak Tani',x:1160,y:510,emoji:'👨‍🌾',role:'Petani padi',kind:'mission'},
 {id:'bu',name:'Bu Rina',x:390,y:365,emoji:'👩‍🌾',role:'Anggota kelompok tani',kind:'mission'},
@@ -678,9 +678,39 @@ function drawWorld(t=0){
  const road=()=>{ctx.beginPath();ctx.moveTo(0,570);ctx.lineTo(520,570);ctx.lineTo(850,570);ctx.lineTo(1100,570);ctx.lineTo(1800,570);ctx.moveTo(700,80);ctx.lineTo(700,570);ctx.lineTo(700,1200);};
  ctx.strokeStyle='#b18b5d';ctx.lineWidth=94;road();ctx.stroke();ctx.strokeStyle='#d9bd8b';ctx.lineWidth=82;road();ctx.stroke();
  ctx.strokeStyle='rgba(255,244,207,.35)';ctx.lineWidth=3;ctx.setLineDash([18,22]);road();ctx.stroke();ctx.setLineDash([]);
+ // Jaringan jalan tambahan di sisi timur dan selatan desa.
+ // Jalur lama di tengah desa tetap dipertahankan; ruas baru tersambung ke jalan utama.
+ const extraRoad=()=>{
+  ctx.beginPath();
+  ctx.moveTo(1800,570);ctx.lineTo(2360,570);
+  ctx.moveTo(2100,180);ctx.lineTo(2100,570);ctx.lineTo(2100,1120);ctx.lineTo(2100,1430);
+  ctx.moveTo(1800,300);ctx.lineTo(2100,300);
+  ctx.moveTo(700,1120);ctx.lineTo(1450,1120);ctx.lineTo(2100,1120);
+  ctx.moveTo(700,1200);ctx.lineTo(700,1430);ctx.lineTo(1200,1430);ctx.lineTo(1700,1430);ctx.lineTo(2100,1430);ctx.lineTo(2360,1430);
+  ctx.moveTo(2100,300);ctx.lineTo(2360,300);
+ };
+ ctx.strokeStyle='#b18b5d';ctx.lineWidth=94;extraRoad();ctx.stroke();
+ ctx.strokeStyle='#d9bd8b';ctx.lineWidth=82;extraRoad();ctx.stroke();
+ ctx.strokeStyle='rgba(255,244,207,.35)';ctx.lineWidth=3;ctx.setLineDash([18,22]);extraRoad();ctx.stroke();ctx.setLineDash([]);
  // Jalan setapak menuju pintu BPP, tersambung dengan jalan desa.
  ctx.save();ctx.lineCap='round';ctx.strokeStyle='#b18b5d';ctx.lineWidth=54;ctx.beginPath();ctx.moveTo(1140,258);ctx.quadraticCurveTo(1125,390,1140,525);ctx.stroke();
  ctx.strokeStyle='#d9bd8b';ctx.lineWidth=44;ctx.beginPath();ctx.moveTo(1140,258);ctx.quadraticCurveTo(1125,390,1140,525);ctx.stroke();ctx.restore();
+ // Area tambahan desa: kebun warga, petak tanaman, pepohonan dan rumah kecil.
+ [[1900,175,110,72],[2250,430,105,72],[1880,850,120,82],[2300,1180,105,78],[1450,1330,130,78]].forEach(([x,y,rx,ry],i)=>{
+  ctx.fillStyle=i%2?'#b5d894':'#9fc879';ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx.fill();
+ });
+ // Kebun sayur tambahan di area timur laut.
+ roundedRect(ctx,1840,355,205,120,12,'#806344');roundedRect(ctx,1849,364,187,102,8,'#c6a36a');
+ for(let row=0;row<2;row++){ctx.strokeStyle='#8b6945';ctx.lineWidth=12;ctx.beginPath();ctx.moveTo(1865,394+row*42);ctx.lineTo(2020,394+row*42);ctx.stroke();for(let x=1880;x<2010;x+=27){ctx.strokeStyle='#4d8d42';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(x,399+row*42);ctx.lineTo(x-4,388+row*42);ctx.moveTo(x,399+row*42);ctx.lineTo(x+4,388+row*42);ctx.stroke();ctx.fillStyle='#8fc65a';ctx.beginPath();ctx.arc(x,388+row*42,3.5,0,Math.PI*2);ctx.fill();}}
+ // Rumah dan gudang kecil di area baru, jauh dari badan jalan.
+ [[2220,170,'RUMAH WARGA'],[2225,850,'GUDANG TANI'],[1740,1250,'RUMAH WARGA']].forEach(([x,y,label],i)=>{
+  ctx.fillStyle='rgba(75,95,51,.18)';ctx.beginPath();ctx.ellipse(x+55,y+88,72,13,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#ead9ad';ctx.fillRect(x,y+25,110,62);
+  ctx.fillStyle='#a65f3e';ctx.beginPath();ctx.moveTo(x-8,y+27);ctx.lineTo(x+55,y-12);ctx.lineTo(x+118,y+27);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#a8d2cb';ctx.fillRect(x+14,y+43,22,20);ctx.fillRect(x+73,y+43,22,20);
+  ctx.fillStyle='#547a50';ctx.fillRect(x+47,y+57,18,30);
+  ctx.fillStyle='#315c37';ctx.font='bold 10px Nunito';ctx.textAlign='center';ctx.fillText(label,x+55,y+105);
+ });
  // roadside stones and grass tufts
  for(let i=0;i<34;i++){let x=(i*83+35)%1770,y=(i%2?520:620);ctx.fillStyle=i%2?'#8b9b72':'#d1c39b';ctx.beginPath();ctx.ellipse(x,y,5,3,.2,0,Math.PI*2);ctx.fill();}
  // irrigation stream with banks and glints
@@ -786,7 +816,10 @@ function drawWorld(t=0){
   const route=[
    [70,570],[700,570],[700,80],[700,570],
    [1140,570],[1140,258],[1140,570],
-   [1730,570],[700,570],[700,1160],[700,570],[70,570]
+   [1730,570],[2360,570],[2100,570],[2100,300],[2360,300],
+   [2100,300],[2100,1120],[1450,1120],[700,1120],[700,1430],
+   [1200,1430],[2100,1430],[2360,1430],[2100,1430],[2100,1120],
+   [700,1120],[700,570],[70,570]
   ];
   const segments=[];let routeLength=0;
   for(let i=0;i<route.length-1;i++){
