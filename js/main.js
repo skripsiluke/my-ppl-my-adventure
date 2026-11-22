@@ -1347,7 +1347,7 @@ function mineInteract(){
 }
 
 let bppPcWindow=null,bppPrintStep=0,bppPrintStartedAt=0;
-let bppPhoneStep='home',bppPhoneMissionDone=false;
+let bppPhoneStep='home',bppPhoneMissionDone=false,bppPhoneCameraCaptured=false,bppWhatsappChat=false;
 let lttOverlay=null;
 let bppCoffeeDrag=null,bppCoffeeCupX=835;
 let bppCoffeeStepRun=0,bppCoffeeAnimUntil=0;
@@ -1869,8 +1869,8 @@ function drawBppPhone(t=0){
  ctx.textAlign='right';ctx.fillText('▮▮▮  92%',615,82);
  if(bppPhoneStep==='home'){
   ctx.fillStyle='#1c5b42';ctx.textAlign='center';ctx.font='bold 19px Nunito';ctx.fillText('HP PENYULUH',480,125);
-  const apps=[{x:390,y:205,c:'#2589df',ico:'●',label:'KONTAK'},{x:535,y:205,c:'#e8b83d',ico:'✉',label:'PESAN'},{x:390,y:345,c:'#8268bd',ico:'▣',label:'KAMERA'},{x:535,y:345,c:'#35a85b',ico:'☎',label:'TELEPON'},{x:390,y:455,c:'#16834b',ico:'🌾',label:'LTT'}];
-  apps.forEach(a=>{roundedRect(ctx,a.x-48,a.y-45,96,90,18,a.c);ctx.fillStyle='#fff';ctx.font='bold 38px Arial';ctx.textAlign='center';ctx.fillText(a.ico,a.x,a.y+7);ctx.font='bold 12px Nunito';ctx.fillText(a.label,a.x,a.y+65);});
+  const apps=[{x:390,y:205,c:'#2589df',ico:'●',label:'KONTAK'},{x:535,y:205,c:'#25a85a',ico:'◉',label:'WHATSAPP'},{x:390,y:330,c:'#8268bd',ico:'▣',label:'KAMERA'},{x:535,y:330,c:'#35a85b',ico:'☎',label:'TELEPON'},{x:390,y:455,c:'#16834b',ico:'🌾',label:'LTT'}];
+  apps.forEach(a=>{roundedRect(ctx,a.x-45,a.y-40,90,80,17,a.c);ctx.fillStyle='#fff';ctx.font='bold 36px Arial';ctx.textAlign='center';ctx.fillText(a.ico,a.x,a.y+7);ctx.font='bold 11px Nunito';ctx.fillText(a.label,a.x,a.y+59);});
   ctx.fillStyle='#276044';ctx.font='bold 11px Nunito';ctx.fillText('Pilih aplikasi • LTT untuk laporan harian',480,535);
  }else if(bppPhoneStep==='ltt'){
   const done=state.lttReport.date===localGameDate();
@@ -1880,6 +1880,30 @@ function drawBppPhone(t=0){
   ctx.fillStyle='#fff';roundedRect(ctx,350,205,260,220,14,'#fff');ctx.fillStyle='#315b40';ctx.font='bold 12px Nunito';ctx.fillText('BERA  •  OLAH LAHAN  •  TANAM  •  PANEN',480,232);
   ctx.fillText(done?'Laporan tersimpan':'Lengkapi empat kolom angka di bawah',480,400);
   roundedRect(ctx,390,448,180,48,12,done?'#9aa99c':'#23834c');ctx.fillStyle='#fff';ctx.font='bold 14px Nunito';ctx.fillText(done?'SUDAH TERKIRIM':'KIRIM LAPORAN',480,477);
+ }else if(bppPhoneStep==='camera'){
+  ctx.fillStyle='#155b43';ctx.textAlign='left';ctx.font='bold 12px Nunito';ctx.fillText('← KEMBALI',345,125);ctx.textAlign='center';ctx.font='bold 19px Nunito';ctx.fillText('KAMERA PENYULUH',480,125);
+  ctx.fillStyle='#fff';roundedRect(ctx,350,150,260,225,15,'#26372e');
+  ctx.save();ctx.beginPath();roundedRect(ctx,360,160,240,205,10,'#26372e');ctx.clip();
+  const cg=ctx.createLinearGradient(360,160,600,365);cg.addColorStop(0,'#9fd4ed');cg.addColorStop(.55,'#d5e7b8');cg.addColorStop(1,'#6da76a');ctx.fillStyle=cg;ctx.fillRect(360,160,240,205);
+  ctx.fillStyle='#6b9b53';ctx.beginPath();ctx.moveTo(360,300);ctx.lineTo(430,235);ctx.lineTo(480,285);ctx.lineTo(535,220);ctx.lineTo(600,295);ctx.lineTo(600,365);ctx.lineTo(360,365);ctx.fill();
+  ctx.fillStyle='#f5f4e9';ctx.fillRect(460,255,42,65);ctx.fillStyle='#8b6543';ctx.fillRect(475,285,14,35);
+  ctx.restore();
+  ctx.fillStyle='#315b40';ctx.font='12px Nunito';ctx.fillText(bppPhoneCameraCaptured?'Foto berhasil diambil!':'Kamera siap • fitur pelengkap',480,400);
+  roundedRect(ctx,400,430,160,48,14,'#23834c');ctx.fillStyle='#fff';ctx.font='bold 13px Nunito';ctx.fillText(bppPhoneCameraCaptured?'AMBIL FOTO LAGI':'● AMBIL FOTO',480,459);
+  ctx.font='11px Nunito';ctx.fillStyle='#315b40';ctx.fillText('Simulasi kamera dalam game',480,505);
+ }else if(bppPhoneStep==='whatsapp'){
+  ctx.fillStyle='#155b43';ctx.textAlign='left';ctx.font='bold 12px Nunito';ctx.fillText('← KEMBALI',345,125);ctx.textAlign='center';ctx.font='bold 19px Nunito';ctx.fillText('WHATSAPP',480,125);
+  if(!bppWhatsappChat){
+   roundedRect(ctx,345,150,270,325,12,'#f7f7f2');
+   const chats=[['PK','Pak Ketua','Baik, terima kasih informasinya.','#168b55'],['BR','Bu Rina','Besok ada pertemuan kelompok?','#c47b45'],['PA','Pak Asep','Siap, Pak.','#3987b8']];
+   chats.forEach((c,i)=>{let y=195+i*88;ctx.fillStyle=c[3];ctx.beginPath();ctx.arc(382,y,24,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 15px Nunito';ctx.fillText(c[0],382,y+5);ctx.textAlign='left';ctx.fillStyle='#244b35';ctx.font='bold 13px Nunito';ctx.fillText(c[1],420,y-4);ctx.font='10px Nunito';ctx.fillStyle='#66786b';ctx.fillText(c[2],420,y+17);ctx.textAlign='center';if(i<2){ctx.strokeStyle='#dce5dc';ctx.beginPath();ctx.moveTo(355,y+43);ctx.lineTo(605,y+43);ctx.stroke();}});
+   ctx.fillStyle='#315b40';ctx.font='11px Nunito';ctx.fillText('Ketuk salah satu percakapan',480,505);
+  }else{
+   roundedRect(ctx,345,150,270,325,12,'#e7eee3');ctx.fillStyle='#168b55';roundedRect(ctx,345,150,270,48,12,'#168b55');ctx.fillStyle='#fff';ctx.font='bold 14px Nunito';ctx.fillText('Pak Ketua',480,180);
+   roundedRect(ctx,365,220,220,90,12,'#fff');ctx.fillStyle='#244b35';ctx.textAlign='left';ctx.font='11px Nunito';ctx.fillText('Assalamualaikum, Pak.',380,245);ctx.fillText('Bagaimana kabar kelompok tani?',380,264);ctx.fillText('Ada informasi terbaru?',380,283);
+   roundedRect(ctx,400,345,160,46,12,'#168b55');ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font='bold 12px Nunito';ctx.fillText('KIRIM SAPAAN',480,373);
+   ctx.fillStyle='#315b40';ctx.font='11px Nunito';ctx.fillText('Percakapan simulasi WhatsApp',480,425);
+  }
  }else if(bppPhoneStep==='contacts'){
   ctx.fillStyle='#155b43';ctx.textAlign='center';ctx.font='bold 20px Nunito';ctx.fillText('KONTAK',480,125);
   const contacts=[['Pak Ketua','Ketua Kelompok Tani'],['Bu Rina','Anggota Kelompok Tani'],['Pak Asep','Peternak']];
@@ -1909,7 +1933,7 @@ function drawBppPhone(t=0){
  ctx.fillStyle='#f3f4ed';ctx.beginPath();ctx.arc(480,558,7,0,Math.PI*2);ctx.fill();
  ctx.fillStyle='#315a42';ctx.font='bold 11px Nunito';ctx.textAlign='center';ctx.fillText('HP PENYULUH • BPP SUKASENANG',480,596);
  $('worldLocation').textContent='📱 HP Penyuluh • BPP Kecamatan Sukasenang';
- $('worldObjective').textContent=bppPhoneStep==='home'?'Buka aplikasi LTT untuk mengirim laporan harian atau Kontak untuk misi telepon.':bppPhoneStep==='ltt'?'Laporan LTT: isi Bera, Olah Lahan, Tanam, dan Panen, lalu kirim untuk memperoleh +5 XP.':bppPhoneStep==='contacts'?'Cari kontak Pak Ketua.':bppPhoneStep==='contact'?'Pilih Telepon untuk menghubungi Pak Ketua.':bppPhoneStep==='calling'?'Kabari Pak Ketua bahwa bantuan benih sudah datang.':bppPhoneStep==='message'?'Tutup telepon untuk menyelesaikan misi.':'Misi selesai • +5 XP';
+ $('worldObjective').textContent=bppPhoneStep==='home'?'Pilih aplikasi LTT, Kamera, WhatsApp, Kontak, atau Telepon.':bppPhoneStep==='ltt'?'Laporan LTT: isi Bera, Olah Lahan, Tanam, dan Panen, lalu kirim untuk memperoleh +5 XP.':bppPhoneStep==='camera'?'Kamera pelengkap: ketuk Ambil Foto untuk simulasi pengambilan foto.':bppPhoneStep==='whatsapp'?'Buka percakapan WhatsApp simulasi dan kirim sapaan.':bppPhoneStep==='contacts'?'Cari kontak Pak Ketua.':bppPhoneStep==='contact'?'Pilih Telepon untuk menghubungi Pak Ketua.':bppPhoneStep==='calling'?'Kabari Pak Ketua bahwa bantuan benih sudah datang.':bppPhoneStep==='message'?'Tutup telepon untuk menyelesaikan misi.':'Misi selesai • +5 XP';
  const hint=$('canvasHint');if(hint)hint.textContent='Klik / tap ikon dan tombol pada layar HP. Pada LTT, isi empat angka lalu kirim laporan. Tekan ESC atau tombol Kembali untuk kembali ke kantor.';
  syncLttOverlay();
 }
@@ -1938,7 +1962,13 @@ function syncLttOverlay(){
 }
 function handleBppPhoneClick(x,y){
  if(bppPhoneStep==='home'&&x>=335&&x<=450&&y>=150&&y<=270){bppPhoneStep='contacts';drawWorld();return;}
+ if(bppPhoneStep==='home'&&x>=480&&x<=590&&y>=150&&y<=270){bppPhoneStep='whatsapp';bppWhatsappChat=false;drawWorld();return;}
+ if(bppPhoneStep==='home'&&x>=335&&x<=450&&y>=285&&y<=405){bppPhoneStep='camera';bppPhoneCameraCaptured=false;drawWorld();return;}
  if(bppPhoneStep==='home'&&x>=335&&x<=445&&y>=410&&y<=500){bppPhoneStep='ltt';drawWorld();return;}
+ if((bppPhoneStep==='camera'||bppPhoneStep==='whatsapp')&&x>=330&&x<=420&&y>=95&&y<=140){bppPhoneStep='home';drawWorld();return;}
+ if(bppPhoneStep==='camera'&&x>=390&&x<=570&&y>=420&&y<=490){bppPhoneCameraCaptured=true;showPalmToast('📷 Foto berhasil diambil (simulasi).');drawWorld();return;}
+ if(bppPhoneStep==='whatsapp'&&!bppWhatsappChat&&x>=345&&x<=615&&y>=150&&y<=280){bppWhatsappChat=true;drawWorld();return;}
+ if(bppPhoneStep==='whatsapp'&&bppWhatsappChat&&x>=390&&x<=570&&y>=335&&y<=405){showPalmToast('✓ Sapaan WhatsApp terkirim (simulasi).');drawWorld();return;}
  if(bppPhoneStep==='ltt'&&x>=385&&x<=575&&y>=440&&y<=505){syncLttOverlay();const send=lttOverlay&&lttOverlay.querySelector('button');if(send)send.click();return;}
  if(bppPhoneStep==='contacts'&&x>=340&&x<=620&&y>=165&&y<=265){bppPhoneStep='contact';drawWorld();return;}
  if(bppPhoneStep==='contact'&&x>=400&&x<=560&&y>=375&&y<=450){bppPhoneStep='calling';drawWorld();return;}
