@@ -392,7 +392,7 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Papan nama dan tiang penyangga ikut disesuaikan dengan posisi bangunan.
 
 
-## Update v0.20.71
+## Update v0.20.72
 - Menambahkan Motor PPL bergaya Honda CRF sebagai kendaraan yang dapat dinaiki di tepi jalan utama desa.
 - Tekan E / INTERAKSI saat dekat motor untuk naik; gunakan WASD, tombol panah, atau analog untuk berkendara.
 - XP: +1 saat motor pertama kali mulai berjalan, lalu +3 XP setiap 30 detik selama berkendara.
