@@ -552,7 +552,7 @@ const buildings=[
 ];
 const obstacles=[...buildings.map(b=>({x:b.x-5,y:b.y-15,w:b.w+10,h:b.h+20})),{x:990,y:720,w:600,h:280},
  // Pagar kandang, kandang ternak, kebun berpagar, dan pepohonan besar
- {x:1223,y:619,w:154,h:92},{x:1235,y:635,w:48,h:40},{x:1368,y:630,w:34,h:28},
+ {x:175,y:1005,w:195,h:105},{x:190,y:1020,w:60,h:45},{x:325,y:1015,w:45,h:35},
  {x:45,y:200,w:120,h:75},{x:445,y:745,w:145,h:88},
  {x:1650,y:685,w:130,h:80},{x:320,y:165,w:45,h:45},{x:1490,y:1110,w:45,h:45},
  {x:82,y:142,w:38,h:38},{x:442,y:112,w:38,h:38},{x:892,y:152,w:38,h:38},{x:1072,y:232,w:38,h:38},{x:1692,y:202,w:38,h:38}];
@@ -785,9 +785,9 @@ function drawWorld(t=0){
  // signboards and lamp posts
  ctx.fillStyle='#68482e';ctx.fillRect(458,962,5,25);roundedRect(ctx,392,935,138,34,5,'#f2dfad');ctx.strokeStyle='#d5bd86';ctx.lineWidth=1;ctx.strokeRect(392,935,138,34);ctx.fillStyle='#315b39';ctx.font='bold 9px Nunito';ctx.textAlign='center';ctx.fillText('BALAI KELOMPOK',461,949);ctx.fillText('TANI',461,961);
  ctx.fillStyle='#68482e';ctx.fillRect(1590,495,5,60);ctx.fillStyle='#f7e4a8';ctx.beginPath();ctx.arc(1592,490,10,0,Math.PI*2);ctx.fill();
- // Peternakan desa: kandang kecil di pojok tenggara persimpangan jalan desa dan jalan setapak BPP.
- // Diletakkan di area kosong, terpisah dari jalur pejalan kaki dan lahan tanaman.
- ctx.save();ctx.translate(1300,665);ctx.scale(.52,.52);ctx.translate(-1190,-375);
+ // Peternakan desa: kandang dipindahkan ke area rumput kosong di barat Balai Kelompok Tani.
+ // Jauh dari label AREA PERSAWAHAN, sawah, jalan desa, bangunan, dan pepohonan.
+ ctx.save();ctx.translate(257,1056);ctx.scale(.52,.52);ctx.translate(-1190,-375);
  roundedRect(ctx,1042,286,296,176,12,'#d8c18d');
  ctx.strokeStyle='#8b6039';ctx.lineWidth=7;ctx.strokeRect(1050,295,280,165);
  for(let fx=1062;fx<1325;fx+=28){ctx.beginPath();ctx.moveTo(fx,295);ctx.lineTo(fx,460);ctx.stroke();}

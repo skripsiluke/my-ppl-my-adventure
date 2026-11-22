@@ -405,6 +405,9 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Tidak mengubah posisi motor, kecepatan, kontrol, atau sistem hadiah XP.
 
 
+## Update v0.20.75
+- Memindahkan kandang ternak ke area rumput kosong di sebelah barat Balai Kelompok Tani; label AREA PERSAWAHAN dan objek sekitar tetap bebas.
+
 ## Update v0.20.74
 - Ukuran tampilan motor PPL beserta pengendara diperkecil menjadi 60% dari ukuran dasar agar lebih proporsional dengan karakter dan kendaraan NPC.
 - Kontrol, kecepatan, orientasi, serta sistem hadiah XP motor tidak diubah.
