@@ -801,10 +801,41 @@ function drawWorld(t=0){
   const progress=segment.len?(distance-segment.start)/segment.len:0;
   const truckX=segment.a[0]+segment.dx*progress;
   const truckY=segment.a[1]+segment.dy*progress;
-  // Lebar sprite disesuaikan dengan lebar jalan; saat di ruas vertikal ikut berputar.
-  const truckW=132,truckH=truckW*kopdesTruckImage.naturalHeight/kopdesTruckImage.naturalWidth;
-  ctx.save();ctx.translate(truckX,truckY);ctx.rotate(segment.angle);
+  // Sprite dijaga tegak: gambar sumber menghadap ke kiri. Balik horizontal hanya saat bergerak ke kanan.
+  // Pada ruas vertikal truk tetap tegak agar roda selalu berada di bawah (tidak terbalik).
+  const truckW=164,truckH=truckW*kopdesTruckImage.naturalHeight/kopdesTruckImage.naturalWidth;
+  ctx.save();ctx.translate(truckX,truckY);
+  if(segment.dx>0)ctx.scale(-1,1);
   ctx.drawImage(kopdesTruckImage,-truckW/2,-truckH/2,truckW,truckH);
+  ctx.restore();
+
+  // Ojek online: motor dan pengendara bergerak pada jaringan jalan yang sama.
+  // Offset waktu membuat jaraknya dengan truk tetap aman dan tidak saling menumpuk.
+  const ojolSpeed=96;
+  const ojolDistance=(distance+routeLength*.43)%routeLength;
+  let ojolSegment=segments[segments.length-1];
+  for(const s of segments){if(ojolDistance<=s.start+s.len){ojolSegment=s;break;}}
+  const ojolProgress=ojolSegment.len?(ojolDistance-ojolSegment.start)/ojolSegment.len:0;
+  const ojolX=ojolSegment.a[0]+ojolSegment.dx*ojolProgress;
+  const ojolY=ojolSegment.a[1]+ojolSegment.dy*ojolProgress;
+  const faceRight=ojolSegment.dx>0;
+  ctx.save();ctx.translate(ojolX,ojolY);
+  if(faceRight)ctx.scale(-1,1);
+  // Bayangan dan roda
+  ctx.fillStyle='rgba(43,55,39,.22)';ctx.beginPath();ctx.ellipse(0,11,22,5,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#20272a';
+  ctx.beginPath();ctx.arc(-13,5,6,0,Math.PI*2);ctx.arc(14,5,6,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#b8c2c4';ctx.lineWidth=2;ctx.beginPath();ctx.arc(-13,5,3,0,Math.PI*2);ctx.arc(14,5,3,0,Math.PI*2);ctx.stroke();
+  // Bodi motor dan jok
+  ctx.fillStyle='#16834b';ctx.beginPath();ctx.moveTo(-18,1);ctx.lineTo(-8,-5);ctx.lineTo(8,-5);ctx.lineTo(17,1);ctx.lineTo(12,5);ctx.lineTo(-12,5);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#252d30';ctx.fillRect(-8,-8,15,3);
+  ctx.fillStyle='#f7d65a';ctx.beginPath();ctx.arc(19,-1,2,0,Math.PI*2);ctx.fill();
+  // Pengendara berjaket hijau dan helm
+  ctx.strokeStyle='#34463d';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(-1,-6);ctx.lineTo(-3,-13);ctx.moveTo(4,-7);ctx.lineTo(10,-12);ctx.stroke();
+  ctx.fillStyle='#167b4b';ctx.beginPath();ctx.roundRect(-7,-18,14,13,4);ctx.fill();
+  ctx.fillStyle='#f0bd8f';ctx.beginPath();ctx.arc(0,-22,5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#f2c83d';ctx.beginPath();ctx.arc(0,-24,5,Math.PI,Math.PI*2);ctx.lineTo(5,-22);ctx.lineTo(-5,-22);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='bold 5px Arial';ctx.textAlign='center';ctx.fillText('OJOL',0,-11);
   ctx.restore();
  }
  // Karakter NPC digambar solid dengan badan, tangan, kaki, dan pakaian.
