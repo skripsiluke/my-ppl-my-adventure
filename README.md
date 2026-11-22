@@ -385,3 +385,8 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Gudang Tani dipindahkan ke koordinat X=2200, Y=400.
 - Balai Kelompok Tani dipindahkan ke koordinat X=600, Y=1000; papan nama dan tiang penyangga disesuaikan.
 - Penyesuaian tetap mempertahankan bangunan SPPG, kendaraan, sungai, dan progres penyimpanan permainan.
+
+
+## Update v0.20.68
+- Balai Kelompok Tani digeser ke kiri dari X=600 menjadi X=500 (Y tetap 1000) agar tidak bertumpuk dengan jalan.
+- Papan nama dan tiang penyangga ikut disesuaikan dengan posisi bangunan.
