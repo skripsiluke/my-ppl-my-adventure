@@ -741,13 +741,21 @@ function drawWorld(t=0){
  });
  // roadside stones and grass tufts
  for(let i=0;i<34;i++){let x=(i*83+35)%1770,y=(i%2?520:620);ctx.fillStyle=i%2?'#8b9b72':'#d1c39b';ctx.beginPath();ctx.ellipse(x,y,5,3,.2,0,Math.PI*2);ctx.fill();}
- // irrigation stream with banks and glints
- // Sungai dialihkan ke koridor hijau di selatan jalan utama agar tidak
- // menimpa jalan horizontal y=1120 maupun jalan selatan y=1430.
- // Sungai hanya memotong jalan vertikal x=700 pada jembatan kayu.
- ctx.strokeStyle='#8baf68';ctx.lineWidth=56;ctx.beginPath();ctx.moveTo(0,1320);ctx.quadraticCurveTo(420,1240,780,1300);ctx.quadraticCurveTo(1150,1360,1800,1290);ctx.stroke();
- ctx.strokeStyle='#6bb7c8';ctx.lineWidth=42;ctx.beginPath();ctx.moveTo(0,1320);ctx.quadraticCurveTo(420,1240,780,1300);ctx.quadraticCurveTo(1150,1360,1800,1290);ctx.stroke();
- ctx.strokeStyle='rgba(222,250,244,.65)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(80,1310);ctx.quadraticCurveTo(430,1260,760,1292);ctx.quadraticCurveTo(1180,1340,1700,1297);ctx.stroke();
+ // Sungai irigasi: mengalir penuh hingga tepi timur peta.
+ // Jalur dibuat di bawah rumah warga selatan, lalu berbelok ke bawah
+ // agar tidak menimpa rumah; persilangan jalan diberi jembatan.
+ const streamPath=()=>{ctx.beginPath();ctx.moveTo(0,1320);ctx.quadraticCurveTo(360,1285,700,1320);ctx.quadraticCurveTo(1120,1365,1580,1370);ctx.quadraticCurveTo(1710,1375,1800,1430);ctx.quadraticCurveTo(2070,1510,2400,1490);};
+ ctx.strokeStyle='#8baf68';ctx.lineWidth=58;streamPath();ctx.stroke();
+ ctx.strokeStyle='#6bb7c8';ctx.lineWidth=44;streamPath();ctx.stroke();
+ ctx.strokeStyle='rgba(222,250,244,.65)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(30,1310);ctx.quadraticCurveTo(360,1290,700,1310);ctx.quadraticCurveTo(1120,1350,1580,1350);ctx.quadraticCurveTo(1710,1360,1800,1410);ctx.quadraticCurveTo(2070,1490,2370,1480);ctx.stroke();
+ // Kolam perikanan di tepi utara sungai, aman dari jalan dan rumah.
+ ctx.fillStyle='rgba(62,87,55,.18)';ctx.beginPath();ctx.ellipse(1190,1220,126,58,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#8baf68';ctx.beginPath();ctx.ellipse(1190,1215,120,52,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#65b6c9';ctx.beginPath();ctx.ellipse(1190,1215,108,42,0,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='rgba(224,249,239,.7)';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(1190,1215,92,30,0,0,Math.PI*2);ctx.stroke();
+ ctx.fillStyle='#f2e7c2';ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillText('KOLAM PERIKANAN',1190,1284);
+ // Riak dan ikan kecil sebagai penanda kolam.
+ for(let i=0;i<4;i++){const fx=1140+i*34,fy=1208+(i%2)*15;ctx.fillStyle='#f0c66d';ctx.beginPath();ctx.ellipse(fx,fy,6,3,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.moveTo(fx-5,fy);ctx.lineTo(fx-10,fy-4);ctx.lineTo(fx-10,fy+4);ctx.closePath();ctx.fill();}
  // paddy bunds, shallow water and rice rows
  roundedRect(ctx,970,700,650,350,18,'#92764c');roundedRect(ctx,982,712,626,326,13,'#6fae68');
  ctx.fillStyle='#83c9c4';roundedRect(ctx,994,724,602,302,9,'#83c9c4');
@@ -831,6 +839,18 @@ function drawWorld(t=0){
  ctx.beginPath();ctx.moveTo(657,1254);ctx.lineTo(657,1343);ctx.moveTo(743,1254);ctx.lineTo(743,1343);ctx.stroke();
  // Sambungan pendek ke tepi jalan di kedua ujung
  ctx.fillStyle='#b98c59';ctx.fillRect(660,1244,80,7);ctx.fillRect(660,1347,80,7);
+ ctx.restore();
+ // Jembatan kedua: jalan horizontal sisi selatan melintasi sungai.
+ ctx.save();ctx.lineCap='round';ctx.lineJoin='round';
+ roundedRect(ctx,1745,1385,120,94,8,'rgba(49,66,43,.22)');
+ roundedRect(ctx,1749,1382,112,94,6,'#795332');
+ roundedRect(ctx,1756,1382,98,94,4,'#b88750');
+ for(let bx=1760;bx<1850;bx+=13){
+  ctx.fillStyle=(Math.floor((bx-1760)/13)%2===0)?'#d9b77b':'#c99e62';
+  ctx.fillRect(bx,1387,10,84);ctx.strokeStyle='rgba(105,72,42,.55)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(bx+10,1387);ctx.lineTo(bx+10,1471);ctx.stroke();
+ }
+ ctx.strokeStyle='#704a2d';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(1752,1385);ctx.lineTo(1858,1385);ctx.moveTo(1752,1474);ctx.lineTo(1858,1474);ctx.stroke();
  ctx.restore();
 
  // Gerbang menuju Kebun Sawit di pojok tenggara desa
