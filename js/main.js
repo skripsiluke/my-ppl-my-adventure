@@ -541,7 +541,7 @@ const npcs=[
 if(state.catQuestNpcId!=='catcaretaker'){state.catQuestNpcId='catcaretaker';save();}
 const buildings=[
 {x:180,y:235,w:150,h:110,name:'Rumah Bu Rina',roof:'#a65f3e',wall:'#f1dfb7',door:'#6b986b'},
-{x:800,y:1200,w:170,h:125,name:'Balai Kelompok Tani',roof:'#9b5638',wall:'#f4e5bd',door:'#5d8c63'},
+{x:600,y:1000,w:170,h:125,name:'Balai Kelompok Tani',roof:'#9b5638',wall:'#f4e5bd',door:'#5d8c63'},
 {x:1420,y:180,w:150,h:110,name:'Kios Pertanian',roof:'#b36c3e',wall:'#f5e6c7',door:'#638e68'},
 {x:1450,y:420,w:190,h:105,name:'Koperasi Desa Merah Putih Sukamaju',type:'kopdes',roof:'#b9c4c8',wall:'#f0f1ed',door:'#a8322c'},
 {x:2000,y:800,w:230,h:150,name:'Satuan Pelayanan Pemenuhan Gizi (SPPG)',type:'sppg',roof:'#0879c9',wall:'#f2f4f1',door:'#277db2'},
@@ -551,7 +551,7 @@ const obstacles=[...buildings.map(b=>({x:b.x-5,y:b.y-15,w:b.w+10,h:b.h+20})),{x:
  // Pagar kandang, kandang ternak, kebun berpagar, dan pepohonan besar
  {x:1223,y:619,w:154,h:92},{x:1235,y:635,w:48,h:40},{x:1368,y:630,w:34,h:28},
  {x:45,y:200,w:120,h:75},{x:445,y:745,w:145,h:88},
- {x:1650,y:685,w:130,h:80},{x:590,y:1015,w:130,h:80},{x:320,y:165,w:45,h:45},{x:1490,y:1110,w:45,h:45},
+ {x:1650,y:685,w:130,h:80},{x:320,y:165,w:45,h:45},{x:1490,y:1110,w:45,h:45},
  {x:82,y:142,w:38,h:38},{x:442,y:112,w:38,h:38},{x:892,y:152,w:38,h:38},{x:1072,y:232,w:38,h:38},{x:1692,y:202,w:38,h:38}];
 function roundedRect(c,x,y,w,h,r,fill){c.fillStyle=fill;c.beginPath();c.roundRect(x,y,w,h,r);c.fill();}
 function drawTree(x,y){
@@ -731,7 +731,7 @@ function drawWorld(t=0){
  roundedRect(ctx,1840,355,205,120,12,'#806344');roundedRect(ctx,1849,364,187,102,8,'#c6a36a');
  for(let row=0;row<2;row++){ctx.strokeStyle='#8b6945';ctx.lineWidth=12;ctx.beginPath();ctx.moveTo(1865,394+row*42);ctx.lineTo(2020,394+row*42);ctx.stroke();for(let x=1880;x<2010;x+=27){ctx.strokeStyle='#4d8d42';ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(x,399+row*42);ctx.lineTo(x-4,388+row*42);ctx.moveTo(x,399+row*42);ctx.lineTo(x+4,388+row*42);ctx.stroke();ctx.fillStyle='#8fc65a';ctx.beginPath();ctx.arc(x,388+row*42,3.5,0,Math.PI*2);ctx.fill();}}
  // Rumah dan gudang kecil di area baru, jauh dari badan jalan.
- [[2220,170,'RUMAH WARGA'],[2225,850,'GUDANG TANI'],[1740,1250,'RUMAH WARGA']].forEach(([x,y,label],i)=>{
+ [[2220,170,'RUMAH WARGA'],[2200,400,'GUDANG TANI'],[1740,1250,'RUMAH WARGA']].forEach(([x,y,label],i)=>{
   ctx.fillStyle='rgba(75,95,51,.18)';ctx.beginPath();ctx.ellipse(x+55,y+88,72,13,0,0,Math.PI*2);ctx.fill();
   ctx.fillStyle='#ead9ad';ctx.fillRect(x,y+25,110,62);
   ctx.fillStyle='#a65f3e';ctx.beginPath();ctx.moveTo(x-8,y+27);ctx.lineTo(x+55,y-12);ctx.lineTo(x+118,y+27);ctx.closePath();ctx.fill();
@@ -772,7 +772,7 @@ function drawWorld(t=0){
  ctx.fillStyle='#315b39';ctx.font=isTouchScreen?'bold 9px Nunito':'bold 10px Nunito';ctx.textAlign='center';ctx.fillText(entryLabel,1140,265);
 
  // signboards and lamp posts
- ctx.fillStyle='#68482e';ctx.fillRect(878,1162,5,25);roundedRect(ctx,812,1135,138,34,5,'#f2dfad');ctx.strokeStyle='#d5bd86';ctx.lineWidth=1;ctx.strokeRect(812,1135,138,34);ctx.fillStyle='#315b39';ctx.font='bold 9px Nunito';ctx.textAlign='center';ctx.fillText('BALAI KELOMPOK',881,1149);ctx.fillText('TANI',881,1161);
+ ctx.fillStyle='#68482e';ctx.fillRect(678,962,5,25);roundedRect(ctx,612,935,138,34,5,'#f2dfad');ctx.strokeStyle='#d5bd86';ctx.lineWidth=1;ctx.strokeRect(612,935,138,34);ctx.fillStyle='#315b39';ctx.font='bold 9px Nunito';ctx.textAlign='center';ctx.fillText('BALAI KELOMPOK',681,949);ctx.fillText('TANI',681,961);
  ctx.fillStyle='#68482e';ctx.fillRect(1590,495,5,60);ctx.fillStyle='#f7e4a8';ctx.beginPath();ctx.arc(1592,490,10,0,Math.PI*2);ctx.fill();
  // Peternakan desa: kandang kecil di pojok tenggara persimpangan jalan desa dan jalan setapak BPP.
  // Diletakkan di area kosong, terpisah dari jalur pejalan kaki dan lahan tanaman.

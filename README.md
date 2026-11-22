@@ -379,3 +379,9 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Mengalihkan aliran sungai irigasi ke koridor hijau di selatan jalan utama agar tidak bertumpuk dengan jalan.
 - Memindahkan jembatan kayu ke titik perpotongan sungai dengan jalan vertikal desa.
 - Mempertahankan jalur jalan, bangunan, dan data penyimpanan permainan.
+
+
+## Update v0.20.67
+- Gudang Tani dipindahkan ke koordinat X=2200, Y=400.
+- Balai Kelompok Tani dipindahkan ke koordinat X=600, Y=1000; papan nama dan tiang penyangga disesuaikan.
+- Penyesuaian tetap mempertahankan bangunan SPPG, kendaraan, sungai, dan progres penyimpanan permainan.
