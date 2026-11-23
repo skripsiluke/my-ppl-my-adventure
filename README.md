@@ -477,3 +477,9 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Saat dikendarai, karakter berada di belakang traktor dalam pose operator yang memegang setang; kendaraan dapat digerakkan ke empat arah menggunakan kontrol yang tersedia.
 - Memberikan 3 XP setiap 30 detik selama sesi berkendara traktor; hadiah berulang dan hitungan berhenti saat turun.
 - Posisi parkir traktor disimpan bersama progres permainan.
+
+
+## v0.20.95
+- Membatasi pergerakan traktor roda dua hanya di dalam area petak persawahan (x 1010–1580, y 740–1015).
+- Menambahkan efek percikan air dan lumpur animatif di belakang roda/rotary ketika traktor bergerak.
+- Menghentikan efek percikan ketika traktor berhenti atau pemain turun.
