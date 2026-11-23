@@ -833,6 +833,25 @@ function kiosInteract(){
  }
  showPalmToast('Dekati Pak Hasan atau PPL Monitoring untuk berinteraksi.');
 }
+
+function realTimeParts(){
+ const d=new Date();
+ const pad=n=>String(n).padStart(2,'0');
+ return {date:`${pad(d.getDate())}-${pad(d.getMonth()+1)}-${d.getFullYear()}`,time:`${pad(d.getHours())}:${pad(d.getMinutes())}`,hours:d.getHours(),minutes:d.getMinutes(),seconds:d.getSeconds()};
+}
+function drawRealTimePanel(){
+ const w=canvas.width;
+ const p=realTimeParts();
+ ctx.save();
+ const boxW=142,boxH=48,x=w-boxW-12,y=12;
+ roundedRect(ctx,x,y,boxW,boxH,8,'rgba(20,55,37,.92)');
+ ctx.fillStyle='#d5edc8';ctx.font='bold 9px Nunito';ctx.textAlign='right';
+ ctx.fillText(p.date,x+boxW-10,y+16);
+ ctx.fillStyle='#fff';ctx.font='bold 17px Nunito';
+ ctx.fillText(p.time,x+boxW-10,y+37);
+ ctx.restore();
+}
+
 function drawWorld(t=0){
  if(state.scene==='village')refreshKiosDailyMission();
  if(state.scene==='mine'){drawMine(t);return;}if(state.scene==='palm'){drawPalm(t);return;}if(state.scene==='bpp'){drawBpp(t);updateBppBackButton();return;}if(state.scene==='pc'){drawBppPc(t);updateBppBackButton();return;}if(state.scene==='coffee'){drawBppCoffee(t);updateBppBackButton();return;}if(state.scene==='phone'){drawBppPhone(t);updateBppBackButton();return;}if(state.scene==='kios'){drawKios(t);updateBppBackButton();return;}
