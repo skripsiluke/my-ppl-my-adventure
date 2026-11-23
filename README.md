@@ -453,16 +453,16 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Urutan desktop dipertahankan seperti sebelumnya.
 
 
-## v0.20.90
+## v0.20.91
 - BGM otomatis dijeda saat halaman game masuk latar belakang, tab berpindah, jendela kehilangan fokus, atau perangkat menyembunyikan halaman.
 - BGM dilanjutkan saat pengguna kembali hanya jika sebelumnya sedang diputar dan pengaturan BGM masih aktif.
 - Jika pengguna mematikan BGM, game tidak menyalakannya kembali secara otomatis.
 
 
-## v0.20.90
+## v0.20.91
 - Perbaikan lifecycle audio: BGM dipause secara paksa saat halaman tersembunyi, kehilangan fokus, pagehide, atau Android membekukan tab; BGM hanya dilanjutkan ketika halaman kembali terlihat dan sebelumnya memang sedang aktif.
 
 
-## v0.20.90
+## v0.20.91
 - Menambahkan panel tanggal dan waktu nyata di pojok kanan atas layar permainan.
 - Menambahkan jam dinding analog di interior BPP yang mengikuti waktu lokal perangkat.

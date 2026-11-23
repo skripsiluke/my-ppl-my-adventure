@@ -1537,6 +1537,18 @@ function drawBpp(t=0){
   ctx.restore();
  }
  ctx.restore();
+ // Jam dinding analog di dinding kanan, mengikuti waktu nyata perangkat.
+ const clockNow=new Date(),clockX=w*.91,clockY=h*.185,clockR=Math.min(34,w*.038);
+ ctx.save();ctx.shadowColor='rgba(35,48,30,.25)';ctx.shadowBlur=7;ctx.shadowOffsetY=3;
+ ctx.fillStyle='#fffdf1';ctx.beginPath();ctx.arc(clockX,clockY,clockR+4,0,Math.PI*2);ctx.fill();
+ ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+ ctx.strokeStyle='#76563a';ctx.lineWidth=4;ctx.beginPath();ctx.arc(clockX,clockY,clockR,0,Math.PI*2);ctx.stroke();
+ ctx.fillStyle='#fffdf3';ctx.beginPath();ctx.arc(clockX,clockY,clockR-2,0,Math.PI*2);ctx.fill();
+ for(let i=0;i<12;i++){const a=i*Math.PI/6-Math.PI/2;const r1=clockR-7,r2=clockR-3;ctx.strokeStyle='#4a493d';ctx.lineWidth=i%3===0?2:1;ctx.beginPath();ctx.moveTo(clockX+Math.cos(a)*r1,clockY+Math.sin(a)*r1);ctx.lineTo(clockX+Math.cos(a)*r2,clockY+Math.sin(a)*r2);ctx.stroke();}
+ const minute=clockNow.getMinutes(),hour=clockNow.getHours()%12;
+ const hand=(angle,len,width,color)=>{ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(clockX,clockY);ctx.lineTo(clockX+Math.sin(angle)*len,clockY-Math.cos(angle)*len);ctx.stroke();};
+ hand((hour+minute/60)*Math.PI/6,clockR*.48,3,'#33352e');hand(minute*Math.PI/30,clockR*.72,2,'#b13d32');
+ ctx.fillStyle='#b13d32';ctx.beginPath();ctx.arc(clockX,clockY,2.5,0,Math.PI*2);ctx.fill();ctx.restore();
  // Banner kantor.
  roundedRect(ctx,w*.29,24,w*.42,66,8,'#f6f0d5');ctx.fillStyle='#27613b';ctx.textAlign='center';ctx.font='bold 18px Nunito';ctx.fillText('BPP KECAMATAN SUKASENANG',w*.5,51);ctx.font='12px Nunito';ctx.fillText('BALAI PENYULUHAN PERTANIAN',w*.5,72);
  // Banner daftar kelompok tani.
@@ -2108,9 +2120,10 @@ function loop(ts){
   if(state.motorPpl.riding&&state.motorPpl.started){const now=performance.now();if(now-state.motorPpl.lastRewardAt>=30000){const ticks=Math.floor((now-state.motorPpl.lastRewardAt)/30000);state.motorPpl.lastRewardAt+=ticks*30000;reward(3*ticks,0);showPalmToast('⭐ Mengendarai Motor PPL: +'+(3*ticks)+' XP');}}
   if(state.catOwned&&state.scene==='village'){const len=Math.hypot(dx,dy)||1,tx=state.player.x-(dx/len)*27,ty=state.player.y-(dy/len)*20;state.catFollower.x+=(tx-state.catFollower.x)*.16;state.catFollower.y+=(ty-state.catFollower.y)*.16;}
   drawWorld(ts);
+  drawRealTimePanel();
  }catch(err){console.error('Game frame error (loop tetap berjalan):',err);}
 }
-function startWorld(){stopWorld();last=0;drawWorld();raf=requestAnimationFrame(loop);}
+function startWorld(){stopWorld();last=0;drawWorld();drawRealTimePanel();raf=requestAnimationFrame(loop);}
 function stopWorld(){if(raf)cancelAnimationFrame(raf);raf=0;state.keys={};}
 function interact(){
   if(dialogOpen)return;
