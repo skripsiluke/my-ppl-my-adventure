@@ -469,3 +469,11 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 
 ## v0.20.93
 - Pintu kantor BPP dipendekkan sekitar 23% dan diturunkan agar tidak menabrak papan nama BPP. Panel dan gagang disesuaikan.
+
+
+## v0.20.94
+- Menambahkan traktor roda dua bergaya hand tractor Quick di tepi area persawahan Desa Sukamaju.
+- Traktor dapat dinaiki dan diturunkan dengan tombol E di PC atau tombol INTERAKSI di Android.
+- Saat dikendarai, karakter berada di belakang traktor dalam pose operator yang memegang setang; kendaraan dapat digerakkan ke empat arah menggunakan kontrol yang tersedia.
+- Memberikan 3 XP setiap 30 detik selama sesi berkendara traktor; hadiah berulang dan hitungan berhenti saat turun.
+- Posisi parkir traktor disimpan bersama progres permainan.

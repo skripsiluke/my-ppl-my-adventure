@@ -18,7 +18,7 @@ const FIRST_LEVEL_XP=150, XP_PER_LEVEL=250;
 function xpThreshold(level){return level<=1?0:FIRST_LEVEL_XP+(level-2)*XP_PER_LEVEL;}
 function levelFromXP(xp){let level=1;while(xp>=xpThreshold(level+1))level++;return level;}
 function levelProgress(xp){const level=levelFromXP(xp);return {level,progress:xp-xpThreshold(level),needed:level===1?FIRST_LEVEL_XP:XP_PER_LEVEL};}
-const state = {name:'Penyuluh Muda',avatarIndex:0,xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},analog:{x:0,y:0},interact:false,motorPpl:{x:330,y:570,riding:false,started:false,lastRewardAt:0,face:1,orientation:'left'},catOwned:false,catHintShown:false,catQuestNpcId:null,catFollower:{x:120,y:410},scene:'village',mineGold:0,mineNodes:[],returnPosition:{x:145,y:390},ranchMissionDone:false,palmGhostCaught:0,farmPlots:[],farmSeeds:{padi:3,jagung:2,cabai:1},farmProduce:{},farmSelectedPlot:0,farmSelectedCrop:'padi',farmPlayer:{x:450,y:430},farmTarget:null,farmDay:1,farmLastWeather:'Cerah',farmUnlockedPlots:1,farmPesticides:0,farmPesticideStarterGranted:false,bppCoffeeStep:0,bppCoffeeDone:false,kiosMonitoring:{stage:0,done:false},lttReport:{date:'',desa:'Desa Sukamaju',bera:'',olahLahan:'',tanam:'',panen:''}};
+const state = {name:'Penyuluh Muda',avatarIndex:0,xp:0,coins:0,missionDone:false,pakMissionRewarded:false,buMissionDone:false,buMissionRewarded:false,ketuaMissionDone:false,ketuaMissionRewarded:false,farmStage:0,questionIndex:0,quizScore:0,harvestCount:0,correctQuizCount:0,unlockedAchievements:[],achievementRewardsClaimed:[],highestLevelReached:1,missionFlags:{},pmaas:{stages:{},milestones:[],farmers:0,groups:0,xpEarned:0,drumSeederCompleted:false,adopterProgress:{}},player:{x:145,y:390},keys:{},analog:{x:0,y:0},interact:false,motorPpl:{x:330,y:570,riding:false,started:false,lastRewardAt:0,face:1,orientation:'left'},tractor:{x:1370,y:760,riding:false,started:false,lastRewardAt:0,orientation:'left'},catOwned:false,catHintShown:false,catQuestNpcId:null,catFollower:{x:120,y:410},scene:'village',mineGold:0,mineNodes:[],returnPosition:{x:145,y:390},ranchMissionDone:false,palmGhostCaught:0,farmPlots:[],farmSeeds:{padi:3,jagung:2,cabai:1},farmProduce:{},farmSelectedPlot:0,farmSelectedCrop:'padi',farmPlayer:{x:450,y:430},farmTarget:null,farmDay:1,farmLastWeather:'Cerah',farmUnlockedPlots:1,farmPesticides:0,farmPesticideStarterGranted:false,bppCoffeeStep:0,bppCoffeeDone:false,kiosMonitoring:{stage:0,done:false},lttReport:{date:'',desa:'Desa Sukamaju',bera:'',olahLahan:'',tanam:'',panen:''}};
 const screens=['homeScreen','menuScreen','gameScreen'];
 function applyMineXpPenalty(amount){
   // XP utama adalah state.xp. Jika runtime tiba-tiba membaca 0 padahal
@@ -74,6 +74,7 @@ function save(){
     pmaas:state.pmaas,
     player:state.player,
     motorPpl:{x:state.motorPpl.x,y:state.motorPpl.y},
+    tractor:{x:state.tractor.x,y:state.tractor.y},
     catOwned:!!state.catOwned,
     catHintShown:!!state.catHintShown,
     catQuestNpcId:state.catQuestNpcId,
@@ -111,7 +112,7 @@ function load(){
   state.pmaas.stages=state.pmaas.stages&&typeof state.pmaas.stages==='object'?state.pmaas.stages:{};
   state.pmaas.milestones=Array.isArray(state.pmaas.milestones)?state.pmaas.milestones:[];
   state.pmaas.farmers=Number(state.pmaas.farmers)||0;state.pmaas.groups=Number(state.pmaas.groups)||0;state.pmaas.xpEarned=Number(state.pmaas.xpEarned)||0;state.pmaas.drumSeederCompleted=!!state.pmaas.drumSeederCompleted;state.pmaas.adopterProgress=state.pmaas.adopterProgress&&typeof state.pmaas.adopterProgress==='object'?state.pmaas.adopterProgress:{};
-  state.motorPpl=state.motorPpl&&typeof state.motorPpl==='object'?{x:Number(state.motorPpl.x)||330,y:Number(state.motorPpl.y)||570,riding:false,started:false,lastRewardAt:0,face:1,orientation:state.motorPpl.orientation||'left'}:{x:330,y:570,riding:false,started:false,lastRewardAt:0,face:1,orientation:'left'};state.catOwned=!!state.catOwned; state.catFollower=state.catFollower&&typeof state.catFollower==='object'?state.catFollower:{x:state.player.x-24,y:state.player.y+18};
+  state.motorPpl=state.motorPpl&&typeof state.motorPpl==='object'?{x:Number(state.motorPpl.x)||330,y:Number(state.motorPpl.y)||570,riding:false,started:false,lastRewardAt:0,face:1,orientation:state.motorPpl.orientation||'left'}:{x:330,y:570,riding:false,started:false,lastRewardAt:0,face:1,orientation:'left'}; state.tractor=state.tractor&&typeof state.tractor==='object'?{x:Number(state.tractor.x)||1370,y:Number(state.tractor.y)||760,riding:false,started:false,lastRewardAt:0,orientation:'left'}:{x:1370,y:760,riding:false,started:false,lastRewardAt:0,orientation:'left'};state.catOwned=!!state.catOwned; state.catFollower=state.catFollower&&typeof state.catFollower==='object'?state.catFollower:{x:state.player.x-24,y:state.player.y+18};
   state.scene='village';state.mineGold=Number(state.mineGold)||0;state.mineNodes=Array.isArray(state.mineNodes)?state.mineNodes:[];state.returnPosition=state.returnPosition||{x:state.player.x,y:state.player.y};state.ranchMissionDone=!!state.ranchMissionDone;
   state.bppCoffeeStep=Math.max(0,Math.min(3,Number(state.bppCoffeeStep)||0));state.bppCoffeeDone=!!state.bppCoffeeDone;
   state.kiosMonitoring=state.kiosMonitoring&&typeof state.kiosMonitoring==='object'?state.kiosMonitoring:{stage:0,done:false};
@@ -1175,12 +1176,37 @@ function drawWorld(t=0){
    roundedRect(ctx,bike.x-94,bike.y-93,188,29,11,'rgba(255,255,245,.97)');ctx.fillStyle='#174d32';ctx.fillText(mob?'INTERAKSI • Naiki Motor PPL':'Tekan E • Naiki Motor PPL',bike.x,bike.y-74);ctx.restore();
   }
  }
+ // Traktor tangan roda dua bergaya Quick, terparkir di tepi area persawahan.
+ const tr=state.tractor,tx=tr.riding?state.player.x:tr.x,ty=tr.riding?state.player.y+5:tr.y;
+ ctx.save();ctx.translate(tx,ty);if(tr.orientation==='right')ctx.scale(-1,1);
+ ctx.fillStyle='rgba(40,48,34,.22)';ctx.beginPath();ctx.ellipse(0,17,59,8,0,0,Math.PI*2);ctx.fill();
+ // Dua roda besar dengan tapak
+ for(const wx of [-30,5]){ctx.fillStyle='#202522';ctx.beginPath();ctx.arc(wx,9,15,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#70766b';ctx.lineWidth=2;ctx.beginPath();ctx.arc(wx,9,8,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#a6a99b';ctx.beginPath();ctx.arc(wx,9,3,0,Math.PI*2);ctx.fill();for(let a=0;a<8;a++){const an=a*Math.PI/4;ctx.strokeStyle='#252a25';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(wx+Math.cos(an)*12,9+Math.sin(an)*12);ctx.lineTo(wx+Math.cos(an)*17,9+Math.sin(an)*17);ctx.stroke();}}
+ // Bodi mesin merah-oranye, tangki, knalpot, dan transmisi
+ ctx.fillStyle='#c94c2d';ctx.beginPath();ctx.roundRect(-22,-18,43,23,5);ctx.fill();ctx.strokeStyle='#71351f';ctx.lineWidth=1.5;ctx.stroke();
+ ctx.fillStyle='#e4b54e';ctx.beginPath();ctx.roundRect(-12,-24,20,10,3);ctx.fill();
+ ctx.fillStyle='#343b35';ctx.fillRect(-24,-3,47,5);ctx.fillStyle='#777d72';ctx.fillRect(-4,-29,5,12);ctx.fillRect(8,-23,17,3);
+ // Bajak rotary kecil di bagian depan
+ ctx.fillStyle='#77796b';ctx.fillRect(-48,3,16,5);ctx.strokeStyle='#4d5149';ctx.lineWidth=2;for(let k=0;k<3;k++){ctx.beginPath();ctx.moveTo(-48+k*5,6);ctx.lineTo(-53+k*5,14);ctx.stroke();}
+ // Setang panjang ke arah operator
+ ctx.strokeStyle='#343c35';ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(15,-13);ctx.lineTo(42,-28);ctx.lineTo(57,-29);ctx.stroke();ctx.strokeStyle='#252a25';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(53,-31);ctx.lineTo(63,-27);ctx.stroke();
+ if(tr.riding){
+  // Operator berjalan di belakang mesin, tampak samping, kedua tangan mendorong setang.
+  ctx.strokeStyle='#263b30';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(42,-8);ctx.lineTo(49,7);ctx.lineTo(57,9);ctx.stroke();
+  ctx.fillStyle='#287b49';ctx.strokeStyle='#174d32';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(35,-39);ctx.lineTo(48,-37);ctx.lineTo(54,-17);ctx.lineTo(40,-13);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.strokeStyle='#c98768';ctx.lineWidth=5.5;ctx.beginPath();ctx.moveTo(40,-34);ctx.lineTo(52,-29);ctx.lineTo(61,-28);ctx.moveTo(43,-31);ctx.lineTo(55,-26);ctx.lineTo(61,-27);ctx.stroke();
+  ctx.fillStyle='#c98768';ctx.beginPath();ctx.arc(34,-47,9,0,Math.PI*2);ctx.fill();ctx.fillStyle='#d8ad4e';ctx.beginPath();ctx.arc(34,-50,10,Math.PI,Math.PI*2);ctx.fill();ctx.fillRect(25,-50,18,3);
+  ctx.strokeStyle='#344b3a';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(42,-15);ctx.lineTo(45,-2);ctx.lineTo(52,4);ctx.stroke();
+ }
+ ctx.restore();
+ if(!tr.riding&&Math.hypot(state.player.x-tr.x,state.player.y-tr.y)<112){const mob=window.matchMedia('(max-width: 760px)').matches;ctx.save();ctx.font='bold 12px Nunito';ctx.textAlign='center';roundedRect(ctx,tr.x-100,tr.y-92,200,29,11,'rgba(255,255,245,.97)');ctx.fillStyle='#174d32';ctx.fillText(mob?'INTERAKSI • Kendarai Traktor':'Tekan E • Kendarai Traktor',tr.x,tr.y-73);ctx.restore();}
  // Karakter NPC digambar solid dengan badan, tangan, kaki, dan pakaian.
  npcs.forEach((n,i)=>{if(n.id==='pplmonitor'&&state.kiosMonitoring.stage>0)return;const done=missionDone(n.id);ctx.font='bold 12px Nunito';drawFarmer(n.x,n.y,{shirt:['#3979b9','#bd6686','#3f8a57','#c58a38'][i%4],pants:'#394d43',hat:['#d6a34d','#d8b86d','#6b8e57'][i%3]},n.walkPhase||0,!!n.wanderTarget);const labelW=Math.max(76,Math.min(132,ctx.measureText(n.name).width+22));roundedRect(ctx,n.x-labelW/2,n.y+28,labelW,23,10,'rgba(255,255,245,.98)');ctx.font='bold 12px Nunito';ctx.textAlign='center';ctx.fillStyle='#23452c';ctx.fillText(n.name,n.x,n.y+44);if(n.kind==='mission'||n.kind==='special'){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(n.x,n.y-43,14,0,Math.PI*2);ctx.fill();ctx.strokeStyle=done?'#23834b':'#d88b1f';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=done?'#23834b':'#d88b1f';ctx.font='bold 17px Nunito';ctx.fillText(n.kind==='special'?(state.catOwned?'✓':(state.catHintShown?'!':'🐾')):(done?'✓':'!'),n.x,n.y-37);if(n.id==='catcaretaker'&&state.catHintShown&&!state.catOwned){ctx.strokeStyle='rgba(255,211,76,.9)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(n.x,n.y-43,20,0,Math.PI*2);ctx.stroke();}}});
  if(state.catOwned)drawPetCat(state.catFollower.x,state.catFollower.y,t);
  // Pemain: badan penuh, dua kaki dan animasi langkah saat bergerak.
  const moving=!!(state.keys.ArrowRight||state.keys.ArrowLeft||state.keys.ArrowUp||state.keys.ArrowDown||state.keys.w||state.keys.a||state.keys.s||state.keys.d||Math.hypot(state.analog.x,state.analog.y)>.12);
- if(state.motorPpl.riding){
+ if(state.tractor.riding){const rideHint=window.matchMedia('(max-width: 760px)').matches?'INTERAKSI • Turun dari traktor':'Tekan E • Turun dari traktor';ctx.save();ctx.font='bold 12px Nunito';ctx.textAlign='center';roundedRect(ctx,state.player.x-112,state.player.y-112,224,28,10,'rgba(255,255,245,.97)');ctx.fillStyle='#174d32';ctx.fillText(rideHint,state.player.x,state.player.y-93);ctx.restore();}
+ else if(state.motorPpl.riding){
   // Model penyuluh sudah digambar menempel pada motor dalam pose duduk.
   const rideHint=window.matchMedia('(max-width: 760px)').matches?'INTERAKSI • Parkir & turun':'Tekan E • Parkir & turun';ctx.save();ctx.font='bold 12px Nunito';ctx.textAlign='center';roundedRect(ctx,state.player.x-100,state.player.y-112,200,28,10,'rgba(255,255,245,.97)');ctx.fillStyle='#174d32';ctx.fillText(rideHint,state.player.x,state.player.y-93);ctx.restore();
  }else{drawFarmer(state.player.x,state.player.y,{shirt:'#287b49',pants:'#344b3a',hat:'#d8ad4e'},t/105,moving,true);}
@@ -1190,7 +1216,7 @@ function drawWorld(t=0){
   if(Math.hypot(500-state.player.x,450-state.player.y)<90){const mob=window.matchMedia('(max-width: 760px)').matches;const mineUnlocked=levelProgress(state.xp).level>=2;const label=mineUnlocked?(mob?'Tap INTERAKSI: Tambang':'Tekan E: Masuk Tambang'):'🔒 TAMBANG • LEVEL 2';ctx.save();ctx.font='bold 11px Nunito';ctx.textAlign='center';const labelW=Math.min(210,Math.max(154,ctx.measureText(label).width+24));roundedRect(ctx,state.player.x-labelW/2,state.player.y-91,labelW,28,12,'rgba(255,255,245,.98)');ctx.fillStyle='#174d32';ctx.fillText(label,state.player.x,state.player.y-73);ctx.restore();}else if(Math.hypot(1660-state.player.x,1030-state.player.y)<125){const mob=window.matchMedia('(max-width: 760px)').matches;const unlocked=levelProgress(state.xp).level>=5;const label=unlocked?(mob?'Tap INTERAKSI: Kebun Sawit':'Tekan E: Kebun Sawit'):(mob?'Terkunci: Butuh Level 5':'Terkunci: Butuh Level 5');ctx.font='bold 12px Nunito';roundedRect(ctx,state.player.x-94,state.player.y-91,188,28,12,'rgba(255,255,245,.98)');ctx.fillStyle='#174d32';ctx.textAlign='center';ctx.fillText(label,state.player.x,state.player.y-73);}else if(near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<88){const mobile=window.matchMedia('(max-width: 760px)').matches;const hint=mobile?'Tap tombol INTERAKSI':'Tekan E untuk bicara';ctx.font='bold 12px Nunito';const bw=Math.max(138,ctx.measureText(hint).width+24),bx=Math.max(8,Math.min(WORLD.w-bw-8,state.player.x-bw/2)),by=state.player.y-91;roundedRect(ctx,bx,by,bw,28,12,'rgba(255,255,245,.98)');ctx.strokeStyle='#d8e6ce';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='#174d32';ctx.textAlign='center';ctx.fillText(hint,bx+bw/2,by+18);}
  ctx.restore();
  $('worldLocation').textContent=(near&&Math.hypot(near.x-state.player.x,near.y-state.player.y)<100?'📍 '+near.name:'📍 Desa Sukamaju')+(state.catOwned?' • 🐈 Kucing menemani':'');
- const hintEl=$('canvasHint');if(hintEl)hintEl.textContent=state.motorPpl.riding?(window.matchMedia('(max-width: 760px)').matches?'Kendarai Motor PPL dengan tombol arah / analog • Tap INTERAKSI untuk parkir dan turun':'Kendarai Motor PPL dengan WASD / tombol panah • Tekan E untuk parkir dan turun'):(window.matchMedia('(max-width: 760px)').matches?'Gunakan tombol arah untuk bergerak • Dekati motor PPL lalu tap INTERAKSI untuk menaiki':'Gunakan WASD / tombol panah • Dekati motor PPL lalu tekan E untuk menaiki');
+ const hintEl=$('canvasHint');if(hintEl)hintEl.textContent=state.tractor.riding?(window.matchMedia('(max-width: 760px)').matches?'Kendarai Traktor dengan tombol arah / analog • Tap INTERAKSI untuk turun':'Kendarai Traktor dengan WASD / tombol panah • Tekan E untuk turun'):state.motorPpl.riding?(window.matchMedia('(max-width: 760px)').matches?'Kendarai Motor PPL dengan tombol arah / analog • Tap INTERAKSI untuk parkir dan turun':'Kendarai Motor PPL dengan WASD / tombol panah • Tekan E untuk parkir dan turun'):(window.matchMedia('(max-width: 760px)').matches?'Gunakan tombol arah untuk bergerak • Dekati motor PPL lalu tap INTERAKSI untuk menaiki':'Gunakan WASD / tombol panah • Dekati motor PPL lalu tekan E untuk menaiki');
  const next=nextMission();$('worldObjective').textContent=next?'🎯 '+next.text:'⭐ Semua misi desa selesai';
 }
 let palmGhost=null,palmNextGhostAt=0,palmGhostToastTimer=0;
@@ -2070,7 +2096,7 @@ function blocked(x,y){
 function movePlayer(dx,dy){
  if(!dx&&!dy)return;
  const len=Math.hypot(dx,dy)||1;dx/=len;dy/=len;
- const speed=state.motorPpl.riding?5.6:3.4;
+ const speed=state.tractor.riding?4.2:(state.motorPpl.riding?5.6:3.4);
  const maxX=(state.scene==='mine'||state.scene==='palm'||state.scene==='bpp'||state.scene==='kios')?canvas.width-35:WORLD.w-25;
  const maxY=(state.scene==='bpp'||state.scene==='kios')?canvas.height-30:((state.scene==='mine'||state.scene==='palm')?canvas.height-90:WORLD.h-30);
  const startX=state.player.x,startY=state.player.y;
@@ -2079,7 +2105,7 @@ function movePlayer(dx,dy){
  const ny=Math.max(80,Math.min(maxY,startY+dy*speed));
  // If a newly-added fence/building surrounds a previously saved player position,
  // allow movement out of the overlap instead of trapping the player permanently.
- if(state.motorPpl.riding||state.scene==='kios'){state.player.x=nx;state.player.y=ny;}else{if(startBlocked || !blocked(nx,startY))state.player.x=nx;if(startBlocked || !blocked(state.player.x,ny))state.player.y=ny;}
+ if(state.motorPpl.riding||state.tractor.riding||state.scene==='kios'){state.player.x=nx;state.player.y=ny;}else{if(startBlocked || !blocked(nx,startY))state.player.x=nx;if(startBlocked || !blocked(state.player.x,ny))state.player.y=ny;}
 }
 function moveNpcs(dt,ts){
  if(state.scene!=='village'||dialogOpen)return;
@@ -2118,6 +2144,11 @@ function loop(ts){
     else{if(dy>0)state.motorPpl.orientation='down';else if(dy<0)state.motorPpl.orientation='up';}
    }
   }
+  if(state.tractor.riding){
+   if(dx||dy){if(Math.abs(dx)>=Math.abs(dy)){if(dx>0)state.tractor.orientation='right';else if(dx<0)state.tractor.orientation='left';}else{if(dy>0)state.tractor.orientation='left';else if(dy<0)state.tractor.orientation='right';}}
+   if(dx||dy){const now=performance.now();if(!state.tractor.started){state.tractor.started=true;state.tractor.lastRewardAt=now;showPalmToast('🚜 Traktor mulai berjalan! XP bertambah setiap 30 detik.');}}
+   if(state.tractor.started){const now=performance.now();if(now-state.tractor.lastRewardAt>=30000){const ticks=Math.floor((now-state.tractor.lastRewardAt)/30000);state.tractor.lastRewardAt+=ticks*30000;reward(3*ticks,0);showPalmToast('🚜 Membajak sawah dengan traktor: +'+(3*ticks)+' XP');}}
+  }
   if(state.motorPpl.riding&&state.motorPpl.started){const now=performance.now();if(now-state.motorPpl.lastRewardAt>=30000){const ticks=Math.floor((now-state.motorPpl.lastRewardAt)/30000);state.motorPpl.lastRewardAt+=ticks*30000;reward(3*ticks,0);showPalmToast('⭐ Mengendarai Motor PPL: +'+(3*ticks)+' XP');}}
   if(state.catOwned&&state.scene==='village'){const len=Math.hypot(dx,dy)||1,tx=state.player.x-(dx/len)*27,ty=state.player.y-(dy/len)*20;state.catFollower.x+=(tx-state.catFollower.x)*.16;state.catFollower.y+=(ty-state.catFollower.y)*.16;}
   drawWorld(ts);
@@ -2128,10 +2159,12 @@ function startWorld(){stopWorld();last=0;drawWorld();drawRealTimePanel();raf=req
 function stopWorld(){if(raf)cancelAnimationFrame(raf);raf=0;state.keys={};}
 function interact(){
   if(dialogOpen)return;
+  if(state.scene==='village'&&state.tractor.riding){state.tractor.riding=false;state.tractor.x=state.player.x;state.tractor.y=state.player.y+8;state.tractor.started=false;state.tractor.lastRewardAt=0;state.player.y+=22;save();showPalmToast('🚜 Traktor diparkir. Kamu turun dari traktor.');drawWorld();return;}
+  if(state.scene==='village'&&!state.motorPpl.riding&&!state.tractor.riding&&Math.hypot(state.player.x-state.tractor.x,state.player.y-state.tractor.y)<112){state.tractor.riding=true;state.tractor.started=false;state.tractor.lastRewardAt=0;state.tractor.orientation='left';state.player.x=state.tractor.x;state.player.y=state.tractor.y-3;state.keys={};state.analog={x:0,y:0};save();showPalmToast('🚜 Kamu mengoperasikan traktor roda dua! Gunakan tombol arah / analog.');drawWorld();return;}
   if(state.scene==='village'&&state.motorPpl.riding){
    state.motorPpl.riding=false;state.motorPpl.x=state.player.x;state.motorPpl.y=state.player.y+8;state.motorPpl.started=false;state.motorPpl.lastRewardAt=0;state.player.y+=25;save();showPalmToast('🏍️ Motor PPL diparkir. Kamu turun dari motor.');drawWorld();return;
   }
-  if(state.scene==='village'&&!state.motorPpl.riding&&Math.hypot(state.player.x-state.motorPpl.x,state.player.y-state.motorPpl.y)<105){
+  if(state.scene==='village'&&!state.motorPpl.riding&&!state.tractor.riding&&Math.hypot(state.player.x-state.motorPpl.x,state.player.y-state.motorPpl.y)<105){
    state.motorPpl.riding=true;state.motorPpl.started=false;state.motorPpl.lastRewardAt=0;state.motorPpl.face=1;state.motorPpl.orientation='left';state.player.x=state.motorPpl.x;state.player.y=state.motorPpl.y-4;state.keys={};state.analog={x:0,y:0};save();showPalmToast('🏍️ Kamu menaiki Motor PPL! Gunakan arah / analog untuk berkendara.');drawWorld();return;
   }
   if(state.scene==='kios'){kiosInteract();return;}
