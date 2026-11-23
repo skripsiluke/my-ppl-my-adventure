@@ -466,3 +466,6 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 ## v0.20.92
 - Menambahkan panel tanggal dan waktu nyata di pojok kanan atas layar permainan.
 - Menambahkan jam dinding analog di interior BPP yang mengikuti waktu lokal perangkat.
+
+## v0.20.93
+- Pintu kantor BPP dipendekkan sekitar 23% dan diturunkan agar tidak menabrak papan nama BPP. Panel dan gagang disesuaikan.

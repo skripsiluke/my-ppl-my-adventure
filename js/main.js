@@ -1517,15 +1517,16 @@ function drawBpp(t=0){
  ctx.strokeStyle='#e4b64e';ctx.lineWidth=2;
  for(let k=0;k<17;k++){const xx=rugX+8+k*(rugW-16)/16;ctx.beginPath();ctx.moveTo(xx,rugY+rugH-5);ctx.lineTo(xx-2,rugY+rugH+3);ctx.stroke();}
  ctx.restore();
- // Pintu kantor kayu di sisi kiri dinding, lengkap kusen, panel dan gagang.
+ // Pintu kantor: dipendekkan sekitar 23% dan diturunkan agar tidak bertabrakan dengan papan nama BPP.
  ctx.save();
- ctx.fillStyle='rgba(47,69,43,.18)';roundedRect(ctx,w*.285+4,h*.13+5,w*.085,h*.40,5,'rgba(47,69,43,.18)');
- roundedRect(ctx,w*.282,h*.125,w*.087,h*.405,4,'#76513a');
- roundedRect(ctx,w*.291,h*.14,w*.069,h*.375,2,'#a9784c');
+ const doorX=w*.282,doorY=h*.17,doorW=w*.087,doorH=h*.31;
+ roundedRect(ctx,doorX+4,doorY+5,doorW,doorH,5,'rgba(47,69,43,.18)');
+ roundedRect(ctx,doorX,doorY,doorW,doorH,4,'#76513a');
+ roundedRect(ctx,doorX+w*.009,doorY+h*.015,doorW-w*.018,doorH-h*.03,2,'#a9784c');
  ctx.strokeStyle='rgba(239,208,153,.65)';ctx.lineWidth=2;
- for(let k=0;k<3;k++)ctx.strokeRect(w*.298,h*(.17+k*.105),w*.055,h*.075);
- ctx.fillStyle='#e0bd70';ctx.beginPath();ctx.arc(w*.347,h*.34,3.2,0,Math.PI*2);ctx.fill();
- ctx.fillStyle='#f5f0df';ctx.font='bold 9px Nunito';ctx.textAlign='center';ctx.fillText('PINTU KANTOR',w*.325,h*.55);
+ for(let k=0;k<3;k++)ctx.strokeRect(doorX+w*.016,doorY+h*(.038+k*.085),doorW-w*.032,h*.058);
+ ctx.fillStyle='#e0bd70';ctx.beginPath();ctx.arc(doorX+doorW*.75,doorY+doorH*.54,3.2,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#f5f0df';ctx.font='bold 9px Nunito';ctx.textAlign='center';ctx.fillText('PINTU KANTOR',doorX+doorW/2,doorY+doorH+17);
  // Jendela kaca dengan kusen putih pada dinding kanan.
  roundedRect(ctx,w*.735,h*.13,w*.075,h*.15,4,'#fffdf0');
  ctx.fillStyle='#a8d5d0';roundedRect(ctx,w*.742,h*.14,w*.061,h*.13,2,'#a8d5d0');
