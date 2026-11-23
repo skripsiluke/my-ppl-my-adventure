@@ -853,6 +853,62 @@ function drawRealTimePanel(){
  ctx.restore();
 }
 
+function riverFishPoint(progress){
+ // Sampel jalur sungai yang sama dengan bentuk sungai pada peta.
+ const segments=[
+  {a:[0,1320],c:[360,1285],b:[700,1320]},
+  {a:[700,1320],c:[1120,1365],b:[1580,1370]},
+  {a:[1580,1370],c:[1710,1375],b:[1800,1430]},
+  {a:[1800,1430],c:[2070,1510],b:[2400,1490]}
+ ];
+ const scaled=Math.max(0,Math.min(.999999,progress))*segments.length;
+ const index=Math.floor(scaled),u=scaled-index,seg=segments[index];
+ const v=1-u;
+ const x=v*v*seg.a[0]+2*v*u*seg.c[0]+u*u*seg.b[0];
+ const y=v*v*seg.a[1]+2*v*u*seg.c[1]+u*u*seg.b[1];
+ const dx=2*v*(seg.c[0]-seg.a[0])+2*u*(seg.b[0]-seg.c[0]);
+ const dy=2*v*(seg.c[1]-seg.a[1])+2*u*(seg.b[1]-seg.c[1]);
+ return {x,y,angle:Math.atan2(dy,dx)};
+}
+function drawRiverFish(t=0){
+ // Tepat 15 model ikan; palet dan corak dibuat berbeda, ukuran tetap mungil
+ // agar seluruh tubuh ikan muat di dalam sungai irigasi.
+ const models=[
+  ['#f28c28','#fff0bd',0],['#e8b84a','#fff6d6',1],['#e85b55','#ffd6a0',2],
+  ['#4b9bd1','#d8f2ff',3],['#8c6ac8','#e7d9ff',4],['#46a879','#d9f5c7',5],
+  ['#e77ca8','#ffe0eb',6],['#687c91','#e2edf3',7],['#d1a34b','#fff0b4',8],
+  ['#36aeb0','#d8ffff',9],['#b86c45','#f4d0a5',10],['#7b9d45','#e7f0b9',11],
+  ['#d85d91','#ffe0ed',12],['#6586d8','#e2eaff',13],['#a0a0a0','#f0f0f0',14]
+ ];
+ models.forEach((m,i)=>{
+  const reverse=i%4===1||i%4===2;
+  const speed=.0000065+(i%5)*.00000065;
+  const raw=(t*speed+i/models.length)%1;
+  const progress=reverse?1-raw:raw;
+  const p=riverFishPoint(progress);
+  const ahead=riverFishPoint(Math.max(0,Math.min(.9999,progress+(reverse?-.001:.001))));
+  let angle=Math.atan2(ahead.y-p.y,ahead.x-p.x);
+  const len=11+(i%4)*1.8,bodyH=4.1+(i%3)*.65;
+  const wag=Math.sin(t*.012+i*2.1)*.18;
+  ctx.save();ctx.translate(p.x,p.y+Math.sin(t*.002+i*1.7)*1.4);ctx.rotate(angle+wag);
+  // bayangan lembut dan ekor bergerak
+  ctx.fillStyle='rgba(26,75,78,.18)';ctx.beginPath();ctx.ellipse(0,2,len*.72,bodyH*.65,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=m[0];ctx.beginPath();ctx.moveTo(-len*.38,0);ctx.lineTo(-len*.92,-bodyH*.78+Math.sin(t*.018+i)*1.3);ctx.lineTo(-len*.92,bodyH*.78+Math.sin(t*.018+i)*1.3);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.ellipse(0,0,len*.58,bodyH,0,0,Math.PI*2);ctx.fill();
+  // sirip punggung dan bawah
+  ctx.fillStyle=m[1];ctx.beginPath();ctx.moveTo(-len*.18,-bodyH*.72);ctx.lineTo(len*.08,-bodyH*1.38);ctx.lineTo(len*.32,-bodyH*.62);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(-len*.12,bodyH*.72);ctx.lineTo(len*.12,bodyH*1.25);ctx.lineTo(len*.34,bodyH*.62);ctx.closePath();ctx.fill();
+  // pola khas setiap model
+  ctx.strokeStyle=m[1];ctx.lineWidth=1.25;
+  if(i%3===0){for(let k=-1;k<=1;k++){ctx.beginPath();ctx.moveTo(k*len*.2,-bodyH*.65);ctx.lineTo(k*len*.2,bodyH*.65);ctx.stroke();}}
+  else if(i%3===1){for(let k=0;k<3;k++){ctx.beginPath();ctx.arc(-len*.18+k*len*.23,0,.8,0,Math.PI*2);ctx.stroke();}}
+  else{ctx.beginPath();ctx.moveTo(-len*.28,0);ctx.lineTo(len*.28,0);ctx.stroke();}
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(len*.34,-bodyH*.2,1.15,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#172b32';ctx.beginPath();ctx.arc(len*.38,-bodyH*.2,.58,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+ });
+}
+
 function drawWorld(t=0){
  if(state.scene==='village')refreshKiosDailyMission();
  if(state.scene==='mine'){drawMine(t);return;}if(state.scene==='palm'){drawPalm(t);return;}if(state.scene==='bpp'){drawBpp(t);updateBppBackButton();return;}if(state.scene==='pc'){drawBppPc(t);updateBppBackButton();return;}if(state.scene==='coffee'){drawBppCoffee(t);updateBppBackButton();return;}if(state.scene==='phone'){drawBppPhone(t);updateBppBackButton();return;}if(state.scene==='kios'){drawKios(t);updateBppBackButton();return;}
@@ -912,6 +968,7 @@ function drawWorld(t=0){
  ctx.strokeStyle='#8baf68';ctx.lineWidth=58;streamPath();ctx.stroke();
  ctx.strokeStyle='#6bb7c8';ctx.lineWidth=44;streamPath();ctx.stroke();
  ctx.strokeStyle='rgba(222,250,244,.65)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(30,1310);ctx.quadraticCurveTo(360,1290,700,1310);ctx.quadraticCurveTo(1120,1350,1580,1350);ctx.quadraticCurveTo(1710,1360,1800,1410);ctx.quadraticCurveTo(2070,1490,2370,1480);ctx.stroke();
+ drawRiverFish(t);
  // Kolam perikanan di tepi utara sungai, aman dari jalan dan rumah.
  ctx.fillStyle='rgba(62,87,55,.18)';ctx.beginPath();ctx.ellipse(1190,1220,126,58,0,0,Math.PI*2);ctx.fill();
  ctx.fillStyle='#8baf68';ctx.beginPath();ctx.ellipse(1190,1215,120,52,0,0,Math.PI*2);ctx.fill();

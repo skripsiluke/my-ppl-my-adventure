@@ -483,3 +483,9 @@ Memperbaiki kondisi animasi berjalan pada karakter pemain agar mendeteksi input 
 - Membatasi pergerakan traktor roda dua hanya di dalam area petak persawahan (x 1010–1580, y 740–1015).
 - Menambahkan efek percikan air dan lumpur animatif di belakang roda/rotary ketika traktor bergerak.
 - Menghentikan efek percikan ketika traktor berhenti atau pemain turun.
+
+
+## v0.20.96
+- Menambahkan 15 model ikan hias dengan variasi warna, bentuk tubuh, sirip, dan corak.
+- Ikan bergerak berenang mengikuti jalur sungai irigasi dari sisi barat hingga timur peta, dengan beberapa ikan bergerak berlawanan arah.
+- Ukuran ikan dibuat kecil dan proporsional terhadap lebar sungai.
